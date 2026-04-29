@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encyclo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #21262d;
+      --border:    #30363d;
+      --text:      #c9d1d9;
+      --muted:     #8b949e;
+      --accent:    #58a6ff;
+      --yellow:    #e3b341;
+      --green:     #3fb950;
+      --red:       #f85149;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    #article-title {
+      flex: 1;
+      font-size: 1rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #timer-display {
+      font-size: 2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--green);
+      min-width: 3ch;
+      text-align: right;
+      transition: color 0.4s;
+    }
+    #timer-display.low { color: var(--red); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+
+    #progress-display {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 3ch;
+    }
+
+    button {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    button:hover { background: var(--border); border-color: #484f58; }
+    button:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Main layout ── */
+    #main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Article panel ── */
+    #article-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 40px;
+      border-right: 1px solid var(--border);
+    }
+
+    #article-content {
+      max-width: 700px;
+      margin: 0 auto;
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+    #article-content p { margin-bottom: 1em; }
+
+    /* sentence spans */
+    .sentence {
+      border-radius: 3px;
+      transition: background-color 0.12s, box-shadow 0.12s;
+    }
+    .sentence.partial-match {
+      background-color: rgba(227, 179, 65, 0.25);
+    }
+    .sentence.exact-match {
+      background-color: rgba(227, 179, 65, 0.55);
+      box-shadow: 0 0 0 1px var(--yellow);
+    }
+    .sentence.locked {
+      background-color: rgba(63, 185, 80, 0.2);
+      color: #adf7b0;
+    }
+
+    /* article navigation links */
+    #article-links {
+      max-width: 700px;
+      margin: 24px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    #article-links h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    #links-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .wiki-link {
+      font-size: 0.78rem;
+      padding: 3px 9px;
+      color: var(--accent);
+      border-color: rgba(88,166,255,0.25);
+      background: rgba(88,166,255,0.05);
+    }
+    .wiki-link:hover { background: rgba(88,166,255,0.15); border-color: var(--accent); }
+
+    .loading {
+      color: var(--muted);
+      font-style: italic;
+      padding: 32px;
+      text-align: center;
+    }
+
+    /* ── Game panel (right sidebar) ── */
+    #game-panel {
+      width: 340px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Input area — top of game panel */
+    #input-area {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    #typer {
+      width: 100%;
+      background: var(--surface2);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      resize: none;
+      height: 90px;
+      outline: none;
+      transition: border-color 0.12s, background-color 0.12s;
+      line-height: 1.5;
+    }
+    #typer::placeholder { color: var(--muted); }
+    #typer.partial  { border-color: var(--yellow); }
+    #typer.no-match { border-color: var(--red);  background: rgba(248,81,73,0.08); }
+    #typer.complete { border-color: var(--green); background: rgba(63,185,80,0.08); }
+
+    #input-status {
+      margin-top: 6px;
+      font-size: 0.73rem;
+      color: var(--muted);
+      min-height: 1.2em;
+    }
+    #input-status.ok     { color: var(--green); }
+    #input-status.warn   { color: var(--red);   }
+
+    /* Matches preview — scrollable middle section */
+    #matches-section {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    #matches-section h4 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .match-preview {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      padding: 5px 8px;
+      margin-bottom: 5px;
+      background: rgba(227,179,65,0.07);
+      border-left: 2px solid var(--yellow);
+      border-radius: 0 4px 4px 0;
+      word-break: break-word;
+    }
+    .match-preview .typed   { color: var(--yellow); }
+    .match-preview .untyped { color: var(--muted); }
+    .match-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Locked sentences — bottom of game panel */
+    #locked-section {
+      padding: 14px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      max-height: 260px;
+    }
+    #locked-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .locked-sentence {
+      display: flex;
+      gap: 8px;
+      padding: 7px 10px;
+      margin-bottom: 7px;
+      background: rgba(63,185,80,0.1);
+      border: 1px solid rgba(63,185,80,0.3);
+      border-radius: 6px;
+    }
+    .lock-num  { color: var(--green); font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
+    .lock-text { font-size: 0.78rem; line-height: 1.5; }
+    .locked-empty { color: var(--muted); font-size: 0.82rem; font-style: italic; }
+
+    /* ── Game overlay ── */
+    #game-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 44px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+    }
+    .overlay-box h2 { font-size: 2rem; margin-bottom: 10px; }
+    .overlay-box p  { color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+    .overlay-box button { font-size: 1rem; padding: 10px 28px; }
+    .overlay-box.win  h2 { color: var(--green); }
+    .overlay-box.lose h2 { color: var(--red);   }
+    .overlay-locked { margin: 0 0 20px; text-align: left; }
+    .overlay-locked .locked-sentence { font-size: 0.8rem; }
+
+    /* scrollbars */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div id="top-bar">
+  <button id="btn-new" title="Load a new random article">↻ New Article</button>
+  <span id="article-title">Loading…</span>
+  <div id="timer-display">80</div>
+  <div id="progress-display">0/3</div>
+</div>
+
+<!-- Main area -->
+<div id="main">
+
+  <!-- Article viewer -->
+  <div id="article-panel">
+    <div id="article-content"><div class="loading">Fetching random article…</div></div>
+    <div id="article-links" style="display:none">
+      <h3>Navigate to</h3>
+      <div id="links-list"></div>
+    </div>
+  </div>
+
+  <!-- Game sidebar -->
+  <div id="game-panel">
+
+    <div id="input-area">
+      <textarea
+        id="typer"
+        placeholder="Type the start of any sentence in the article…"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+      ></textarea>
+      <div id="input-status">Start typing to find a sentence.</div>
+    </div>
+
+    <div id="matches-section">
+      <h4>Completions</h4>
+      <div id="matches-list"></div>
+    </div>
+
+    <div id="locked-section">
+      <h3>Locked Sentences</h3>
+      <p class="locked-empty">None yet — lock 3 to win!</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- End-of-game overlay -->
+<div id="game-overlay"></div>
+
+<script>
+'use strict';
+
+const WIKI = 'https://en.wikipedia.org/w/api.php';
+
+// ── State ──────────────────────────────────────────────────────────────────
+const S = {
+  sentences:  [],      // plain-text sentences extracted from current article
+  locked:     [],      // {id, text} of locked sentences
+  lockedIds:  new Set(),
+  currentMatch: null,  // {id, text} of the current exact match
+  lastValid:  '',      // last input value that had at least one match
+  inputState: 'empty', // 'empty' | 'partial' | 'no-match' | 'complete'
+  timeLeft:   80,
+  timer:      null,
+  active:     false,
+};
+
+// ── Wikipedia helpers ──────────────────────────────────────────────────────
+async function randomTitle() {
+  const r = await fetch(`${WIKI}?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*`);
+  const d = await r.json();
+  return d.query.random[0].title;
+}
+
+async function loadArticle(title) {
+  document.getElementById('article-title').textContent = 'Loading…';
+  document.getElementById('article-content').innerHTML = '<div class="loading">Loading…</div>';
+  document.getElementById('article-links').style.display = 'none';
+  clearInput();
+
+  try {
+    const url =
+      `${WIKI}?action=parse` +
+      `&page=${encodeURIComponent(title)}` +
+      `&prop=text&section=0&format=json&origin=*&disableeditsection=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.info);
+
+    document.getElementById('article-title').textContent = data.parse.title;
+    renderArticle(data.parse.text['*'], data.parse.title);
+  } catch (e) {
+    document.getElementById('article-content').innerHTML =
+      `<div class="loading">Error: ${esc(e.message)} — try another article.</div>`;
+  }
+}
+
+// ── Article rendering ──────────────────────────────────────────────────────
+function renderArticle(html, title) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // strip noise
+  doc.querySelectorAll(
+    '.mw-editsection, .reflist, .references, script, style, ' +
+    '.hatnote, .toc, .navbox, .thumb, table, .infobox, ' +
+    'sup.reference, .mw-empty-elt'
+  ).forEach(el => el.remove());
+
+  // collect inter-article links before we gut the paragraphs
+  const seen = new Set();
+  const wikiLinks = [];
+  doc.querySelectorAll('a[href^="/wiki/"]').forEach(a => {
+    const raw = (a.getAttribute('href') || '').slice(6);
+    if (!raw || raw.includes(':')) return;
+    const t = decodeURIComponent(raw).replace(/_/g, ' ');
+    if (!seen.has(t)) { seen.add(t); wikiLinks.push({ t, label: a.textContent.trim() || t }); }
+  });
+
+  // process paragraphs → sentence spans
+  const sents = [];
+  doc.querySelectorAll('p').forEach(p => {
+    const raw = p.textContent
+      .replace(/\[\d+\]/g, '')   // strip [1] citations
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (raw.length < 40) return;
+
+    const parts = splitSentences(raw);
+    p.innerHTML = '';
+
+    parts.forEach(s => {
+      s = s.trim();
+      if (!s) return;
+      if (s.length < 20) {
+        p.appendChild(document.createTextNode(s + ' '));
+        return;
+      }
+      const id = sents.length;
+      sents.push(s);
+      const span = document.createElement('span');
+      span.className = 'sentence';
+      span.dataset.id = id;
+      span.textContent = s + ' ';
+      p.appendChild(span);
+    });
+  });
+
+  S.sentences = sents;
+
+  // if too few sentences, this article is useless — silently reroll
+  if (sents.length < 4) {
+    randomTitle().then(loadArticle);
+    return;
+  }
+
+  document.getElementById('article-content').innerHTML = doc.body.innerHTML;
+
+  // render navigation links
+  const list = document.getElementById('links-list');
+  list.innerHTML = '';
+  wikiLinks.slice(0, 40).forEach(({ t, label }) => {
+    const b = document.createElement('button');
+    b.className = 'wiki-link';
+    b.textContent = label;
+    b.title = t;
+    b.onclick = () => loadArticle(t);
+    list.appendChild(b);
+  });
+  const linksSection = document.getElementById('article-links');
+  linksSection.style.display = wikiLinks.length ? 'block' : 'none';
+}
+
+// ── Sentence splitter ──────────────────────────────────────────────────────
+// Splits on ". "/!"/?" followed by an uppercase letter, skipping common abbreviations.
+const ABBR = new Set([
+  'Mr','Mrs','Ms','Dr','Prof','Sr','Jr','vs','etc','al','ca','approx',
+  'est','inc','corp','dept','St','Ave','Blvd','Rd','Mt','Lt','Sgt',
+  'Cpl','Pvt','Maj','Col','Gen','Rep','Sen','Gov','Pres','No','Vol',
+  'U.S','U.K','Jan','Feb','Mar','Apr','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
+]);
+
+function splitSentences(text) {
+  const words = text.split(' ');
+  const out = [];
+  let cur = '';
+
+  for (let i = 0; i < words.length; i++) {
+    cur += (cur ? ' ' : '') + words[i];
+    const w = words[i];
+    if (!/[.!?]['"]?$/.test(w)) continue;
+    if (i + 1 >= words.length) break;
+    if (!/^[A-Z"(]/.test(words[i + 1])) continue;
+    const stem = w.replace(/[.!?'"]+$/, '');
+    if (ABBR.has(stem) || /^[A-Z]$/.test(stem)) continue; // single cap or known abbr
+    if (cur.split(' ').length < 4) continue; // too short to be a real sentence
+    out.push(cur);
+    cur = '';
+  }
+  if (cur.trim()) out.push(cur);
+  return out;
+}
+
+// ── Typing mechanic ────────────────────────────────────────────────────────
+const typer = document.getElementById('typer');
+
+typer.addEventListener('input', onInput);
+typer.addEventListener('keydown', onKey);
+
+function onInput() {
+  const val = typer.value;
+
+  if (!val.trim()) {
+    setState('empty');
+    clearHighlights();
+    renderPreviews([]);
+    return;
+  }
+
+  const matches = findMatches(val);
+
+  if (matches.length === 0) {
+    setState('no-match');
+    clearHighlights();
+    renderPreviews([]);
+    return;
+  }
+
+  // exact match: typed text equals a stored sentence (trim to forgive trailing space)
+  const exact = matches.find(m => m.text === val.trim());
+  if (exact) {
+    setState('complete');
+    S.currentMatch = exact;
+    highlight(matches, exact);
+    renderPreviews([exact], val);
+  } else {
+    setState('partial');
+    S.currentMatch = null;
+    S.lastValid = val;
+    highlight(matches, null);
+    renderPreviews(matches, val);
+  }
+}
+
+function onKey(e) {
+  if (e.key === 'Backspace' && S.inputState === 'no-match') {
+    e.preventDefault();
+    typer.value = S.lastValid;
+    onInput();
+    return;
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (S.inputState === 'no-match' || S.inputState === 'empty') {
+      typer.value = '';
+      onInput();
+    } else if (S.inputState === 'complete' && S.currentMatch) {
+      lock(S.currentMatch);
+    }
+  }
+}
+
+function findMatches(val) {
+  const lower = val.toLowerCase();
+  return S.sentences
+    .map((text, id) => ({ id, text }))
+    .filter(({ id, text }) =>
+      !S.lockedIds.has(id) && text.toLowerCase().startsWith(lower)
+    );
+}
+
+// ── Highlight helpers ──────────────────────────────────────────────────────
+function highlight(matches, exact) {
+  clearHighlights();
+  let scrolled = false;
+  for (const m of matches) {
+    const span = document.querySelector(`.sentence[data-id="${m.id}"]`);
+    if (!span) continue;
+    const cls = m === exact ? 'exact-match' : 'partial-match';
+    span.classList.add(cls);
+    if (!scrolled && (m === exact || matches.length === 1)) {
+      span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      scrolled = true;
+    }
+  }
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.sentence.partial-match, .sentence.exact-match')
+    .forEach(s => s.classList.remove('partial-match', 'exact-match'));
+}
+
+// ── State / UI helpers ─────────────────────────────────────────────────────
+function setState(s) {
+  S.inputState = s;
+  typer.className = s === 'empty' ? '' : s === 'partial' ? 'partial' : s === 'no-match' ? 'no-match' : 'complete';
+  const el = document.getElementById('input-status');
+  const msgs = {
+    empty:    'Type the start of any sentence…',
+    partial:  'Keep going — Enter clears if stuck',
+    'no-match': '✗ No match — Enter to clear, Backspace to undo',
+    complete: '✓ Full match! Press Enter to lock.',
+  };
+  el.textContent = msgs[s] || '';
+  el.className = s === 'complete' ? 'ok' : s === 'no-match' ? 'warn' : '';
+}
+
+function renderPreviews(matches, val = '') {
+  const el = document.getElementById('matches-list');
+  if (matches.length === 0) { el.innerHTML = ''; return; }
+
+  if (matches.length > 8) {
+    el.innerHTML = `<div class="match-count">${matches.length} matching sentences</div>`;
+    return;
+  }
+
+  el.innerHTML = matches.slice(0, 8).map(m => {
+    const tlen = val.length;
+    return `<div class="match-preview">` +
+      `<span class="typed">${esc(m.text.slice(0, tlen))}</span>` +
+      `<span class="untyped">${esc(m.text.slice(tlen))}</span>` +
+      `</div>`;
+  }).join('');
+}
+
+// ── Locking ────────────────────────────────────────────────────────────────
+function lock(m) {
+  S.locked.push(m);
+  S.lockedIds.add(m.id);
+
+  const span = document.querySelector(`.sentence[data-id="${m.id}"]`);
+  if (span) {
+    span.classList.remove('partial-match', 'exact-match');
+    span.classList.add('locked');
+  }
+
+  renderLocked();
+  clearInput();
+  if (S.locked.length >= 3) endGame(true);
+}
+
+function renderLocked() {
+  const el = document.getElementById('locked-section');
+  document.getElementById('progress-display').textContent = `${S.locked.length}/3`;
+  el.innerHTML = '<h3>Locked Sentences</h3>';
+  if (S.locked.length === 0) {
+    el.innerHTML += '<p class="locked-empty">None yet — lock 3 to win!</p>';
+    return;
+  }
+  S.locked.forEach(({ text }, i) => {
+    const d = document.createElement('div');
+    d.className = 'locked-sentence';
+    d.innerHTML = `<span class="lock-num">${i + 1}</span><span class="lock-text">${esc(text)}</span>`;
+    el.appendChild(d);
+  });
+}
+
+function clearInput() {
+  typer.value = '';
+  S.lastValid = '';
+  S.currentMatch = null;
+  setState('empty');
+  clearHighlights();
+  renderPreviews([]);
+}
+
+// ── Timer ──────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(S.timer);
+  S.active = true;
+  S.timeLeft = 80;
+  renderTimer();
+  S.timer = setInterval(() => {
+    if (!S.active) return;
+    S.timeLeft--;
+    renderTimer();
+    if (S.timeLeft <= 0) endGame(false);
+  }, 1000);
+}
+
+function renderTimer() {
+  const el = document.getElementById('timer-display');
+  el.textContent = S.timeLeft;
+  el.className = S.timeLeft <= 15 ? 'low' : '';
+}
+
+// ── End of game ────────────────────────────────────────────────────────────
+function endGame(won) {
+  clearInterval(S.timer);
+  S.active = false;
+
+  const overlay = document.getElementById('game-overlay');
+  overlay.style.display = 'flex';
+
+  const lockedHtml = S.locked.map(({ text }, i) =>
+    `<div class="locked-sentence"><span class="lock-num">${i + 1}</span><span class="lock-text">${esc(text)}</span></div>`
+  ).join('');
+
+  if (won) {
+    overlay.innerHTML = `
+      <div class="overlay-box win">
+        <h2>Victory!</h2>
+        <p>3 sentences locked with <strong>${S.timeLeft}s</strong> to spare.</p>
+        <div class="overlay-locked">${lockedHtml}</div>
+        <button onclick="restart()">Play Again</button>
+      </div>`;
+  } else {
+    overlay.innerHTML = `
+      <div class="overlay-box lose">
+        <h2>Time's Up!</h2>
+        <p>You locked <strong>${S.locked.length}/3</strong> sentences.</p>
+        <div class="overlay-locked">${lockedHtml}</div>
+        <button onclick="restart()">Try Again</button>
+      </div>`;
+  }
+}
+
+async function restart() {
+  S.locked = [];
+  S.lockedIds = new Set();
+  document.getElementById('game-overlay').style.display = 'none';
+  renderLocked();
+  clearInput();
+  await newArticle();
+  startTimer();
+}
+
+// ── Controls ───────────────────────────────────────────────────────────────
+async function newArticle() {
+  const title = await randomTitle();
+  await loadArticle(title);
+}
+
+document.getElementById('btn-new').onclick = () => {
+  if (S.active) newArticle();
+};
+
+// ── Utility ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+(async () => {
+  await newArticle();
+  startTimer();
+  typer.focus();
+})();
+</script>
+</body>
+</html>
