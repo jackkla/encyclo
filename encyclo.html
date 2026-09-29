@@ -210,6 +210,8 @@
             transition: opacity 0.2s;
         }
         .frag-host:hover::after { opacity: 0.9; }
+        /* Media kept beside a fragment's text (flag icons, small symbols) stays inline with it. */
+        .frag-host img, .frag-host svg { display: inline-block; vertical-align: middle; }
         /* Don't add an extra underline when the fragment is locked or matching */
         .frag-host:has(.state-locked)::after,
         .frag-host:has(.state-yellow)::after { display: none; }
@@ -1218,8 +1220,38 @@
         .pack-dialog-cards .rarity-epic-card::before { animation-duration:3.5s; }
         .pack-dialog-cards .rarity-legendary-card::before { animation-duration:2.8s; }
         .pack-dialog-cards button:not(.rarity-common-card) .pack-dialog-glyph { color:var(--aura); filter:drop-shadow(0 0 calc(var(--glow)/3) var(--aura)); }
-        @keyframes rarityShimmer { 0%,20% {transform:translateX(-40%) rotate(12deg);} 80%,100% {transform:translateX(40%) rotate(12deg);} }
-        @media(prefers-reduced-motion:reduce) { .pack-dialog-cards button::before {animation:none;transform:rotate(12deg);} }
+        /* Foil window: the glyph sits on a rarity-tinted plate; a crisp gleam sweeps across it, then rests.
+           Epic plates shift like a hologram; legendary plates are gold foil with twinkling sparks. */
+        .pack-dialog-cards button::before { content:none; }
+        .pack-dialog-cards button:not(.rarity-common-card) { box-shadow:4px 4px 0 var(--aura),0 6px var(--glow) color-mix(in srgb,var(--aura) 22%,transparent); }
+        .pack-dialog-plate { position:relative; isolation:isolate; overflow:hidden; display:flex; align-items:center; justify-content:center; height:96px; margin:-18px -18px 2px;
+            border-bottom:2px solid var(--aura); background:color-mix(in srgb,var(--aura) 10%,#fffdf4); }
+        .rarity-common-card .pack-dialog-plate { border-bottom-color:#181b20; background:#efeadb radial-gradient(#181b2014 1px,transparent 1px) 0 0/6px 6px; }
+        .pack-dialog-cards button .pack-dialog-plate .pack-dialog-glyph { position:relative; z-index:1; font-size:60px; line-height:1; text-shadow:none; filter:none; color:var(--aura); }
+        .pack-dialog-cards button.rarity-common-card .pack-dialog-plate .pack-dialog-glyph { color:#214ee7; }
+        .pack-dialog-cards button:not(.rarity-common-card) .pack-dialog-plate::after { content:''; position:absolute; inset:0 -40%; z-index:2; pointer-events:none;
+            background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0) 44%,rgba(255,255,255,.9) 50%,rgba(255,255,255,0) 56%,transparent 60%);
+            transform:translateX(-75%); animation:foilSweep 4.2s cubic-bezier(.45,0,.25,1) var(--sweep-delay,.6s) infinite; }
+        .rarity-epic-card .pack-dialog-plate::after { animation-duration:3.4s; }
+        .rarity-legendary-card .pack-dialog-plate::after { animation-duration:2.8s; }
+        .rarity-epic-card .pack-dialog-plate { background:linear-gradient(115deg,#f4e8ff,#e4eeff 25%,#fbe6f6 50%,#e9f9f3 75%,#f4e8ff) 0 0/300% 100%; animation:foilShift 7s linear infinite; }
+        .rarity-legendary-card .pack-dialog-plate { background:linear-gradient(115deg,#fff3cc,#ffd66e 30%,#fff5d6 50%,#f5c150 70%,#fff3cc) 0 0/300% 100%; animation:foilShift 6s linear infinite; }
+        .pack-dialog-cards button.rarity-legendary-card .pack-dialog-plate .pack-dialog-glyph { color:#7a4f00; text-shadow:0 1px 0 #fff6d8,0 -1px 0 #b97d0e55; }
+        .pack-sparks, .pack-sparks::before, .pack-sparks::after { position:absolute; width:7px; height:7px; z-index:3; pointer-events:none; background:#fff;
+            clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation:sparkTwinkle 2.4s ease-in-out infinite; }
+        .pack-sparks { top:18%; left:22%; }
+        .pack-sparks::before { content:''; top:420%; left:880%; width:10px; height:10px; animation-delay:.8s; }
+        .pack-sparks::after { content:''; top:160%; left:1500%; animation-delay:1.5s; }
+        @keyframes foilSweep { 0% {transform:translateX(-75%);} 42%,100% {transform:translateX(75%);} }
+        @keyframes foilShift { to {background-position:300% 0;} }
+        @keyframes sparkTwinkle { 0%,100% {opacity:0;transform:scale(.3) rotate(0);} 50% {opacity:1;transform:scale(1) rotate(45deg);} }
+        @media(max-width:760px) {
+            .pack-dialog-plate { grid-row:span 2; width:72px; height:72px; margin:0; border:2px solid var(--aura); }
+            .rarity-common-card .pack-dialog-plate { border-color:#181b20; }
+            .pack-dialog-cards button .pack-dialog-plate .pack-dialog-glyph { font-size:40px; }
+            .pack-dialog-cards .rarity-badge { justify-self:start; }
+        }
+        @media(prefers-reduced-motion:reduce) { .pack-dialog-plate,.pack-dialog-plate::after,.pack-sparks,.pack-sparks::before,.pack-sparks::after { animation:none!important; } .pack-dialog-plate::after { opacity:0; } }
 
         /* Quiet chrome, expressive ink. Formatting never relies on hue alone. */
         .excerpt-text .fmt-bold,.excerpt-text .fmt-italic,.excerpt-text .fmt-link,.excerpt-text .fmt-bullet,
@@ -1410,8 +1442,8 @@
         const IDLE_HINT_DELAY_MS = 3000;
         const MIN_SENTENCE_LEN   = 15;
         const MAX_SENTENCE_LEN   = 300;
-        const MIN_FRAGMENT_LEN   = 4;
-        const MAX_FRAGMENT_LEN   = 220;
+        const MIN_FRAGMENT_LEN   = 2;
+        const MAX_FRAGMENT_LEN   = MAX_SENTENCE_LEN; // longer captions and cells are split into several targets
         const ANTE_BASE_TARGET   = 5_000_000;
         const MAX_ANTE           = 7;
         const ROUND_TARGETS = [ANTE_BASE_TARGET, 25_000_000, 100_000_000, 300_000_000, 1_000_000_000, 3_500_000_000, 12_000_000_000];
@@ -2338,6 +2370,20 @@
             add('華华學清高河城',.15); add('县縣省寺神張张陳陈',.1); add('門龍',.08); add('龙',.06); add('门',.05);
             add('の',.4); add('ンー',.3); add('ルトス',.15); add('クイリ',.12); add('ラかしア',.1); add('には',.08); add('たなロマ',.08);
             add('이한',.1); add('대국',.08); add('김',.06); add('서',.05);
+            // Obscure extras: transliteration and historic Latin, rarer Greek and Cyrillic, more scripts, maths, money and signs.
+            const more = (chars, n) => Array.from(chars).forEach(c => { if (f[c] === undefined) f[c] = n; });
+            more('ḥṣ',3); more('ʿʾ',2.5); more('ṭḍṇṛṃṅ',1.5); more('ǎǐǒǔ',1.2); more('ġħ',1); more('ĉĝĥĵŝŭ',.3); more('ǚǜẽỹǫ',.3);
+            more('ŵŷɓɗƙƴŧŀĳ',.2); more('ǀǁǂǃ',.15); more('ȝƿſ',.1); more('ḃċḋḟṁṗṡṫǿǽ',.1);
+            more('άέήίόύώ',.8); more('ϕϑϵϰ',.3); more('ΐΰϊϋ',.1); more('ϝϙϡϻ',.05);
+            more('ґўђћџљњѕ',.1); more('әөүұқғңһ',.1); more('ѣѳѵѫ',.03);
+            more('ա',.2); more('նրոե',.15); more('իկսմտյ',.1); more('գբդզէըթժլխծհձղճշչպջռվցւփքօֆ',.05);
+            more('აი',.15); more('ერსლომნ',.1); more('ვგდბთკპტუქშჩცძწჭხჯჰზჟღყფ',.04);
+            more('านรอก',.1); more('เมงยลวดทสบคพ',.06); more('কর',.1); more('নসতমলবপদয',.06); more('கம',.08); more('னரலதபவயட',.05);
+            more('ሀለመሰረቀበተነአከወዘየደገጠጸፈፐ',.02); more('ཀགངཅཉཏདནཔབམཚཞཟའཡརལཤསཧ',.01); more('កខគងចជញដណតថទនបពមយរលវសហអ',.008);
+            more('ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ',.01); more('ᚁᚂᚃᚄᚅᚆᚇᚈᚉᚊᚋᚌᚍᚎᚏ',.005); more('ⲁⲃⲅⲇⲉⲍⲏⲑⲓⲕⲗⲙⲛⲝⲟⲡⲣⲥⲧⲩⲫⲭⲯⲱϣϥϧϩϫϭ',.005); more('ܐܒܓܕܗܘܙܚܛܝܟܠܡܢܣܥܦܨܩܪܫܬ',.005);
+            more('½',2); more('¼¾µ',1); more('‰',.8); more('⅓⅔⅛',.3); more('∀∃∅∇∏∧∨¬',.3); more('⊂⊆∩∪∝∠⊥∥≡≅∼⊕⊗',.2); more('ℵℏℝℕℤℚℂ',.15); more('∮∴∵⌊⌋⌈⌉',.08); more('‱',.02);
+            more('₁₄',.3); more('¢',.3); more('₩₽₺₪₫₱₴₦',.1); more('₿฿₡₭₮₲₵₸',.03);
+            more('©®™',.5); more('♀♂',.4); more('↑↓',.4); more('№¶★☆',.3); more('⇒⇔⇌↦✓✗',.1); more('♩♪♫♮♠♣♥♦',.05); more('☉☽♃♄♈※‽⁂¦‖‣⁄℗℮',.02); more('⁊',.005);
             return Object.freeze(f);
         })();
         // Frequency guesses for characters an article contains but the table lacks.
@@ -2349,13 +2395,14 @@
         const charFrequency = c => { const k = boostKey(c); if (CHAR_FREQ[k] !== undefined) return CHAR_FREQ[k]; if (/\p{M}/u.test(k) || !needsSpecialInput(k)) return null; return (SCRIPT_FREQ.find(([re]) => re.test(k)) || [0,.05])[1]; };
         const FREQ_REF = CHAR_FREQ.e;
         const niceNumber = x => { const e = Math.pow(10, Math.floor(Math.log10(x))); const m = [1,1.2,1.5,2,2.5,3,4,5,6,8,10].find(n => n * e >= x * .96) * e; return Math.round(m); };
-        // Twice the original frequency-scaled boost, before uppercase and word multipliers.
-        const boostForFrequency = freq => { const L = Math.max(0, Math.log10(FREQ_REF / freq)); return 2 * Math.max(2, niceNumber(2 * Math.pow(10, .4205 * L + .0595 * L * L))); };
+        // Frequency-scaled boost, before uppercase and word multipliers: E +4, J +16, é +40, ° +100, α +400, ψ +3,000.
+        const boostForFrequency = freq => { const L = Math.max(0, Math.log10(FREQ_REF / freq)); return 2 * Math.max(2, niceNumber(2 * Math.pow(10, .286 * L + .0409 * L * L))); };
         const rarityForFrequency = freq => freq >= 10000 ? 'common' : freq >= 1000 ? 'uncommon' : freq >= 30 ? 'rare' : freq >= 2 ? 'epic' : 'legendary';
         const charDisplay = k => /\p{M}/u.test(k) ? `◌${k}` : /^[a-z]$/.test(k) ? k.toUpperCase() : k;
         // Family label so look-alikes (IPA ɡ vs g, Greek ο vs o, Cyrillic а vs a) are unambiguous.
         const charFamily = k => /^[a-z]$/.test(k) ? 'Letter' : /^[0-9]$/.test(k) ? 'Digit' : /[ɐ-˿ᴀ-ᶿ]/u.test(k) ? 'IPA' : /[぀-ヿ]/u.test(k) ? 'Japanese'
-            : [['Greek','Greek'],['Cyrillic','Cyrillic'],['Hebrew','Hebrew'],['Arabic','Arabic'],['Devanagari','Devanagari'],['Han','Chinese'],['Hangul','Korean'],['Latin','Latin']]
+            : [['Greek','Greek'],['Coptic','Coptic'],['Cyrillic','Cyrillic'],['Hebrew','Hebrew'],['Arabic','Arabic'],['Syriac','Syriac'],['Devanagari','Devanagari'],['Bengali','Bengali'],['Tamil','Tamil'],['Thai','Thai'],['Khmer','Khmer'],['Tibetan','Tibetan'],
+               ['Armenian','Armenian'],['Georgian','Georgian'],['Ethiopic','Ethiopic'],['Runic','Runic'],['Ogham','Ogham'],['Han','Chinese'],['Hangul','Korean'],['Latin','Latin']]
                 .find(([script]) => new RegExp(`\\p{Script=${script}}`, 'u').test(k))?.[1] || 'Symbol';
         const boosterId = (k, level) => /^[a-z]$/.test(k) ? `boost-${k}-${level}` : `boost-u${k.codePointAt(0).toString(16)}-${level}`;
         const boosterCache = new Map();
@@ -2389,14 +2436,14 @@
         ];
         // Every boostable character, plus special characters found in the current article, at the next level the player can take.
         function boosterCandidates(owned, sentences = []) {
-            const keys = new Set(Object.keys(CHAR_FREQ));
+            const keys = new Set(Object.keys(CHAR_FREQ).filter(k => /^[a-z0-9]$/.test(k) || needsSpecialInput(k)));
             sentences.forEach(s => s.chars.forEach(c => { if (!c.cit && needsSpecialInput(c.c) && !/\p{M}/u.test(c.c)) keys.add(boostKey(c.c)); }));
             const out = [];
             keys.forEach(k => { const level = [1,2,3].find(l => !owned.some(u => u.id === boosterId(k, l))); const u = level && boosterFor(k, level); if (u) out.push(u); });
             return out;
         }
         // Explicit tier odds make uncommon/rare pulls useful without flooding packs with exotic scripts.
-        const BOOSTER_TIER_WEIGHTS = {common:38, uncommon:32, rare:20, epic:8, legendary:2};
+        const BOOSTER_TIER_WEIGHTS = {common:50, uncommon:33, rare:12, epic:4, legendary:1};
         function drawBooster(size, owned, random = Math.random, sentences) {
             const pool = boosterCandidates(owned, sentences), result = [];
             if(size>=5 && !pool.some(u=>u.rarity!=='common'))return [];
@@ -2511,7 +2558,7 @@
         const probeCache = new WeakMap();
         function probeContexts(sentences) {
             if(probeCache.has(sentences))return probeCache.get(sentences);
-            const contexts=sentences.map(s=>{const d=scoreSentence(s,NO_UPGRADES);return {words:d.words.map((w,index,all)=>({...w,isFirst:index===0,isLast:index===all.length-1,index,count:all.length})),citationBlocks:d.citationBlocks,citationTexts:d.citationTexts};});
+            const contexts=sentences.map(s=>{const d=scoreSentence(s,NO_UPGRADES),outline=d.words.map(w=>wordOutline(w.chars));return {words:d.words.map((w,index,all)=>({...w,isFirst:index===0,isLast:index===all.length-1,index,count:all.length,prev:outline[index-1]||null,words:outline})),citationBlocks:d.citationBlocks,citationTexts:d.citationTexts};});
             probeCache.set(sentences,contexts);return contexts;
         }
         const triggersOn = (u,sentences)=>probeContexts(sentences).some(ctx=>u.type==='WORD'?ctx.words.some(w=>u.action(w)):u.type==='SENTENCE'?!!u.action(ctx):true);
@@ -2636,6 +2683,63 @@
                 return {difficulty:share>=.02?1:share>=.006?2:3,name:`${P(FORMAT_TITLES[k])} Flourish ${P(n+'+')}`,
                     desc:`+${amount} to the word multiplier for ${P(FORMAT_NAMES[k])} words of ${P(n)} or more characters. Attached punctuation counts.`,
                     action:w=>w.len>=n&&hasFormat(w,k)?{multAdd:amount}:null};
+            }});
+        // Word-multiplier families: each names a detail and adds to the word's format multiplier.
+        defineFamily({key:'resonant',type:'WORD',...plainIds('resonant'),
+            title:'Resonant',summary:`Word multiplier per occurrence of a named ${P('letter')} in the word. Scarcer letters add more each.`,
+            options:()=>Array.from('abcdefghijklmnopqrstuvwxyz',l=>[l]),
+            build:l=>{
+                if(!/^[a-z]$/.test(l))return null;
+                const f=CHAR_FREQ[l]/LETTER_TOTAL,amount=Math.min(3,scarcityMult(.06,f,.5)),L=P(l.toUpperCase());
+                return {difficulty:scarcityTier(inlaidShare(l)),name:`Resonant ${L}`,desc:`+${amount} to the word multiplier for each ${L} in the word, ignoring case.`,
+                    action:w=>{const n=Array.from(w.text.toLocaleLowerCase('en')).filter(c=>c===l).length;return n?{multAdd:amount*n}:null;}};
+            }});
+        const MORPHEMES = {
+            suffix:{ing:.03,ed:.06,al:.04,er:.05,tion:.02,ly:.02,ity:.006,ous:.006,ment:.006,est:.004,ness:.003,able:.003,ist:.003,ism:.002,ship:.001,ology:.001},
+            prefix:{re:.02,un:.01,pre:.004,inter:.003,sub:.003,trans:.002,over:.002,non:.002,anti:.001,counter:.0003}
+        };
+        defineFamily({key:'morpheme',type:'WORD',...plainIds('morpheme'),
+            title:'Morpheme',summary:`Word multiplier for words that begin or end with a named ${P('prefix')} or ${P('suffix')}. Rarer morphemes add more.`,
+            options:()=>Object.entries(MORPHEMES).flatMap(([kind,table])=>Object.keys(table).map(v=>[kind,v])),
+            build:(kind,value)=>{
+                const table=own(MORPHEMES,kind),share=table&&own(table,value);
+                if(!share)return null;
+                const amount=Math.min(4,scarcityMult(.9*Math.pow(.03,.5),share,.5)),label=kind==='suffix'?`–${value}`:`${value}–`;
+                const test=kind==='suffix'?t=>t.endsWith(value)&&t.length>value.length+1:t=>t.startsWith(value)&&t.length>value.length+2;
+                return {difficulty:Math.max(1,scarcityTier(share)),name:`Morpheme ${P(label)}`,
+                    desc:`+${amount} to the word multiplier for words ${kind==='suffix'?'ending':'starting'} with ${P(label)}. Ignores case and outer punctuation.`,
+                    action:w=>test(cleanWord(w.text))?{multAdd:amount}:null};
+            }});
+        // Shares of words that are numbers with exactly n digits (4 is mostly years).
+        const FIGURE_SHARE = {1:.012,2:.01,3:.006,4:.02,5:.002,6:.0015};
+        const FIGURE_TIER = {1:1,2:1,3:2,4:1,5:2,6:3};
+        defineFamily({key:'figures',type:'WORD',...plainIds('figures'),
+            title:'Figures',summary:`Word multiplier for numbers with a named count of ${P('digits')}; four digits are mostly years.`,
+            options:()=>Object.keys(FIGURE_SHARE).map(n=>[n]),
+            build:n=>{
+                const share=own(FIGURE_SHARE,n);if(!share)return null;
+                n=Number(n);const amount=Math.min(4,scarcityMult(1.2*Math.pow(.02,.5),share,.5)),label=n===6?'6+':String(n);
+                return {difficulty:FIGURE_TIER[n],name:`Figures ${P(label)}`,desc:`+${amount} to the word multiplier for numbers of ${n===6?`${P('6')} or more`:`exactly ${P(n)}`} digit${n===1?'':'s'}: no letters, commas and points ignored.`,
+                    action:w=>{if(/\p{L}/u.test(w.text))return null;const d=(w.text.match(/\d/g)||[]).length;return (n===6?d>=6:d===n)?{multAdd:amount}:null;}};
+            }});
+        const SUMMIT_TYPES = {any:[1.5,0],l:[2.5,1],i:[3,2],b:[3.5,2]};
+        defineFamily({key:'summit',type:'WORD',...plainIds('summit'),
+            title:'Summit',summary:`Word multiplier for the longest word of each excerpt, or the longest word in a named ${P('format')}.`,
+            options:()=>Object.keys(SUMMIT_TYPES).map(k=>[k]),
+            build:k=>{
+                const t=own(SUMMIT_TYPES,k);if(!t)return null;
+                const f=k==='any'?null:k,kind=f?`${P(FORMAT_NAMES[f])} word`:P('word');
+                return {difficulty:t[1],name:f?`Summit ${P(FORMAT_TITLES[f])}`:'Summit',desc:`+${t[0]} to the word multiplier for the longest ${kind} in each excerpt. Ties all qualify; attached punctuation counts.`,
+                    action:w=>{if(f&&!hasFormat(w,f))return null;const pool=(w.words||[]).filter(x=>!f||x.fmt[f]);return pool.length&&w.len===Math.max(...pool.map(x=>x.len))?{multAdd:t[0]}:null;}};
+            }});
+        defineFamily({key:'alliterative',type:'WORD',...plainIds('alliterative'),
+            title:'Alliterative',summary:`Word multiplier for a word starting with a named ${P('letter')} right after another word starting with it.`,
+            options:()=>Object.keys(INITIAL_LETTER_SHARE).filter(l=>INITIAL_LETTER_SHARE[l]>=.006).map(l=>[l]),
+            build:l=>{
+                const share=own(INITIAL_LETTER_SHARE,l);if(!share||!/^[a-z]$/.test(l))return null;
+                const pair=share*share,amount=Math.min(4,scarcityMult(1.5*Math.pow(.005,.3),pair,.3)),L=P(l.toUpperCase());
+                return {difficulty:pair>=.004?1:pair>=.0006?2:3,name:`Alliterative ${L}`,desc:`+${amount} to the word multiplier for a word starting with ${L} that follows another word starting with ${L}. Ignores case and outer punctuation.`,
+                    action:w=>w.prev&&cleanWord(w.text).startsWith(l)&&cleanWord(w.prev.text).startsWith(l)?{multAdd:amount}:null};
             }});
 
         /* ---------- SENTENCE families ---------- */
@@ -3096,6 +3200,10 @@
                 if (node.nodeType !== Node.ELEMENT_NODE) return;
 
                 const tag = node.tagName.toLowerCase();
+                // Line breaks and stacked blocks read as a space, so "Quebec City<br>Lévis" is not typed as one word.
+                if (tag === 'br') { charArray.push({ c: ' ', ...format }); return; }
+                const blockEdge = /^(div|p|li|dd|dt|tr|td|th|h[1-6]|ul|ol|dl|table|caption|figcaption)$/.test(tag);
+                if (blockEdge) charArray.push({ c: ' ', ...format });
                 const newFormat = { ...format };
 
                 if (tag === 'b' || tag === 'strong') newFormat.b = true;
@@ -3103,7 +3211,7 @@
 
                 // Bullet/list marker: when entering an <li>, set the bullet
                 // flag on all nested content. Player toggles Ctrl+O once.
-                if (tag === 'li') newFormat.bul = true;
+                if (tag === 'li' && !node.classList.contains('gallerybox')) newFormat.bul = true;
 
                 if (isCitationNode(node)) newFormat.cit = true;
                 if (tag === 'sup' && !newFormat.cit) newFormat.exp = true;
@@ -3118,8 +3226,9 @@
                 if (newFormat.cit) { newFormat.exp = false; newFormat.b = false; newFormat.i = false; newFormat.l = false; newFormat.target = null; }
 
                 for (const child of node.childNodes) traverse(child, newFormat);
+                if (blockEdge) charArray.push({ c: ' ', ...format });
             }
-            traverse(rootEl, { b: false, i: false, l: false, cit: false, bul: !!rootEl.closest('li'), target: null });
+            traverse(rootEl, { b: false, i: false, l: false, cit: false, bul: !!rootEl.closest('li:not(.gallerybox)'), target: null });
 
             // Collapse runs of whitespace
             const cleaned = [];
@@ -3164,13 +3273,15 @@
                 '.mw-headline',
                 // Hatnotes and disambiguation
                 '.hatnote', '.dablink',
-                // Image captions
-                '.thumbcaption', 'figcaption',
-                // Tables (infobox + wikitable). List items inside cells win over
+                // Image, gallery and multi-image captions
+                '.thumbcaption', 'figcaption', '.gallerytext', '.gallerycaption', '.trow .thumbcaption',
+                // Infobox titles, captions and rows. List items and captions inside cells win over
                 // cells via the leaf-most filter below.
-                '.infobox li', '.wikitable li',
+                '.infobox-title', '.infobox-above', '.infobox-header', '.infobox-subheader', '.infobox-caption', '.infobox-below',
+                '.infobox li', '.wikitable li', 'table li',
                 '.infobox th', '.infobox td',
                 '.wikitable th', '.wikitable td',
+                'table th', 'table td',
                 'caption',
                 // Bulleted/numbered list items in body content
                 'ul > li', 'ol > li',
@@ -3209,20 +3320,42 @@
                 // Skip if already inside a paragraph (handled by paragraph parser)
                 // or inside a citation/reference block.
                 if (el.closest('p, blockquote') || el.closest(CITATION_SELECTOR)) return;
-                // Skip empty/short fragments after flatten
-                const chars = flattenToChars(el);
-                if (chars.length < MIN_FRAGMENT_LEN || chars.length > MAX_FRAGMENT_LEN) return;
-                // Skip if it's truly empty or just punctuation (e.g. "—" or "")
-                const lettery = chars.filter(c => /[a-zA-Z]/.test(c.c)).length;
-                const numbery = chars.filter(c => /[0-9]/.test(c.c)).length;
-                if (lettery + numbery < 3) return;
-
-                const id = `${pageId}-frag-${counter++}`;
-                el.setAttribute('data-frag-id', id);
-                fragments.push({ id, chars, isFragment: true });
+                counter = markFragmentHost(el, pageId, counter, fragments);
             });
 
             return { fragments, nextCounter: counter };
+        }
+        // Make one element typeable. Anything with a letter or digit qualifies, in any script; text longer
+        // than one excerpt is split at sentence ends, then at spaces, into several targets that share the host.
+        function markFragmentHost(el, pageId, counter, fragments) {
+            const chars = flattenToChars(el);
+            if (chars.length < MIN_FRAGMENT_LEN || !chars.some(c => !c.cit && /[\p{L}\p{N}]/u.test(c.c))) return counter;
+            const ids = [];
+            for (const piece of splitLongText(chars)) {
+                if (!piece.some(c => !c.cit && /[\p{L}\p{N}]/u.test(c.c))) continue;
+                const id = `${pageId}-frag-${counter++}`;
+                ids.push(id);
+                fragments.push({ id, chars: piece, isFragment: true });
+            }
+            if (ids.length) el.setAttribute('data-frag-id', ids.join(' '));
+            return counter;
+        }
+        function splitLongText(chars) {
+            if (chars.length <= MAX_FRAGMENT_LEN) return [chars];
+            const out = [];
+            for (const sentence of splitSentences(chars)) {
+                let rest = sentence;
+                while (rest.length > MAX_FRAGMENT_LEN) {
+                    let cut = MAX_FRAGMENT_LEN;
+                    while (cut > MAX_FRAGMENT_LEN / 2 && !(rest[cut].c === ' ' && !rest[cut].cit)) cut--;
+                    if (cut <= MAX_FRAGMENT_LEN / 2) cut = MAX_FRAGMENT_LEN;
+                    out.push(rest.slice(0, cut));
+                    rest = rest.slice(cut);
+                    while (rest.length && rest[0].c === ' ') rest = rest.slice(1);
+                }
+                if (rest.length) out.push(rest);
+            }
+            return out;
         }
 
         // Wikipedia series sidebars are navigation, not article reading/typing material.
@@ -3238,7 +3371,7 @@
                 const doc=new DOMParser().parseFromString(block.html,'text/html');
                 if(!removeArticleNavigation(doc))return [block];
                 if(!doc.body.textContent.trim()&&!doc.body.querySelector('img,svg,video,audio,math'))return [];
-                const remainingIds=new Set([...doc.querySelectorAll('[data-frag-id]')].map(el=>el.getAttribute('data-frag-id')));
+                const remainingIds=new Set([...doc.querySelectorAll('[data-frag-id]')].flatMap(el=>el.getAttribute('data-frag-id').split(' ')));
                 return [{...block,html:doc.body.innerHTML,fragments:(block.fragments||[]).filter(f=>remainingIds.has(String(f.id)))}];
             });
         }
@@ -3252,7 +3385,7 @@
             // Strip elements that break parsing or are pure UI noise
             // (kept .hatnote in — it's typeable as a fragment now)
             doc.querySelectorAll(
-                '.mw-empty-elt, .mw-editsection, .navbox, .sistersitebox, script, style, .reference-text'
+                '.mw-empty-elt, .mw-editsection, .navbox, .sistersitebox, script, style, .reference-text, annotation, [style*="display:none"], [style*="display: none"]'
             ).forEach(el => el.remove());
 
             // Normalize image sources to absolute https URLs
@@ -3285,7 +3418,10 @@
                     if (valid.length > 0) {
                         blocks.push({ type: 'PARAGRAPH', tag, id: Math.random(), sentences: valid });
                     } else {
-                        blocks.push({ type: 'HTML', id: Math.random(), html: node.outerHTML, fragments: [] });
+                        // Too short or too long for an excerpt: still typeable, as one or more fragments.
+                        const fragments = [];
+                        sentenceIdCounter = markFragmentHost(node, pageId, sentenceIdCounter, fragments);
+                        blocks.push({ type: 'HTML', id: Math.random(), html: node.outerHTML, fragments });
                     }
                 } else {
                     // Preserve images, infoboxes, tables, headings as raw HTML.
@@ -3454,9 +3590,10 @@
 
         function extractSentencesFromParagraph(pEl, pageId, initialCounter) {
             let sentenceIdCounter = initialCounter;
-            const cleaned = flattenToChars(pEl);
-
-            // Split into sentences on .!? followed by trailing citations + space + capital letter
+            return splitSentences(flattenToChars(pEl)).map(chars => ({ id: `${pageId}-${sentenceIdCounter++}`, chars }));
+        }
+        // Split on .!? followed by trailing citations + space + capital letter.
+        function splitSentences(cleaned) {
             const sentences = [];
             let current = [];
             let i = 0;
@@ -3480,16 +3617,14 @@
 
                     if (atEnd || startsNew) {
                         if (trailingCit.length > 0) current.push(...trailingCit);
-                        sentences.push({ id: `${pageId}-${sentenceIdCounter++}`, chars: current });
+                        sentences.push(current);
                         current = [];
                         i = j - 1;
                     }
                 }
                 i++;
             }
-            if (current.length > 0) {
-                sentences.push({ id: `${pageId}-${sentenceIdCounter++}`, chars: current });
-            }
+            if (current.length > 0) sentences.push(current);
             return sentences;
         }
 
@@ -3610,12 +3745,24 @@
             useEffect(() => {
                 if (!containerRef.current) return;
                 const els = Array.from(containerRef.current.querySelectorAll('[data-frag-id]'));
+                const targets = [];
                 els.forEach(el => {
-                    // Drop original children — RenderedText reproduces them
-                    while (el.firstChild) el.removeChild(el.firstChild);
+                    // Drop the original text (RenderedText reproduces it) but keep text-free media such as flag icons.
+                    Array.from(el.childNodes).forEach(n => {
+                        const media = n.nodeType === 1 && !n.textContent.trim() && (n.matches('img,svg,video,audio,picture') || n.querySelector('img,svg,video,audio,picture'));
+                        if (!media) el.removeChild(n);
+                    });
                     el.classList.add('frag-host');
+                    // A long caption holds several targets, one span each.
+                    el.getAttribute('data-frag-id').split(' ').forEach((fragId, i) => {
+                        if (i || el.firstChild) el.appendChild(document.createTextNode(' '));
+                        const host = document.createElement('span');
+                        host.className = 'frag-text';
+                        el.appendChild(host);
+                        targets.push({ fragId, el: host });
+                    });
                 });
-                setPortalTargets(els.map(el => ({ fragId: el.getAttribute('data-frag-id'), el })));
+                setPortalTargets(targets);
             }, [block.id]);
 
             const fragmentMap = useMemo(() => {
@@ -3666,6 +3813,7 @@
 
         // Scores are pure functions of (excerpt, build, rules); memoise them so the HUD and pace
         // meter can re-read locked excerpts on every keystroke without rescoring.
+        const wordOutline = chars => ({ text: chars.map(c => c.c).join(''), len: chars.length, fmt: { b: chars.some(c => c.b), i: chars.some(c => c.i), l: chars.some(c => c.l), bul: chars.some(c => c.bul) } });
         const sentenceScoreCache = new WeakMap();
         function scoreSentence(s, upgrades, rules = DEFAULT_SCORING) {
             let byUpgrades = sentenceScoreCache.get(s);
@@ -3699,6 +3847,8 @@
             });
             if (current.length > 0) words.push(current);
 
+            // Outline of every word, so word upgrades can look at neighbours (Alliterative) and the whole excerpt (Summit).
+            const outline = words.map(wordOutline);
             // Score each word
             const wordScores = words.map((wChars, idx) => {
                 const text = wChars.map(c => c.c).join('');
@@ -3729,7 +3879,7 @@
                 const wordEffects = [];
 
                 wordUpgrades.forEach(u => {
-                    const effect = u.action({ len, isFirst, isLast, index: idx, count: words.length, charDetails, text });
+                    const effect = u.action({ len, isFirst, isLast, index: idx, count: words.length, charDetails, text, prev: outline[idx - 1] || null, words: outline });
                     if (effect) {
                         if (effect.baseAdd) upgradeBase += effect.baseAdd * rules.wordBonus;
                         if (effect.multAdd) upgradeMult += effect.multAdd * rules.wordBonus;
@@ -4053,8 +4203,8 @@
                 <div className="pack-dialog-cards">{pack.choices.map((id, i) => {
                     const u = boosterById(id); if (!u) return null;
                     const proof = boosterEvidence(u, sentences, owned, rules);
-                    return <button key={id} onClick={() => onChoose(id)} style={{ animationDelay: `${i * 70}ms` }} className={`rarity-${u.rarity}-card`}>
-                        <b className="pack-dialog-glyph" aria-hidden="true" lang="und">{u.glyph}</b>
+                    return <button key={id} onClick={() => onChoose(id)} style={{ animationDelay: `${i * 70}ms`, '--sweep-delay': `${.6 + i * .35}s` }} className={`rarity-${u.rarity}-card`}>
+                        <span className="pack-dialog-plate" aria-hidden="true"><b className="pack-dialog-glyph" lang="und">{u.glyph}</b>{u.rarity === 'legendary' && <i className="pack-sparks" />}</span>
                         <span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span>
                         <strong>{u.name}</strong>
                         <em className="pack-dialog-boost">+{u.boostAmount.toLocaleString()} <span>per character</span></em>
@@ -4131,7 +4281,7 @@
                 <details><summary>02 / Typing & formatting</summary><p>Click the typing field to focus it. Formatting buttons are toggles, not keys you hold down. Turn each required format on before typing that part, then off when it ends. Multiple formats can be on at once. The toggles stay on until you change them, including between excerpts. After three seconds without typing in an unfinished excerpt, a hint appears above the input when the next character is unambiguous. It shows the character and any formatting toggles that need changing. If only the last character is wrong, it shows how to replace it. Typing or changing a format dismisses the hint. The format-button values show the standard word multiplier for bold/italic, link points per word, and citation multiplier per citation block; bullet formatting itself adds no points.</p><table><thead><tr><th>Action</th><th>Shortcut</th></tr></thead><tbody>{[['Bold','B'],['Italic','I'],['Link','L'],['Citation',';'],['Bullet','O'],['Compose','M']].map(([label,key]) => <tr key={key}><td>{label}</td><td>Ctrl / ⌘ + {key}</td></tr>)}<tr><td>Special characters</td><td>Hold Ctrl, then Ctrl + shown key</td></tr><tr><td>Use item in bag slot 1–3</td><td>Ctrl + 1–3</td></tr></tbody></table><p>Enter locks only a complete match. Backspace removes the last character. Ctrl, ⌘ or Alt + Backspace clears the input. Clear or Escape clears the unfinished sentence and resets formatting; locked sentences stay. Escape first closes Compose or the special-character panel when either is open. An unmatched character or format turns the input red; edit it to restore a match. Straight quotes also match curly quotes; a hyphen matches an en dash or em dash. Spaces still require the correct formatting.</p><p>Citation mode applies to references and annotations such as [which?] and [citation needed], including brackets. These use small baseline brackets with a dotted underline, without internal link or italic toggles. Math superscripts and area exponents are ordinary text, never citations. Each format combination has its own ink color and an underline showing its component colors. Hover a word or check the active-format preview to see the combination; bullet-only text and bullet markers stay green. Bullet mode matches the text of a list item; do not type its decorative bullet. Special characters typed from the Ctrl panel use your active formats.</p><p>Practice has three excerpts, no clock and no target. Complete the plain, bold and italic excerpts to finish; it does not replace your saved run.</p></details>
                 <details><summary>03 / Navigation, clock & saving</summary><p>The clock starts with your first typed character, inserted special character or article link, except for an unused Scout’s Honor free click. Following a link clears unfinished input after the new article loads; locked excerpts and upgrades remain. Back returns to a previously visited article.</p><p>The clock pauses while the game menu is open, during article loading, Rules, dev mode and scoring. Practice is untimed. Switching browser tabs alone does not pause a running clock. Save & leave stores the run in this browser; Continue resumes with the clock paused until typing or navigation begins. The run also autosaves while playing. Restart starts at round one with a new article and resets upgrades and credits; Keep playing cancels it. The clock pauses while choosing. New run replaces the saved run.</p></details>
                 <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
-                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 8 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 15 words followed by 9 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (4 credits) reveals 3 characters and a Large pack (7 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented Latin, symbols, Greek, IPA, Cyrillic, Hebrew, Arabic, Devanagari, Chinese, Japanese and Korean, plus any special character in your current article. Characters now pay twice their previous boost. Pack tier odds are 38% common, 32% uncommon, 20% rare, 8% epic and 2% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · THIS ROUND':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
+                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 8 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 15 words followed by 9 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (4 credits) reveals 3 characters and a Large pack (7 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +4, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · THIS ROUND':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
                 <details><summary>06 / Special characters</summary><p>Hold Ctrl for a moment to open the character panel: every special character on the current page, each with a key. While still holding Ctrl, press that key to type the character with your active formatting; release Ctrl to close the panel. Keys are fixed for the whole article, with the most frequent characters on single keys. Pages with more characters than keys use two-key labels (for example Ctrl+0 then Ctrl+S). Experienced players can press Ctrl+key without waiting for the panel. The Ω button pins the panel open for mouse and touch; click a character to type it. Hint keys never reuse the format toggles (B I L ; O M) or the item slots (1–3). Characters that match plain keys are left out: straight quotes match curly quotes, a hyphen matches en and em dashes, and superscript digits accept ordinary digits (² → 2); exponents do not require Citation mode. Combining marks are shown on a dotted circle for legibility; only the mark is inserted.</p><p>Compose also works for common Latin accents and typography: toggle Compose, then type a two-character combination. A supported pair inserts one character with the active formatting and exits Compose. An unsupported pair inserts both characters literally. Escape or Enter cancels composition without clearing the existing input.</p><table><thead><tr><th>Pair</th><th>Character</th></tr></thead><tbody>{Object.entries(COMPOSE_SYMBOLS).map(([pair,char]) => <tr key={pair}><td><code>{pair}</code></td><td>{char}</td></tr>)}</tbody></table><p>Combine a letter with an accent marker in either order: apostrophe for acute, backtick for grave, double quote for diaeresis, ^ for circumflex, ~ for tilde, comma for cedilla, / for stroke, or o for ring. An accented character is inserted when the combination forms a single character; otherwise the pair is inserted literally. Example: apostrophe + e gives é.</p></details>
                 <details><summary>07 / Dev mode & sandbox</summary><p>DEV pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
             </div>
