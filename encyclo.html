@@ -2198,6 +2198,39 @@
         .round-card.is-ahead .rc-block.is-live { background:repeating-linear-gradient(135deg,#bfe6d3 0 5px,#e6f5ed 5px 10px)!important; }
         .round-card.is-behind .rc-block.is-live { background:repeating-linear-gradient(135deg,#f6c4bc 0 5px,#fce9e5 5px 10px)!important; }
         .rc-pace { position:absolute; top:-3px; bottom:-3px; width:2px; margin-left:-1px; background:var(--c-ink); opacity:.45; z-index:2; }
+
+        /* Trimmed HUD: score, target, clock, credits. The time estimate appears only when the sentence won't fit. */
+        .score-hud .hud-earn,.excerpt-counter { display:none!important; }
+        .hud-eta:not(.is-late) { display:none!important; }
+        /* Live gains under the buff tiles */
+        #root .game-shell .rail-tiles { gap:19px; }
+        #root .game-shell .build-rail { padding-bottom:22px!important; }
+        .rt-gain { position:absolute; top:calc(100% + 4px); left:50%; transform:translateX(-50%); font:800 10px/1 'Inter',sans-serif; color:var(--c-words); white-space:nowrap; pointer-events:none; }
+        #root .rail-tile:not(.is-live) .rt-gain { display:none; }
+        /* Rarity shows only when it is above common */
+        .rarity-badge.rarity-common { display:none!important; }
+        /* Extra time is an item card */
+        .shop-row.has-time { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+        .shop-item.item-time { display:flex; flex-direction:column; border:2px solid var(--c-ink)!important; background:var(--c-card)!important; }
+        .shop-item.item-time .shop-card-body { flex:1; }
+        .time-art { display:block; margin-bottom:auto; font:900 30px/1 'Inter',sans-serif; letter-spacing:-.04em; color:var(--c-ink); }
+        .time-buy { display:flex; flex-direction:column; border-top:2px solid var(--c-ink); }
+        .time-buy button { display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:8px 14px; background:var(--c-card); border:0; font:600 12.5px 'Inter',sans-serif; color:var(--c-ink); text-align:left; }
+        .time-buy button + button { border-top:1px solid var(--c-line); }
+        .time-buy button b { font:800 13px 'Inter',sans-serif; color:var(--c-accent); }
+        .time-buy button:hover:enabled { background:var(--c-soft); }
+        .time-buy button:disabled { color:var(--c-faint); cursor:not-allowed; } .time-buy button:disabled b { color:var(--c-faint); }
+
+        /* Shop on the finished article's halftone; small text sits on paper so it stays readable. */
+        #root .shop.has-wall { background:var(--shop-wall) top center / 100% auto repeat-y, var(--c-bg)!important; }
+        .shop.has-wall .shop-head > div:first-child { justify-self:start; align-self:end; padding:8px 14px 6px; background:var(--c-bg); }
+        .shop.has-wall .shop-label { background:none!important; }
+        .shop.has-wall .shop-label > * { padding:2px 8px; background:var(--c-bg); }
+        .shop.has-wall .shop-label::after,.shop.has-wall .shop-label::before { display:none!important; }
+        .shop.has-wall .shop-receipt { padding:8px 12px; background:var(--c-bg)!important; }
+        .shop.has-wall :is(.shop-foot-label,.shop-link) { padding:4px 9px; background:var(--c-bg); }
+        .shop.has-wall .shop-slot.is-empty { background:var(--c-bg)!important; }
+        .shop.has-wall .shop-foot { border-top:0!important; }
 </style>
 </head>
 <body>
@@ -4600,9 +4633,9 @@
         // Every non-citation format mask gets deliberate ink rather than a muddy average.
         // B=1, I=2, Link=4, Bullet=8. Hue plus a constituent-color ribbon identifies each mix.
         const FORMAT_PALETTE = {
-            0:'#243041', 1:'#aa460a', 2:'#6e3ac2', 4:'#1456c7', 8:'#177238',
-            3:'#cb1573', 5:'#166e8d', 9:'#796917', 6:'#92519a', 10:'#75404b', 12:'#0e564b',
-            7:'#cc173a', 11:'#724019', 13:'#384984', 14:'#bb18a8', 15:'#94173d'
+            // Bold and italic are carried by weight and slant alone; links are always blue, bullets green.
+            0:'#243041', 1:'#15171c', 2:'#15171c', 3:'#15171c', 4:'#1d4ad8', 5:'#1d4ad8', 6:'#1d4ad8', 7:'#1d4ad8',
+            8:'#177238', 9:'#177238', 10:'#177238', 11:'#177238', 12:'#1d4ad8', 13:'#1d4ad8', 14:'#1d4ad8', 15:'#1d4ad8'
         };
         const FORMAT_BITS = {b:1,i:2,l:4,bul:8};
         const FORMAT_LABELS = {b:'Bold',i:'Italic',l:'Link',bul:'Bullet',cit:'Citation'};
@@ -5521,7 +5554,7 @@
         const BuffTile = ({ u, rules, gain, live, off, effect, children }) => {
             const { main, mark } = buffIcon(u);
             return <li data-name={u.name} tabIndex={0} aria-label={u.name} className={`rail-item rail-tile type-${(u.type || 'UTILITY').toLowerCase()}${live ? ' is-live' : ''}${off ? ' is-off' : ''}${effect ? ' is-effect' : ''}${u.slots > 1 ? ' is-double' : ''}`}>
-                <span className={`rt-glyph${[].concat(main).map(x => typeof x === 'string' ? x : 'x').join('').length > 3 ? ' is-long' : ''}`} lang="und">{main}</span>{mark && <sup className="rt-mark">{mark}</sup>}{u.times && <sub className="rt-times">×</sub>}
+                <span className={`rt-glyph${[].concat(main).map(x => typeof x === 'string' ? x : 'x').join('').length > 3 ? ' is-long' : ''}`} lang="und">{main}</span>{mark && <sup className="rt-mark">{mark}</sup>}{u.times && <sub className="rt-times">×</sub>}{gain && <small className="rt-gain">{gain.split('·')[0].replace(/\s+each$/, '').trim()}</small>}
                 <div className="rt-card" role="tooltip">
                     <b><RichText text={u.richName || u.name}/>{effect && <em>this round</em>}{u.slots > 1 && <em>2 slots</em>}</b>
                     {gain && <em className="rail-gain">{gain}</em>}
@@ -5924,8 +5957,15 @@
                     const octx = out.getContext('2d');
                     octx.fillStyle = '#efe9dc';
                     octx.fillRect(0, 0, out.width, out.height);
-                    // One blue ink on paper: the photo survives as a halftone behind the page.
-                    octx.fillStyle = 'rgba(33,70,224,0.3)';
+                    // Four print inks on paper: each dot takes the ink nearest its pixel's hue; greys print in blue.
+                    const INKS = ['rgba(33,70,224,0.32)', 'rgba(226,61,40,0.34)', 'rgba(230,168,0,0.42)', 'rgba(15,138,90,0.34)'];
+                    const inkOf = (r, g, b) => {
+                        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                        if (mx < 40 || (mx - mn) / mx < .28) return 0;
+                        let h = mx === r ? ((g - b) / (mx - mn)) % 6 : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4;
+                        h = (h * 60 + 360) % 360;
+                        return h < 22 || h >= 300 ? 1 : h < 68 ? 2 : h < 170 ? 3 : 0;
+                    };
 
                     const step = 7;
                     const maxR = step * 0.7;
@@ -5937,16 +5977,17 @@
                             await new Promise(resolve => { wakeFrame=resolve;frameId=requestAnimationFrame(resolve); });
                             wakeFrame=null;if(cancelled)return;sliceStart=performance.now();
                         }
-                        octx.beginPath();
+                        const paths = INKS.map(() => new Path2D());
                         for (let x = 0; x < out.width; x += step) {
                             const idx = (y * out.width + x) * 4;
                             const lum = (0.299*pixels[idx] + 0.587*pixels[idx+1] + 0.114*pixels[idx+2]) / 255;
                             const radius = Math.pow(1 - lum, .8) * maxR;
                             if (radius < 0.35) continue;
-                            octx.moveTo(x + step/2 + radius, y + step/2);
-                            octx.arc(x + step/2, y + step/2, radius, 0, Math.PI * 2);
+                            const path = paths[inkOf(pixels[idx], pixels[idx+1], pixels[idx+2])];
+                            path.moveTo(x + step/2 + radius, y + step/2);
+                            path.arc(x + step/2, y + step/2, radius, 0, Math.PI * 2);
                         }
-                        octx.fill();
+                        paths.forEach((path, k) => { octx.fillStyle = INKS[k]; octx.fill(path); });
                     }
                     out.toBlob(blob => {
                         if(cancelled || !blob)return;
@@ -6082,6 +6123,14 @@
 
             const uniqueExcerpt = matchStates._activeCount === 1
                 ? flatSentences.find(s=>matchStates[s.id]==='YELLOW'||matchStates[s.id]==='COMPLETE') : null;
+            // Follow the typed sentence: once the draft matches exactly one excerpt, bring it into view if it is off screen.
+            useEffect(()=>{
+                if(!uniqueExcerpt)return;
+                const el=document.querySelector(`.wiki-content [data-sid="${CSS.escape(String(uniqueExcerpt.id))}"]`),sc=el?.closest('.overflow-y-auto');
+                if(!el||!sc)return;
+                const r=el.getBoundingClientRect(),b=sc.getBoundingClientRect();
+                if(r.top<b.top+20||r.bottom>b.bottom-20)el.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+            },[uniqueExcerpt?.id]); // eslint-disable-line
             // How the current draft is being typed: mistakes (each slip into red), when it started, and which
             // articles this round has visited. Locked excerpts keep a copy for Clean Copy, Tempo, Tip Jar and Rabbit Hole.
             const draftRef=useRef({start:null,mistakes:0,red:false});
@@ -6730,7 +6779,7 @@
                 const itemFor = id => CONSUMABLES.find(c=>c.id===id);
                 const shortBy = price => `Need ${price-market.credits}¢ more`;
                 return (
-                    <div className="shop print-stage">
+                    <div className={`shop print-stage${halftoneBg?' has-wall':''}`} style={halftoneBg?{'--shop-wall':`url("${halftoneBg}")`}:undefined}>
                         {rulebook}
                         <header className="shop-head">
                             <div>
@@ -6740,7 +6789,6 @@
                             <dl className="shop-ledger">
                                 <div><dt>Round {ante+1} target</dt><dd>{formatScore(getRoundTarget(ante+1))}</dd></div>
                                 <div className="is-clock"><dt>Clock</dt><dd>{clockNow}s</dd>
-                                    <div className="shop-time" role="group" aria-label="Buy time">{TIME_OFFERS.map(o=><button key={o.key} onClick={()=>buyTime(o.key)} disabled={market.credits<o.price} title={o.key==='all'?`+${o.seconds}s on every future round (you have +${market.extraSeconds||0}s)`:`+${o.seconds}s on round ${ante+1} only (you have +${market.nextSeconds||0}s)`}>+{o.seconds}s <span>{o.label}</span><b>{o.price}¢</b></button>)}</div>
                                 </div>
                                 <div className="is-credits"><dt>Credits{market.earned>0&&<span>+{market.earned}</span>}</dt><dd aria-live="polite" aria-atomic="true">{market.credits}¢</dd></div>
                             </dl>
@@ -6810,7 +6858,7 @@
 
                             <section className="shop-shelf" aria-labelledby="shop-items">
                                 <div className="shop-label"><h2 id="shop-items">Items</h2><span>Single use</span></div>
-                                <div className="shop-row">
+                                <div className="shop-row has-time">
                                     {market.stock.map(id => {
                                         const item=itemFor(id), full=bagCount(market.bag)>=BAG_SLOTS, afford=market.credits>=item.price;
                                         return (
@@ -6821,6 +6869,10 @@
                                         );
                                     })}
                                     {Array.from({length:Math.max(0,2-market.stock.length)},(_,i)=><div key={`sold-${i}`} className="shop-item is-empty">Sold out</div>)}
+                                    <div className="shop-item item-time" role="group" aria-label="Buy time">
+                                        <span className="shop-card-body"><span className="time-art" aria-hidden="true">+5s</span><h3>Extra time</h3><p>Round {ante+1} starts with {clockNow}s.</p></span>
+                                        <span className="time-buy">{TIME_OFFERS.map(o=><button key={o.key} onClick={()=>buyTime(o.key)} disabled={market.credits<o.price} title={o.key==='all'?`+${o.seconds}s on every future round (you have +${market.extraSeconds||0}s)`:`+${o.seconds}s on round ${ante+1} only`}><span>{o.label}</span><b>{o.price}¢</b></button>)}</span>
+                                    </div>
                                 </div>
                             </section>
                         </main>
