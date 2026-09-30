@@ -2223,14 +2223,21 @@
 
         /* Shop on the finished article's halftone; small text sits on paper so it stays readable. */
         #root .shop.has-wall { background:var(--shop-wall) top center / 100% auto repeat-y, var(--c-bg)!important; }
-        .shop.has-wall .shop-head > div:first-child { justify-self:start; align-self:end; padding:8px 14px 6px; background:var(--c-bg); }
-        .shop.has-wall .shop-label { background:none!important; }
-        .shop.has-wall .shop-label > * { padding:2px 8px; background:var(--c-bg); }
-        .shop.has-wall .shop-label::after,.shop.has-wall .shop-label::before { display:none!important; }
-        .shop.has-wall .shop-receipt { padding:8px 12px; background:var(--c-bg)!important; }
-        .shop.has-wall :is(.shop-foot-label,.shop-link) { padding:4px 9px; background:var(--c-bg); }
+        /* Over the halftone every piece of text lives on a ruled paper object: a header strip, ink tabs on each shelf, a footer bar. */
+        .shop.has-wall .shop-head { align-items:stretch!important; gap:0!important; padding:0!important; border:2px solid var(--c-ink)!important; background:var(--c-card); }
+        .shop.has-wall .shop-head > div:first-child { display:flex; flex-direction:column; justify-content:center; padding:12px 20px 14px; }
+        .shop.has-wall .shop-kicker { margin:0 0 4px!important; font:600 12px/1.2 'Inter',sans-serif!important; color:var(--c-ok)!important; }
+        .shop.has-wall .shop-title { font-size:clamp(30px,4.2vh,42px)!important; line-height:.9!important; }
+        .shop.has-wall .shop-ledger { border:0!important; border-left:2px solid var(--c-ink)!important; box-shadow:none!important; background:var(--c-card)!important; }
+        .shop.has-wall .shop-ledger > div,.shop.has-wall .shop-ledger .is-clock { display:flex!important; flex-direction:column; justify-content:center; align-items:flex-start; }
+        .shop.has-wall .shop-receipt { align-self:start; margin-top:calc(-1 * var(--vgap) - 2px); padding:7px 20px!important; border:2px solid var(--c-ink)!important; background:var(--c-bg)!important; box-shadow:none!important; }
+        .shop.has-wall .shop-label { gap:0!important; margin:0!important; align-items:stretch!important; }
+        .shop.has-wall .shop-label h2 { flex:0 0 auto!important; gap:0!important; padding:6px 12px 5px; background:var(--c-ink); color:var(--c-card)!important; font:800 12px/1 'Inter',sans-serif!important; letter-spacing:.06em!important; text-transform:uppercase; }
+        .shop.has-wall .shop-label h2::after { display:none!important; }
+        .shop.has-wall .shop-label > span { display:flex; align-items:center; margin-left:auto; padding:0 10px; background:var(--c-ink); color:#c9c4b6!important; font:500 11.5px/1 'Inter',sans-serif!important; }
+        .shop.has-wall :is(.shop-cards,.shop-row) { margin-top:0; }
+        .shop.has-wall .shop-foot { padding:10px 12px 10px 18px!important; border:2px solid var(--c-ink)!important; background:var(--c-card); }
         .shop.has-wall .shop-slot.is-empty { background:var(--c-bg)!important; }
-        .shop.has-wall .shop-foot { border-top:0!important; }
 </style>
 </head>
 <body>
