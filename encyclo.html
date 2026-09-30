@@ -2155,7 +2155,9 @@
             if(understudyCache.has(upgrades))return understudyCache.get(upgrades);
             const out=upgrades.map((u,i)=>{
                 if(u.id!=='understudy')return u;
-                const prev=upgrades[i-1];
+                // "Above" means the previous buff slot: letter levels and this-round effects are skipped.
+                let j=i-1;while(j>=0&&(upgrades[j].booster||upgrades[j].temporary))j--;
+                const prev=upgrades[j];
                 if(!prev||!['WORD','SENTENCE','RUN'].includes(prev.type)||['symmetric','safety-net'].includes(prev.id))return u;
                 return {...prev,id:'understudy',copyId:prev.id,name:'Understudy',copyOf:prev.name,temporary:false};
             });
@@ -4898,6 +4900,9 @@
             const wb = new Map();
             d.words.forEach(w => w.wordEffects.forEach(e => { const g = wb.get(e.name) || { base: 0, mult: 0, times: 1, words: 0 }; g.base += e.base || 0; if (e.mult) g.mult = Math.max(g.mult, e.mult); if (e.times && e.times !== 1) g.times = e.times; g.words++; wb.set(e.name, g); }));
             const wordBuffs = [...wb].map(([label, g]) => ({ label, text: gainText(g) }));
+            // Letter packs: extra base on every boosted character.
+            const boosted = d.words.flatMap(w => w.charDetails.filter(c => c.boost));
+            if (boosted.length) wordBuffs.unshift({ label: `Letters ${[...new Set(boosted.map(c => c.c.toUpperCase()))].slice(0, 6).join(' ')}`, text: `+${boosted.reduce((n, c) => n + c.boost, 0).toLocaleString()} base · ${boosted.length} chars` });
             return { words, chips: d.sentenceBase, mult: d.sentenceMultiplier * d.chainMultiplier, steps, wordBuffs, total: d.sentenceTotal };
         }
         // What each buff adds to one excerpt, for the buffs list.
