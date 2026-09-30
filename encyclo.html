@@ -2013,15 +2013,45 @@
         .wt-mult-line { padding-top:0; }
         .tally-steps li.is-word { background:#e5eaff; } .tally-steps li.is-word b { color:var(--c-words); }
         .sb-pop p.is-word { padding-left:8px; font-size:11px; } .sb-pop p.is-word b { font-size:10.5px; }
-        .round-banner { position:absolute; left:50%; top:118px; z-index:40; display:flex; align-items:baseline; gap:12px; padding:10px 18px; border:2px solid var(--c-ink); background:var(--c-gold); box-shadow:6px 6px 0 var(--c-ink); pointer-events:none; transform:translateX(-50%) rotate(-1.5deg); animation:banner 2.1s cubic-bezier(.2,.9,.3,1) forwards; }
-        .round-banner span { font:700 11px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
-        .round-banner b { font:900 34px/1 'Inter',sans-serif; letter-spacing:-.05em; }
-        .round-banner small { font:400 17px 'Permanent Marker','Inter',sans-serif; color:var(--c-mult); }
-        @keyframes banner { 0% { opacity:0; transform:translate(-50%,-30px) rotate(-6deg) scale(1.2); } 12% { opacity:1; transform:translateX(-50%) rotate(-1.5deg) scale(1); } 80% { opacity:1; transform:translateX(-50%) rotate(-1.5deg); } 100% { opacity:0; transform:translate(-50%,-14px) rotate(-1.5deg); } }
-        @media (prefers-reduced-motion:reduce) { .round-banner { animation:none; opacity:0; } }
         .wiki-content [data-w],.tally-row [data-w] { cursor:pointer; }
         .play-menu-panel > button[aria-pressed=true] small { color:var(--c-accent); }
         .score-hud .sb-box small { color:var(--c-ink); opacity:1; background:var(--c-card); padding:1px 3px; font-weight:800; }
+        /* ---- Round card: centred target + log gauge ---- */
+        .round-card { display:flex; flex-direction:column; gap:5px; width:clamp(300px,34vw,470px); margin:6px auto; padding:7px 10px 6px; border:2px solid var(--c-ink); background:var(--c-gold); box-shadow:4px 4px 0 var(--c-ink); transform:rotate(-.6deg); }
+        .rc-head { display:flex; align-items:baseline; justify-content:center; gap:10px; line-height:1; }
+        .rc-head span { font:700 10.5px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+        .rc-head b { font:900 26px/1 'Inter',sans-serif; letter-spacing:-.05em; }
+        .rc-head small { font:400 15px/1 'Permanent Marker','Inter',sans-serif; color:var(--c-mult); }
+        .rc-bar { position:relative; height:20px; border:2px solid var(--c-ink); background:repeating-linear-gradient(90deg,#fffdf6 0 10px,#f6f0df 10px 20px); overflow:hidden; }
+        .rc-block { position:absolute; top:0; bottom:0; display:flex; align-items:center; justify-content:center; border-right:2px solid var(--c-ink); overflow:hidden; transition:left .25s ease, width .25s cubic-bezier(.3,1.4,.5,1); }
+        .rc-block i { font:800 10.5px/1 'JetBrains Mono',monospace; font-style:normal; color:#fff; white-space:nowrap; padding:0 3px; }
+        .rc-block.is-locked { background:var(--c-words); } .rc-block.is-locked.is-n1,.rc-block.is-locked.is-n2 { background:#3257f0; } .rc-block.is-locked.is-n3 { background:#4d6cf2; }
+        .rc-block.is-gold,.rc-block.is-bonus-in { background:var(--c-ink); } .rc-block.is-gold i,.rc-block.is-bonus-in i { color:var(--c-gold); }
+        .rc-block.is-live { background:repeating-linear-gradient(135deg,#2146e0 0 5px,#8fa6ff 5px 10px); animation:rc-march 1s linear infinite; background-size:14px 14px; }
+        .rc-block.is-live i { color:var(--c-ink); background:#ffffffd9; }
+        .rc-block.is-bonus { background:transparent; border:2px dashed #15171c80; border-left:0; } .rc-block.is-bonus i { color:var(--c-ink2); }
+        @keyframes rc-march { to { background-position:14px 0; } }
+        .rc-tick { position:absolute; top:0; bottom:0; width:0; border-left:2px dotted #15171c59; pointer-events:none; }
+        .rc-goal { position:absolute; top:-2px; bottom:-2px; width:4px; margin-left:-2px; background:var(--c-mult); pointer-events:none; }
+        .rc-goal em { display:none; }
+        .round-card.is-clear .rc-bar { box-shadow:0 0 0 2px var(--c-ok); }
+        .rc-foot { text-align:center; font:600 11.5px/1.2 'Inter',sans-serif; color:var(--c-ink); }
+        .rc-foot b { font-weight:900; } .rc-foot em { font-style:normal; font-weight:800; }
+        .rc-foot .is-good { color:var(--c-ok); } .rc-foot .is-bad { color:var(--c-mult); }
+        .game-shell>.flex-1.overflow-y-auto { padding-left:24px!important; }
+        @media (min-width:900px) {
+            .game-shell .hud-header { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); grid-template-areas:"timer timer timer" "title card actions" "metrics card feedback"; column-gap:14px; }
+            .hud-header > .w-full.h-1 { grid-area:timer; }
+            .game-shell .play-toolbar,.game-shell .score-hud { display:contents!important; }
+            .play-toolbar > :first-child { grid-area:title; padding:6px 0 0 20px; align-self:center; }
+            .play-toolbar > .play-actions { grid-area:actions; justify-self:end; align-self:center; padding:6px 20px 0 0; }
+            .score-hud-metrics { grid-area:metrics; padding:0 0 7px 20px; align-self:center; }
+            .score-feedback { grid-area:feedback; justify-self:end; align-self:center; padding:0 20px 7px 0; margin:0!important; }
+            .round-card { grid-area:card; align-self:center; margin:6px 0 8px; }
+        }
+        @media (max-width:899px) { .round-card { width:auto; margin:4px 12px 6px; transform:none; } .rc-head b { font-size:22px; } }
+        .round-card { padding:5px 10px 5px; gap:4px; }
+        .rc-head b { font-size:23px; } .rc-bar { height:19px; } .rc-block i { font-size:10px; padding:0 2px; }
 </style>
 </head>
 <body>
@@ -4915,6 +4945,47 @@
             </div>;
         };
 
+        /* ================================================================
+           ROUND CARD — the target and a log-scale gauge. Excerpt scores multiply, so on a log scale
+           they add: each excerpt is a block, three on-pace blocks exactly reach the goal, and
+           guaranteed multipliers (Glass Cannon, Carbon Copy) are a gold block you start with.
+           ================================================================ */
+        const RoundCard = ({ ante, target, locked, live, upgrades, rules, aim, bonus, forecast }) => {
+            const L = Math.log(Math.max(2, target)), sym = hasUpgrade(upgrades, 'symmetric') ? rules.symmetric : 0;
+            const G = guaranteedRunMultiplier(upgrades, rules);
+            const val = x => scoreSentence(x, upgrades, rules).sentenceTotal + sym;
+            const wOf = x => x > 1 ? Math.log(x) / L : 0;
+            const blocks = [];
+            if (G > 1.001) blocks.push({ kind: 'gold', w: wOf(G), label: `×${fmtMult(G)}`, title: 'Guaranteed multipliers' });
+            locked.forEach((x, i) => { const v = val(x); blocks.push({ kind: 'locked', w: wOf(v), label: formatScore(v), title: `Excerpt ${i + 1}: ${v.toLocaleString()}` }); });
+            const liveNew = live && !locked.some(x => x.id === live.id) && locked.length < REQUIRED_SENTENCES;
+            let liveV = null;
+            if (liveNew) { liveV = val(live); blocks.push({ kind: 'live', w: wOf(liveV), label: formatScore(liveV), title: `The excerpt you are typing, if you lock it now: ${liveV.toLocaleString()}` }); }
+            // On the last excerpt the scorer knows everything: show the run bonuses that would actually land.
+            if (liveNew && locked.length === REQUIRED_SENTENCES - 1 && forecast) {
+                const product = G * [...locked, live].reduce((n, x) => n * val(x), 1), extra = product > 0 ? forecast / product : 1;
+                if (extra > 1.001) blocks.push({ kind: 'bonus-in', w: wOf(extra), label: `×${fmtMult(extra)}`, title: 'Run bonuses that land with this excerpt' });
+            } else if (bonus > 1.001 && locked.length < REQUIRED_SENTENCES) blocks.push({ kind: 'bonus', w: wOf(bonus), label: `×${fmtMult(bonus)}?`, title: 'Run bonuses you can still earn this round' });
+            const solid = blocks.filter(b => b.kind !== 'bonus').reduce((n, b) => n + b.w, 0), total = blocks.reduce((n, b) => n + b.w, 0);
+            const R = Math.max(1.14, total + .04), pos = x => `${x / R * 100}%`;
+            const g0 = G > 1.001 ? wOf(G) : 0, ticks = [1, 2].map(k => g0 + (1 - g0) * k / 3);
+            let at = 0;
+            const left = REQUIRED_SENTENCES - locked.length;
+            const liveGood = liveV !== null && Number.isFinite(aim) && liveV - sym >= aim;
+            const foot = left === 0 ? 'Scoring…'
+                : forecast ? <>Round if locked <b>{formatScore(forecast)}</b> · {forecast >= target ? <em className="is-good">clears</em> : <em className="is-bad">{formatScore(target - forecast)} short</em>}</>
+                : <>{left === 3 ? 'Aim' : left === 1 ? 'Last one needs' : `Next ${left} need`} <b>{Number.isFinite(aim) ? formatScore(aim) : '—'}</b>{left > 1 ? ' each' : ''}{liveV !== null && <> · this one <em className={liveGood ? 'is-good' : 'is-bad'}>{formatScore(liveV - sym)}</em></>}</>;
+            return <div className={`round-card${solid >= 1 ? ' is-clear' : ''}`} title={'Scores multiply, so this gauge adds them on a log scale: three on-pace excerpts fill it exactly.\nBlue: locked excerpts. Striped: the one you are typing. Gold: guaranteed multipliers. Dashed: run bonuses you can still earn.'}>
+                <div className="rc-head"><span>Round {ante} of {MAX_ANTE}</span><b>{formatScore(target)}</b><small>to clear</small></div>
+                <div className="rc-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1, solid) * 100)} aria-label="Progress to the round target">
+                    {blocks.map((b, i) => { const x = at; at += b.w; return b.w > 0 && <span key={i} className={`rc-block is-${b.kind}${b.kind === 'locked' ? ` is-n${i}` : ''}`} style={{ left: pos(x), width: pos(b.w) }} title={b.title}>{b.w / R > (b.label.length > 5 ? .075 : .045) && <i>{b.label}</i>}</span>; })}
+                    {ticks.map((t, i) => <span key={i} className="rc-tick" style={{ left: pos(t) }}/>)}
+                    <span className="rc-goal" style={{ left: pos(1) }}><em>Goal</em></span>
+                </div>
+                <div className="rc-foot">{foot}</div>
+            </div>;
+        };
+
         const WordTipCard = ({ tip }) => { const b = wordBreakdown(tip.word, tip.rules || DEFAULT_SCORING); return <div className={`word-tip ${tip.below ? 'is-below' : ''}`} style={{ left: tip.x, top: tip.y }} role="tooltip">
             <div className="wt-eq">
                 <span className="wt-base"><b>{tip.word.base.toLocaleString()}</b><small>base</small></span><i>×</i>
@@ -5805,9 +5876,6 @@
             // As each word of the matched excerpt is finished, its points pop above it and the buffs it used flash.
             const pops=usePops();
             const popState=useRef({id:null,done:0});
-            // Round banner: slides in when a round starts, names the target, gets out of the way.
-            const [banner,setBanner]=useState(null);
-            useEffect(()=>{if(gameState!=='PLAYING'||isPractice)return;setBanner({ante,k:Date.now()});const t=setTimeout(()=>setBanner(null),2100);return ()=>clearTimeout(t);},[gameState,ante,isPractice]);
             useEffect(()=>{
                 const st=popState.current;
                 if(!liveExcerpt||!liveDetail){st.id=null;st.done=0;return;}
@@ -6567,7 +6635,7 @@
                         <div className="play-toolbar flex justify-between items-center gap-2">
                             {/* Left: ante + title */}
                             <div className="flex items-center gap-3 min-w-0 flex-1"><span className="hud-brand" aria-hidden="true">Ency<span>clo</span></span>
-                                <span className="round-pill">Round {ante}<small>/{MAX_ANTE}</small></span>
+                                {isPractice&&<span className="round-pill">Practice</span>}
                                 <h2 className="text-lg md:text-xl font-serif font-bold text-zinc-900 truncate min-w-0">
                                     {article}
                                 </h2>
@@ -6615,19 +6683,10 @@
                                 </div></details>
                             </div>
                         </div>
+                        {!isPractice&&<RoundCard ante={ante} target={targetScore} locked={lockedSentences} live={liveExcerpt} upgrades={activeUpgrades} rules={rules} aim={requiredPace} bonus={bonusOutlook.multiplier} forecast={roundForecast}/>}
                         <section className="score-hud" aria-label="Round score dashboard">
                             <div className="score-hud-metrics">
-                                {!isPractice&&<div><span>Target</span><strong title={targetScore.toLocaleString()}>{formatScore(targetScore)}</strong></div>}
                                 <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><ScoreBar detail={liveDetail}/>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}{(liveDetail||typedWords>0)&&<em className="hud-words" title="Words typed / words in this sentence">{liveDetail?`${Math.min(typedWords,liveDetail.words.length)}/${liveDetail.words.length}`:typedWords} {(liveDetail?liveDetail.words.length:typedWords)===1?'word':'words'}</em>}</div>
-                                {!isPractice&&(()=>{
-                                    const bonusCount=bonusOutlook.live.length, split=bonusCount>0&&bonusPace!==requiredPace, fmt=n=>Number.isFinite(n)?formatScore(n):'unreachable';
-                                    const names=bonusOutlook.live.map(u=>u.name).join(', ');
-                                    return <div className="hud-pace" title={`Equal score each remaining excerpt needs.\nNo bonuses: only guaranteed multipliers (Symmetric, Carbon Copy).\n${bonusCount?`All bonuses: ${names} also land.`:'No conditional run bonus is still possible.'}${bonusOutlook.lost.length?`\nRuled out: ${bonusOutlook.lost.map(u=>u.name).join(', ')}.`:''}`}>
-                                        <span>{lockedSentences.length===2?'Still needed':'Aim per sentence'}</span>
-                                        <strong title={Number.isFinite(requiredPace)?requiredPace.toLocaleString():'A locked excerpt has zero points'}>{fmt(requiredPace)}<small>before buffs</small></strong>
-                                        {split&&<strong className="is-bonus" title={Number.isFinite(bonusPace)?bonusPace.toLocaleString():''}>{fmt(bonusPace)}<small>{bonusCount===1?bonusOutlook.live[0].name:`all ${bonusCount} bonuses`}</small></strong>}
-                                    </div>;
-                                })()}
                                 {!isPractice&&<div className="hud-credits" title={`${market.credits}¢ in hand. Locked excerpts pay ${formatCredits(pendingCredits)} when the round clears (1¢ per ${WORDS_PER_CREDIT} words${hasUpgrade(activeUpgrades,'patron')||hasUpgrade(activeUpgrades,'royalties')?', plus bonuses':''}).`}><span>Credits</span><strong>{market.credits}¢</strong><em className="hud-earn">{pendingCredits>0?`+${formatCredits(pendingCredits)} on clear`:''}</em></div>}
                                 {!isPractice&&bagCount(market.bag)>0&&<div className="quick-bag" role="group" aria-label={`Items — use with ${ITEM_KEY_HINT}`}>
                                     {normalizeBag(market.bag).map((id,k)=>{const item=CONSUMABLES.find(c=>c.id===id);if(!item)return <span key={`empty-${k}`} className="qb-slot is-empty" aria-label={`Slot ${k+1} empty`}><kbd>{itemKeyLabel(k)}</kbd></span>;const active=item.effect&&hasUpgrade(activeUpgrades,item.effect);const nudged=itemNudge?.slot===k;
@@ -6642,7 +6701,6 @@
                             </div>
                             <div className="score-feedback"><span className="excerpt-counter">Sentence {Math.min(3,lockedSentences.length+1)} / 3</span>{(<div className="hud-locks" aria-label="Locked excerpt scores">{[0,1,2].map(i=>{const locked=lockedSentences[i];return <span key={i} className={locked?'locked':i===lockedSentences.length?'active':''} title={locked?locked.chars.map(c=>c.c).join(''):''}><b>0{i+1}</b>{locked?formatScore(scoreSentence(locked,activeUpgrades,rules).sentenceTotal):'—'}{locked&&!isPractice&&<small className="lock-earn">+{formatCredits(lockedIncome[i].credits)}</small>}{locked&&<i aria-label="Locked">✓</i>}</span>;})}</div>)}</div>
                             
-                            {!isPractice&&lockedSentences.length===2&&<div className={`target-forecast ${roundForecast!==null&&roundForecast>=targetScore?'cleared':''}`}><span>Round if locked <b>{roundForecast===null?'—':formatScore(roundForecast)}</b>{roundForecast!==null&&` · ${roundForecast>=targetScore?'target met':`${formatScore(targetScore-roundForecast)} short`}`}</span></div>}
 
                         </section>
                         {/* Subtle bottom hairline */}
@@ -6655,12 +6713,10 @@
                     {saveNotice.startsWith('Saving is unavailable') && <div role="alert" className="px-5 py-2 bg-orange-50 text-orange-800 text-sm">{saveNotice}</div>}
                     {navigationError && <div role="status" className="px-5 py-2 bg-red-50 text-red-800 text-sm flex justify-between gap-2">{navigationError}<button onClick={() => setNavigationError('')} aria-label="Dismiss message">✕</button></div>}
                     
-                    {!isPractice&&<PaceMeter locked={lockedSentences} live={liveExcerpt} liveScore={liveScore} needed={neededScore} upgrades={activeUpgrades} rules={rules} target={targetScore}/>}
                     {/* Wikipedia article canvas */}
                     {!isPractice&&<BuildRail upgrades={activeUpgrades} rules={rules} detail={liveDetail} fired={liveDetail?.triggeredUpgrades||[]} lost={bonusOutlook.lost.map(u=>u.name)}/>}
                     {articleHover.node}
                     {pops.node}
-                    {banner&&<div key={banner.k} className="round-banner" aria-hidden="true"><span>Round {banner.ante} of {MAX_ANTE}</span><b>{formatScore(getRoundTarget(banner.ante))}</b><small>to clear</small></div>}
                     <div className="flex-1 overflow-y-auto px-6 pt-3 pb-24 font-article relative" onScroll={articleHover.clear} style={{
                         backgroundImage: halftoneBg ? `url("${halftoneBg}")` : 'none',
                         backgroundRepeat: 'repeat-y',
