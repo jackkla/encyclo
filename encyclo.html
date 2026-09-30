@@ -2191,6 +2191,13 @@
         .build-rail .rail-empty { width:46px; margin:0; font:500 10.5px/1.3 'Inter',sans-serif; color:var(--c-faint); text-align:center; }
         .build-rail .rail-letters { flex-direction:column; align-items:center; gap:4px; width:46px; margin:8px 0 0!important; padding:8px 0 0!important; }
         @keyframes rail-pulse { 0% { transform:scale(1.18); } 100% { transform:scale(1); } }
+
+        /* Gauge pace: green when the fill is where it should be for the excerpts so far, red when behind. */
+        .round-card.is-ahead .rc-block.is-locked,.round-card.is-ahead .rc-progress { background:var(--c-ok)!important; }
+        .round-card.is-behind .rc-block.is-locked,.round-card.is-behind .rc-progress { background:var(--c-mult)!important; }
+        .round-card.is-ahead .rc-block.is-live { background:repeating-linear-gradient(135deg,#bfe6d3 0 5px,#e6f5ed 5px 10px)!important; }
+        .round-card.is-behind .rc-block.is-live { background:repeating-linear-gradient(135deg,#f6c4bc 0 5px,#fce9e5 5px 10px)!important; }
+        .rc-pace { position:absolute; top:-3px; bottom:-3px; width:2px; margin-left:-1px; background:var(--c-ink); opacity:.45; z-index:2; }
 </style>
 </head>
 <body>
@@ -2207,7 +2214,7 @@
         const getRoundDuration = ante => ROUND_SECONDS[Math.max(0, Math.min(ROUND_SECONDS.length - 1, ante - 1))];
         const REQUIRED_SENTENCES = 3;
         // New buff numbers (tuned on simulated rounds of real articles).
-        const CLEAN_COPY_MULT=.5, TEMPO_STEP=.25, TEMPO_FLOOR=30, MARGINALIA_MULT=.75, LEDE_MULT=1.25, TITLE_DROP_MULT=4, POLYGLOT_MULT=3,
+        const CLEAN_COPY_MULT=.5, TEMPO_STEP=.25, TEMPO_FLOOR=30, MARGINALIA_MULT=.75, LEDE_MULT=1.25, SEE_ALSO_MULT=2, TITLE_DROP_MULT=4, POLYGLOT_MULT=3,
             FACE_VALUE_RATE=.1, FACE_VALUE_CAP=9999, GLASS_CANNON_TIMES=5, HIGHLIGHTER_TIMES=2, RABBIT_HOLE_STEP=1.25, RABBIT_HOLE_MAX=4, SNOWBALL_STEP=2, TIP_JAR_PAY=1, BOUNTY_MAX=5, LONG_FORM_PAY=1, LONG_FORM_WORDS=25, FRUGAL_PAY=1;
         const BUFF_SLOTS = 5, EPIC_FROM_ROUND = 3;
         const IDLE_HINT_DELAY_MS = 3000;
@@ -3172,6 +3179,8 @@
                 action:s=>s.sentence?.isFragment?{multAdd:MARGINALIA_MULT}:null},
             {id:'lede',name:'Lede',rarity:'common',price:4,type:'SENTENCE',desc:`+${LEDE_MULT} to the sentence multiplier for excerpts from the article’s first paragraph.`,
                 action:s=>s.sentence?.lede?{multAdd:LEDE_MULT}:null},
+            {id:'see-also',name:'See Also',rarity:'uncommon',price:6,type:'SENTENCE',anyArticle:true,desc:`+${SEE_ALSO_MULT} to the sentence multiplier for excerpts from an article you reached from one that lists it under See also.`,
+                action:s=>s.sentence?.viaSeeAlso?{multAdd:SEE_ALSO_MULT}:null},
             {id:'title-drop',name:'Title Drop',rarity:'uncommon',price:7,type:'WORD',anyArticle:true,desc:`+${TITLE_DROP_MULT} to the word multiplier for words that appear in the article’s title. Ignores case and plurals; a bracketed part of the title does not count.`,
                 action:w=>w.title&&inTitle(w.text,w.title)?{multAdd:TITLE_DROP_MULT}:null},
             {id:'polyglot',name:'Polyglot',rarity:'rare',price:10,type:'SENTENCE',desc:`+${POLYGLOT_MULT} to the sentence multiplier for each non-Latin writing system in the excerpt: Greek, Cyrillic, CJK, Arabic, Hebrew, IPA and others.`,
@@ -4126,6 +4135,7 @@
         /* Walk a DOM subtree and flatten into a per-character array, tagging
            format inheritance (bold/italic/link/citation). Shared by paragraph
            sentence extraction and fragment extraction. */
+        const DROPPED_SECTIONS = /^(notes|references|citations|sources|footnotes|bibliography|further reading|external links|works cited|notes and references|references and notes|explanatory notes|general references|general and cited references|cited sources|primary sources|secondary sources|literature)$/;
         const CITATION_SELECTOR = '.reference, .mw-ref, [role="doc-noteref"], [typeof~="mw:Extension/ref"], sup.Template-Fact, sup.Inline-Template';
         function isCitationNode(node) {
             if (node.matches(CITATION_SELECTOR)) return true;
@@ -4350,10 +4360,18 @@
             let sentenceIdCounter = 0;
 
             const root = doc.querySelector('.mw-parser-output') || doc.body;
+            // Reference-list sections go entirely; the See also list is kept and its links remembered for the See Also buff.
+            root.querySelectorAll('.reflist, .references, ol.references, .refbegin').forEach(el => el.remove());
+            let section = '';
+            const seeAlsoTitles = new Set();
 
             Array.from(root.childNodes).forEach(node => {
                 if (node.nodeType !== Node.ELEMENT_NODE) return;
                 const tag = node.tagName.toLowerCase();
+                const h2 = tag === 'h2' ? node : node.classList.contains('mw-heading2') || (node.classList.contains('mw-heading') && node.querySelector(':scope > h2')) ? node.querySelector('h2') : null;
+                if (h2) section = h2.textContent.replace(/\[edit\]/i, '').trim().toLowerCase();
+                if (DROPPED_SECTIONS.test(section)) return;
+                if (section === 'see also' && !h2) node.querySelectorAll('a[title]').forEach(a => { if (!a.classList.contains('external')) seeAlsoTitles.add(a.getAttribute('title')); });
 
                 if (tag === 'p' || tag === 'blockquote') {
                     const sentences = extractSentencesFromParagraph(node, pageId, sentenceIdCounter);
@@ -4405,7 +4423,7 @@
             // The lede: sentences of the first body paragraph.
             const lede = blocks.find(b => b.type === 'PARAGRAPH' && b.sentences?.length);
             if (lede) lede.sentences.forEach(x => { x.lede = true; });
-            return { blocks, meta: { leadImageUrl, allImages, era } };
+            return { blocks, meta: { leadImageUrl, allImages, era, seeAlso: [...seeAlsoTitles] } };
         }
 
         // Pick a mood from the article's title, categories and lead; the audio engine turns it into a musical style.
@@ -5122,14 +5140,18 @@
             let at = 0;
             const left = REQUIRED_SENTENCES - locked.length;
             const liveGood = liveV !== null && Number.isFinite(aim) && liveV - sym >= aim;
+            // Pace: after n excerpts (locked plus the live one) the fill should reach n thirds of the way past the gold block.
+            const n = locked.length + (liveNew ? 1 : 0), paceAt = g0 + (1 - g0) * n / 3;
+            const pace = n === 0 ? '' : liveNew && locked.length === REQUIRED_SENTENCES - 1 && forecast ? (forecast >= target ? ' is-ahead' : ' is-behind') : solid >= paceAt - 1e-9 ? ' is-ahead' : ' is-behind';
             const foot = left === 0 ? 'Scoring…'
                 : forecast ? <>Round if locked <b>{formatScore(forecast)}</b> · {forecast >= target ? <em className="is-good">clears</em> : <em className="is-bad">{formatScore(target - forecast)} short</em>}</>
                 : <>{left === 3 ? 'Aim' : left === 1 ? 'Last one needs' : `Next ${left} need`} <b>{Number.isFinite(aim) ? formatScore(aim) : '—'}</b>{left > 1 ? ' each' : ''}{liveV !== null && <> · this one <em className={liveGood ? 'is-good' : 'is-bad'}>{formatScore(liveV - sym)}</em></>}</>;
-            return <div className={`round-card${solid >= 1 ? ' is-clear' : ''}`} title={'Scores multiply, so this gauge adds them on a log scale: three on-pace excerpts fill it exactly.\nBlue: locked excerpts. Striped: the one you are typing. Gold: guaranteed multipliers. Dashed: run bonuses you can still earn.'}>
+            return <div className={`round-card${solid >= 1 ? ' is-clear' : ''}${pace}`} title={'Scores multiply, so this gauge adds them on a log scale: three on-pace excerpts fill it exactly.\nBlue: locked excerpts. Striped: the one you are typing. Gold: guaranteed multipliers. Dashed: run bonuses you can still earn.'}>
                 <div className="rc-head"><span>Round {ante} of {MAX_ANTE}</span><b>{formatScore(target)}</b><small>to clear</small></div>
                 <div className="rc-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1, solid) * 100)} aria-label="Progress to the round target">
                     {blocks.map((b, i) => { const x = at; at += b.w; return b.w > 0 && <span key={i} className={`rc-block is-${b.kind}${b.kind === 'locked' ? ` is-n${i}` : ''}`} style={{ left: pos(x), width: pos(b.w) }} title={b.title}>{b.kind === 'live' && <b className="rc-progress" style={{ width: `${Math.min(100, progress * 100)}%` }}/>}{b.w / R > (b.label.length > 5 ? .075 : .045) && <i>{b.label}</i>}</span>; })}
                     {ticks.map((t, i) => <span key={i} className="rc-tick" style={{ left: pos(t) }}/>)}
+                    {n > 0 && n < REQUIRED_SENTENCES && <span className="rc-pace" style={{ left: pos(paceAt) }} title={`Pace for ${n} excerpt${n === 1 ? '' : 's'}`}/>}
                     <span className="rc-goal" style={{ left: pos(1) }}><em>Goal</em></span>
                 </div>
                 <div className="rc-foot">{foot}</div>
@@ -5484,7 +5506,7 @@
         const sellValue = u => Math.floor(shopPrice(u) / 2);
         // Buff icons: the buff's own token when it has one (T, 10+, –ing, a bold B), else a mark for its kind.
         const BUFF_MARKS = { length:'↔', double:'×2', position:'#', lexical:'“”', flourish:'~', resonant:'≈', morpheme:'-', figures:'9', summit:'▲', alliterative:'AA', snowball:'◢', count:'W', span:'↔', census:'Σ', ending:'.', mark:'( )', cited:'†', 'citation-content':'†', echo:'↻', overprint:'▣', vintage:'⌛', pyramid:'△', every:'∞', 'round-tally':'Σ', shape:'Aa',
-            bookends:'[ ]', illuminated:'Aa', footnotes:'†', resonance:'≈', pocketwatch:'◷', breathing:'~', scout:'◎', curator:'⊕', mulligan:'⟲', naturalist:'❦', historian:'Ⅻ', wayfarer:'→', prismatic:'◆', singularity:'●', mosaic:'▦', encyclopedist:'E', patron:'¢', 'clean-copy':'✓', tempo:'♩', marginalia:'✎', lede:'¶', 'title-drop':'H', polyglot:'αβ',
+            bookends:'[ ]', illuminated:'Aa', footnotes:'†', resonance:'≈', pocketwatch:'◷', breathing:'~', scout:'◎', curator:'⊕', mulligan:'⟲', naturalist:'❦', historian:'Ⅻ', wayfarer:'→', prismatic:'◆', singularity:'●', mosaic:'▦', encyclopedist:'E', patron:'¢', 'clean-copy':'✓', tempo:'♩', marginalia:'✎', lede:'¶', 'title-drop':'H', 'see-also':'↪', polyglot:'αβ',
             'rabbit-hole':'⤵', 'safety-net':'#', understudy:'⇡', 'tip-jar':'¢', bounty:'★', 'long-form':'≡', anchor:'⚓︎', frugal:'□', 'face-value':'¤', 'glass-cannon':'×5', royalties:'¢', interest:'%', chain:'∞', 'chain-forged':'∞', diacritics:'é', numerologist:'123', tiny:'a',
             'carbon-effect':'⧉', 'ink-effect':'✒︎', 'highlighter-effect':'▬', hourglass:'⧗', loupe:'⌕' };
         const TOKEN_MARKS = { Bold:<b key="b">B</b>, Italic:<i key="i">I</i>, Linked:'↗', Bullet:'•', Cited:'[1]', Rising:'↗', Falling:'↘', 'Country name':'⚑' };
@@ -6607,11 +6629,14 @@
 
                     if (totalSentences > 0) {
                         if(freeScout)setScoutUsed(true);
+                        // Arriving through the See also list marks every excerpt here for the See Also buff.
+                        const viaSeeAlso=(articleMeta.seeAlso||[]).includes(targetTitle);
+                        if(viaSeeAlso)parsed.forEach(b=>[...(b.sentences||[]),...(b.fragments||[])].forEach(x=>{x.viaSeeAlso=true;}));
                         const reward=articleTimeReward({categories:data.categories||[]},activeUpgrades,utilityUsed);
                         const travel=!freeScout && data.title!==article && hasUpgrade(activeUpgrades,'wayfarer') && !utilityUsed.includes('wayfarer');
                         const seconds=reward.seconds+(travel?8:0);
                         if(seconds && !isPractice){setTimeLeft(t=>t+seconds);setUtilityUsed(u=>[...new Set([...u,...reward.awards,...(travel?['wayfarer']:[])])]);}
-                        setUtilityNotice(seconds?`Exploration +${seconds}s`:freeScout?'Free scouting click used':'');
+                        setUtilityNotice(seconds?`Exploration +${seconds}s`:freeScout?'Free scouting click used':viaSeeAlso&&hasUpgrade(activeUpgrades,'see-also')?`See Also: +${SEE_ALSO_MULT} mult on this article`:'');
                         setNavHistory(prev => [...prev, article]);
                         setBuffer([]);
                         setArticle(data.title);
@@ -6622,7 +6647,7 @@
                     setNavigationError("Couldn’t open that article. You’re still here — try the link again.");
                 }
                 setIsNavigating(false);
-            }, [isNavigating, gameState, article, roundStarted, scoutUsed, activeUpgrades, utilityUsed, isPractice]);
+            }, [isNavigating, gameState, article, articleMeta, roundStarted, scoutUsed, activeUpgrades, utilityUsed, isPractice]);
 
             const handleWikiClick = useCallback((e) => {
                 const a = e.target.closest('a');
