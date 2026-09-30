@@ -1742,6 +1742,70 @@
         .rules-link { font:500 13px 'Inter',sans-serif; letter-spacing:0; border:0; color:var(--c-muted); }
         .tally-dialog .word-inspector { align-self:stretch; max-height:none; }
         @media(max-width:650px){ .tally-dialog .word-inspector { border-left:0; border-top:1px solid var(--c-line); max-height:210px; } }
+        /* ---- Word hover card ---- */
+        .word-hover { background:#155bd114; border-radius:3px; box-shadow:0 0 0 2px #155bd114; }
+        .word-tip { position:fixed; z-index:120; transform:translate(-50%,-100%); display:flex; align-items:center; gap:8px; padding:7px 11px; border-radius:10px;
+            background:var(--c-ink); color:#fff; box-shadow:0 10px 30px -8px #0f1c3380; pointer-events:none; white-space:nowrap; font-family:'Inter',sans-serif; animation:tip-in .1s ease-out; }
+        .word-tip.is-below { transform:translate(-50%,0); }
+        .word-tip span { display:flex; flex-direction:column; align-items:center; line-height:1; }
+        .word-tip b { font:650 15px/1 'Inter',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+        .word-tip small { margin-top:3px; font:500 9.5px/1 'Inter',sans-serif; color:#ffffff8c; }
+        .word-tip i { font-style:normal; color:#ffffff73; font-size:13px; }
+        .word-tip .is-total b { color:#9cc0ff; }
+        @keyframes tip-in { from { opacity:0; } }
+
+        /* ---- Word count in the HUD ---- */
+        .hud-words { font:500 10.5px 'Inter',sans-serif; font-style:normal; color:var(--c-muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+        .current-excerpt-score .hud-earn + .hud-words::before { content:'·'; margin:0 5px 0 1px; color:var(--c-faint); }
+
+        /* ---- Buffs rail: play screen (right) and shop (right) ---- */
+        .build-rail { display:none; }
+        .build-rail ul { margin:0; padding:0; list-style:none; overflow:auto; overscroll-behavior:contain; }
+        .rail-head { display:flex; justify-content:space-between; align-items:baseline; padding:0 4px 8px; font:600 12.5px 'Inter',sans-serif; color:var(--c-ink); }
+        .rail-head b { font:500 12px 'Inter',sans-serif; color:var(--c-faint); }
+        .rail-item { position:relative; padding:8px 8px 8px 12px; border-radius:8px; transition:background .15s,opacity .15s; }
+        .rail-item::before { content:''; position:absolute; left:3px; top:11px; width:4px; height:4px; border-radius:50%; background:#aab4c3; }
+        .rail-uncommon::before { background:#1f9a62; } .rail-rare::before { background:#2f6bdc; } .rail-epic::before { background:#8d46c9; } .rail-legendary::before { background:#d99614; }
+        .rail-item + .rail-item { margin-top:2px; }
+        .rail-item > b { display:block; font:600 12.5px/1.3 'Inter',sans-serif; letter-spacing:-.01em; color:var(--c-ink); }
+        .rail-item > b em { margin-left:6px; font:500 10px 'Inter',sans-serif; font-style:normal; color:var(--c-warn); }
+        .rail-item > span { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px; font:400 11.5px/1.4 'Inter',sans-serif; color:var(--c-muted); }
+        .rail-item .rolled { font-weight:600; }
+        .rail-item.is-live { background:var(--c-soft); }
+        .rail-item.is-live > b { color:var(--c-accent); }
+        .rail-item.is-off { opacity:.45; }
+        .rail-empty { margin:0; padding:0 4px; font:400 12px/1.5 'Inter',sans-serif; color:var(--c-faint); }
+        @media (min-width:1180px) {
+            .game-shell .build-rail { position:absolute; right:14px; top:calc(50% + 20px); transform:translateY(-50%); z-index:8; display:flex; flex-direction:column; width:218px; max-height:min(64vh,620px);
+                padding:12px 8px 8px; background:#fffffff2; border:1px solid var(--c-line); border-radius:12px; box-shadow:var(--c-shadow); backdrop-filter:blur(6px); }
+            .game-shell:has(.build-rail) > .flex-1.overflow-y-auto { padding-right:246px!important; }
+        }
+        @media (min-width:1200px) {
+            .shop .build-rail { position:fixed; right:18px; top:18px; bottom:18px; z-index:6; display:flex; flex-direction:column; width:236px; padding:16px 8px 8px;
+                background:var(--c-card); border:1px solid var(--c-line); border-radius:14px; box-shadow:var(--c-shadow); }
+            .shop:has(.build-rail) { padding-right:calc(236px + 18px + clamp(16px,2.4vw,36px)); }
+            .shop .shop-build { display:none; }
+        }
+
+        /* ---- Tally: sentences, totals, nothing else ---- */
+        dialog.tally-dialog.is-simple { width:min(780px,calc(100vw - 24px)); height:fit-content; max-height:92dvh; }
+        .tally-dialog.is-simple .tally-ledger { flex:0 1 auto; min-height:0; overflow:auto; padding:6px 28px 10px; }
+        .tally-hint { margin:10px 0 4px; font:400 12px 'Inter',sans-serif; color:var(--c-faint); }
+        .tally-row { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; align-items:baseline; padding:16px 0; }
+        .tally-row + .tally-row { border-top:1px solid var(--c-line); }
+        .tally-dialog .tally-row .tally-quote { margin:0; font:400 17px/1.75 'PT Serif',serif; color:var(--c-ink); }
+        .tally-row > strong { font:700 22px/1 'Inter',sans-serif; letter-spacing:-.03em; color:var(--c-accent); font-variant-numeric:tabular-nums; }
+        .tally-row > small { grid-column:1 / -1; margin-top:6px; font:400 12px 'Inter',sans-serif; color:var(--c-muted); }
+        .tally-row .excerpt-text { cursor:default; }
+        .tally-row [data-w] { cursor:help; }
+        .tally-dialog.is-simple .tally-result { align-items:flex-end; }
+        .tally-dialog.is-simple .tally-equation { margin-top:6px; font:400 13px/1.4 'Inter',sans-serif; color:var(--c-muted); font-variant-numeric:tabular-nums; }
+        .tally-dialog.is-simple .tally-equation b { font-weight:600; color:var(--c-accent); }
+        .tally-run-names { font-size:12px; color:var(--c-faint); }
+        .wiki-content [data-w] { cursor:help; }
+        .wiki-content a [data-w],.wiki-content a[data-w] { cursor:pointer; }
+        @media (max-width:650px) { .tally-dialog.is-simple .tally-ledger { padding:4px 16px 8px; } .tally-dialog .tally-row .tally-quote { font-size:15.5px; } }
+        @media (max-width:700px) { .current-excerpt-score .hud-words { display:block; } .current-excerpt-score .hud-earn + .hud-words::before { content:none; } }
 </style>
 </head>
 <body>
@@ -1937,410 +2001,496 @@
         }
 
         /* ================================================================
-           AUDIO ENGINE — typewriter effects and a small generative composer.
-           Every article gets its own seeded song: a style chosen from its
-           subject (chamber, waltz, jazz, ambient, dusk, pulse, folk, march),
-           then a key, mode, tempo, chord progression and melodic motif from
-           its title. A look-ahead scheduler places every note on the audio
-           clock, chords are voice-led, and layers build as the round clock
-           runs down. Game sounds are drawn from the current chord, so they
-           always sit in key.
+           AUDIO ENGINE — typewriter SFX + ambient pipeline
            ================================================================ */
         const AudioEngine = (() => {
-            let ctx = null, masterGain = null, sfxBus = null, noiseBuffer = null;
-            let muted = false, era = null, song = null;
+            let ctx = null;
+            let masterGain = null;
+            let noiseBuffer = null;
+            let impulseBuffer = null;
+            let muted = false;
+            let ambientNodes = null;  // { source, gain } when ambient is playing
+            let ambientVersion = 0, mediaRequest = null;
+            let era = null;           // median article year, shapes click timbre
 
-            const MASTER = .6;
             function init() {
                 if (ctx) return ctx;
                 const AC = window.AudioContext || window.webkitAudioContext;
                 if (!AC) return null;
                 ctx = new AC();
                 masterGain = ctx.createGain();
-                masterGain.gain.value = muted ? 0 : MASTER;
-                const limiter = ctx.createDynamicsCompressor();
-                limiter.threshold.value = -10; limiter.knee.value = 6; limiter.ratio.value = 4; limiter.attack.value = .004; limiter.release.value = .2;
-                masterGain.connect(limiter).connect(ctx.destination);
-                sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(masterGain);
+                masterGain.gain.value = muted ? 0 : 0.55;
+                masterGain.connect(ctx.destination);
+
+                // Pre-bake a noise buffer (1s of white noise)
                 const sr = ctx.sampleRate;
                 noiseBuffer = ctx.createBuffer(1, sr, sr);
                 const nd = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < sr; i++) nd[i] = Math.random() * 2 - 1;
+                for (let i = 0; i < sr; i++) nd[i] = (Math.random() * 2 - 1);
+
+                // Synthesize a short reverb impulse (~1.6s exponential decay)
+                const irLen = Math.floor(sr * 1.6);
+                impulseBuffer = ctx.createBuffer(2, irLen, sr);
+                for (let ch = 0; ch < 2; ch++) {
+                    const d = impulseBuffer.getChannelData(ch);
+                    for (let i = 0; i < irLen; i++) {
+                        const decay = Math.pow(1 - i / irLen, 3);
+                        d[i] = (Math.random() * 2 - 1) * decay;
+                    }
+                }
                 return ctx;
             }
+
             function ensureRunning() {
                 init();
                 if (ctx && ctx.state === 'suspended') ctx.resume();
                 return ctx;
             }
-            // Stereo hall: decorrelated, exponentially decaying noise with a soft low-pass tilt.
-            function makeImpulse(seconds, decay) {
-                const sr = ctx.sampleRate, len = Math.floor(sr * seconds), ir = ctx.createBuffer(2, len, sr);
-                for (let ch = 0; ch < 2; ch++) {
-                    const d = ir.getChannelData(ch); let lp = 0;
-                    for (let i = 0; i < len; i++) { lp += ((Math.random() * 2 - 1) - lp) * (.35 - .25 * i / len); d[i] = lp * Math.pow(1 - i / len, decay); }
-                }
-                return ir;
-            }
-            const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
-            const voiceEnd = (nodes, t) => { const [first] = nodes; if (first) first.onended = () => nodes.forEach(n => { try { n.disconnect(); } catch {} }); };
 
-            /* ---------- typewriter effects ---------- */
-            let lastKeyGain = null;
+            // Single typewriter click — filtered noise burst with quick envelope.
+            let lastKeyGain = null;  // tracks active key/space gain so a new keystroke chokes it
+
             function chokeKey() {
                 if (!lastKeyGain || !ctx) return;
-                try { lastKeyGain.gain.cancelScheduledValues(ctx.currentTime); lastKeyGain.gain.setValueAtTime(lastKeyGain.gain.value, ctx.currentTime); lastKeyGain.gain.linearRampToValueAtTime(0, ctx.currentTime + .008); } catch {}
+                try {
+                    lastKeyGain.gain.cancelScheduledValues(ctx.currentTime);
+                    lastKeyGain.gain.setValueAtTime(lastKeyGain.gain.value, ctx.currentTime);
+                    lastKeyGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.008);
+                } catch (e) {}
                 lastKeyGain = null;
             }
-            // Era shapes the click: pre-1950 duller and woodier, post-1990 crisper.
+
+            // Era shapes the timbre: pre-1950 → duller/lower (mechanical typewriter),
+            // post-2000 → crisper/higher (modern keyboard), in-between → neutral.
             function playKey() {
                 if (!ensureRunning() || muted) return;
                 chokeKey();
-                const t = ctx.currentTime, src = ctx.createBufferSource();
-                src.buffer = noiseBuffer; src.loop = true;
-                const centre = era === null ? 2200 : era < 1950 ? 1300 : era < 1990 ? 1800 : 2700;
-                const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = centre + Math.random() * 600; bp.Q.value = 5;
+                const t = ctx.currentTime;
+                const src = ctx.createBufferSource();
+                src.buffer = noiseBuffer;
+                src.loop = true;
+
+                // Era-modulated bandpass center frequency
+                let centerFreq = 2000;
+                let q = 6;
+                if (era !== null) {
+                    if (era < 1950)      { centerFreq = 1100; q = 4; }     // dull, woody
+                    else if (era < 1990) { centerFreq = 1700; q = 5; }     // mid-century
+                    else                 { centerFreq = 2600; q = 7; }     // modern click
+                }
+                const bp = ctx.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = centerFreq + Math.random() * 800;
+                bp.Q.value = q;
+
                 const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.09 + Math.random() * .03, t + .002); gain.gain.exponentialRampToValueAtTime(.001, t + .045);
-                src.connect(bp).connect(gain).connect(sfxBus);
-                src.start(t, Math.random() * .8); src.stop(t + .05); voiceEnd([src, bp, gain]);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.18 + Math.random() * 0.06, t + 0.002);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+
+                src.connect(bp).connect(gain).connect(masterGain);
+                src.start(t);
+                src.stop(t + 0.06);
                 lastKeyGain = gain;
             }
+
+            // Subtle space-bar thunk — lower frequency
             function playSpace() {
                 if (!ensureRunning() || muted) return;
                 chokeKey();
-                const t = ctx.currentTime, osc = ctx.createOscillator(), gain = ctx.createGain();
-                osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(70, t + .07);
-                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.12, t + .004); gain.gain.exponentialRampToValueAtTime(.001, t + .09);
-                osc.connect(gain).connect(sfxBus); osc.start(t); osc.stop(t + .1); voiceEnd([osc, gain]);
+                const t = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(180, t);
+                osc.frequency.exponentialRampToValueAtTime(70, t + 0.08);
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.22, t + 0.005);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                osc.connect(gain).connect(masterGain);
+                osc.start(t);
+                osc.stop(t + 0.12);
                 lastKeyGain = gain;
             }
-            function playEnter() { playKey(); }
-            function playError() {
+
+            // Carriage return — descending blip + click
+            function playEnter() {
                 if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime, osc = ctx.createOscillator(), lp = ctx.createBiquadFilter(), gain = ctx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(110, t); osc.frequency.exponentialRampToValueAtTime(70, t + .12);
-                lp.type = 'lowpass'; lp.frequency.value = 500;
-                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.16, t + .006); gain.gain.exponentialRampToValueAtTime(.001, t + .16);
-                osc.connect(lp).connect(gain).connect(sfxBus); osc.start(t); osc.stop(t + .18); voiceEnd([osc, lp, gain]);
+                const t = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, t);
+                osc.frequency.exponentialRampToValueAtTime(440, t + 0.15);
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.2, t + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                osc.connect(gain).connect(masterGain);
+                osc.start(t);
+                osc.stop(t + 0.22);
+                setTimeout(playKey, 50);
             }
 
-            /* ---------- instruments (all return nothing; they schedule at time t) ---------- */
-            // Electric piano: two-operator FM with a decaying index, plus a quiet tine partial.
-            function epiano(out, m, t, dur, vel = .5) {
-                const f = midiHz(m), car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), amp = ctx.createGain();
-                const tine = ctx.createOscillator(), tg = ctx.createGain();
-                car.frequency.value = f; mod.frequency.value = f; tine.frequency.value = f * 4;
-                mg.gain.setValueAtTime(f * (1.4 + vel), t); mg.gain.exponentialRampToValueAtTime(f * .25, t + .7);
-                tg.gain.setValueAtTime(.12 * vel, t); tg.gain.exponentialRampToValueAtTime(.0005, t + .25);
-                const peak = .16 * vel, end = t + Math.max(.2, dur);
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .006); amp.gain.exponentialRampToValueAtTime(peak * .35, t + 1.2);
-                amp.gain.setValueAtTime(peak * .35, end); amp.gain.exponentialRampToValueAtTime(.0005, end + .35);
-                mod.connect(mg).connect(car.frequency); car.connect(amp); tine.connect(tg).connect(amp); amp.connect(out);
-                [car, mod, tine].forEach(o => { o.start(t); o.stop(end + .4); }); voiceEnd([car, mod, tine, mg, tg, amp]);
-            }
-            // Mallet (marimba/kalimba): fundamental plus a fast-fading fourth-harmonic strike.
-            function mallet(out, m, t, vel = .5, ring = .9) {
-                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), ga = ctx.createGain(), gb = ctx.createGain();
-                a.frequency.value = f; b.frequency.value = f * 4;
-                ga.gain.setValueAtTime(0, t); ga.gain.linearRampToValueAtTime(.14 * vel, t + .004); ga.gain.exponentialRampToValueAtTime(.0005, t + ring);
-                gb.gain.setValueAtTime(.05 * vel, t); gb.gain.exponentialRampToValueAtTime(.0005, t + .09);
-                a.connect(ga).connect(out); b.connect(gb).connect(out);
-                a.start(t); b.start(t); a.stop(t + ring + .05); b.stop(t + .12); voiceEnd([a, ga]); voiceEnd([b, gb]);
-            }
-            // Bell: inharmonic FM (ratio 3.5) with a long tail.
-            function bell(out, m, t, vel = .5, ring = 2.4) {
-                const f = midiHz(m), car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), amp = ctx.createGain();
-                car.frequency.value = f; mod.frequency.value = f * 3.5;
-                mg.gain.setValueAtTime(f * 1.6, t); mg.gain.exponentialRampToValueAtTime(f * .1, t + ring * .6);
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(.1 * vel, t + .003); amp.gain.exponentialRampToValueAtTime(.0005, t + ring);
-                mod.connect(mg).connect(car.frequency); car.connect(amp).connect(out);
-                car.start(t); mod.start(t); car.stop(t + ring + .05); mod.stop(t + ring + .05); voiceEnd([car, mod, mg, amp]);
-            }
-            // Soft lead: sine and quiet triangle with delayed vibrato, like a breathy flute.
-            function flute(out, m, t, dur, vel = .5) {
-                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), vib = ctx.createOscillator(), vg = ctx.createGain(), gb = ctx.createGain(), amp = ctx.createGain();
-                a.frequency.value = f; b.type = 'triangle'; b.frequency.value = f; gb.gain.value = .25;
-                vib.frequency.value = 5; vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(f * .006, t + Math.min(.5, dur));
-                vib.connect(vg); vg.connect(a.frequency); vg.connect(b.frequency);
-                const peak = .085 * vel, end = t + dur;
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .05); amp.gain.setValueAtTime(peak, Math.max(t + .05, end - .06)); amp.gain.linearRampToValueAtTime(0, end + .12);
-                a.connect(amp); b.connect(gb).connect(amp); amp.connect(out);
-                [a, b, vib].forEach(o => { o.start(t); o.stop(end + .15); }); voiceEnd([a, b, vib, vg, gb, amp]);
-            }
-            // Pluck lead for pulse styles: filtered saw with a quick filter decay.
-            function pluck(out, m, t, vel = .5) {
-                const f = midiHz(m), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
-                o.type = 'sawtooth'; o.frequency.value = f; lp.type = 'lowpass'; lp.Q.value = 2;
-                lp.frequency.setValueAtTime(Math.min(8000, f * 8), t); lp.frequency.exponentialRampToValueAtTime(f * 1.5, t + .25);
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(.2 * vel, t + .003); amp.gain.exponentialRampToValueAtTime(.0005, t + .45);
-                o.connect(lp).connect(amp).connect(out); o.start(t); o.stop(t + .5); voiceEnd([o, lp, amp]);
-            }
-            // Pad: two detuned saws spread left and right through a gentle low-pass, slow swell and release.
-            function pad(out, m, t, dur, level, cutoff) {
-                const f = midiHz(m), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
-                const oscs = [-8, 8].map(c => { const o = ctx.createOscillator(), p = ctx.createStereoPanner(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = c; p.pan.value = c / 12; o.connect(p).connect(lp); return [o, p]; });
-                lp.type = 'lowpass'; lp.frequency.value = cutoff; lp.Q.value = .4;
-                const att = Math.min(1.6, dur * .4), end = t + dur;
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(level, t + att); amp.gain.setValueAtTime(level, end); amp.gain.linearRampToValueAtTime(0, end + 1.4);
-                lp.connect(amp).connect(out);
-                oscs.forEach(([o]) => { o.start(t); o.stop(end + 1.5); }); voiceEnd([...oscs.flat(), lp, amp]);
-            }
-            // Round bass: sine with an octave triangle, low-passed.
-            function bass(out, m, t, dur, vel = .6) {
-                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), gb = ctx.createGain(), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
-                a.frequency.value = f; b.type = 'triangle'; b.frequency.value = f * 2; gb.gain.value = .22; lp.type = 'lowpass'; lp.frequency.value = 340;
-                const peak = .15 * vel, end = t + Math.max(.12, dur);
-                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .008); amp.gain.exponentialRampToValueAtTime(peak * .6, t + .3);
-                amp.gain.setValueAtTime(peak * .6, end - .03); amp.gain.linearRampToValueAtTime(0, end + .06);
-                a.connect(lp); b.connect(gb).connect(lp); lp.connect(amp).connect(out);
-                a.start(t); b.start(t); a.stop(end + .1); b.stop(end + .1); voiceEnd([a, b, gb, lp, amp]);
-            }
-            // Drums: soft kick, rim, closed hat, brush.
-            function noiseHit(out, t, type, freq, q, len, level) {
-                const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-                src.buffer = noiseBuffer; f.type = type; f.frequency.value = freq; f.Q.value = q;
-                g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + .002); g.gain.exponentialRampToValueAtTime(.0005, t + len);
-                src.connect(f).connect(g).connect(out); src.start(t, Math.random() * .8); src.stop(t + len + .02); voiceEnd([src, f, g]);
-            }
-            function kick(out, t, vel = .7) {
-                const o = ctx.createOscillator(), g = ctx.createGain();
-                o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
-                g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.2 * vel, t + .004); g.gain.exponentialRampToValueAtTime(.0005, t + .26);
-                o.connect(g).connect(out); o.start(t); o.stop(t + .34); voiceEnd([o, g]);
-            }
-            // Unpitched, so it never clashes with the key.
-            const rim = (out, t, vel = .6) => { noiseHit(out, t, 'bandpass', 1900, 3, .06, .14 * vel); noiseHit(out, t, 'highpass', 5000, .7, .02, .06 * vel); };
-            const hat = (out, t, vel = .5) => noiseHit(out, t, 'highpass', 7500, .7, .035, .05 * vel);
-            const brush = (out, t, vel = .5) => noiseHit(out, t, 'bandpass', 3200, .8, .16, .045 * vel);
-
-            /* ---------- harmony ---------- */
-            const MODES = { major: [0, 2, 4, 5, 7, 9, 11], lydian: [0, 2, 4, 6, 7, 9, 11], mixolydian: [0, 2, 4, 5, 7, 9, 10], dorian: [0, 2, 3, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10], phrygian: [0, 1, 3, 5, 7, 8, 10] };
-            // Progressions as scale degrees (0 = tonic), one chord per bar.
-            const PROGRESSIONS = {
-                major: [[0, 4, 5, 3], [0, 5, 3, 4], [0, 3, 0, 4], [5, 3, 0, 4], [0, 2, 3, 4], [1, 4, 0, 0], [0, 3, 5, 4], [3, 4, 2, 5]],
-                lydian: [[0, 1, 0, 1], [0, 1, 4, 0], [0, 1, 5, 4]],
-                mixolydian: [[0, 6, 3, 0], [0, 3, 6, 3], [0, 6, 4, 3]],
-                dorian: [[0, 3, 0, 3], [0, 6, 3, 0], [0, 3, 6, 2], [0, 2, 3, 6]],
-                aeolian: [[0, 5, 2, 6], [0, 3, 5, 4], [0, 6, 5, 6], [0, 5, 3, 4], [0, 2, 5, 6]],
-                phrygian: [[0, 1, 0, 6], [0, 1, 6, 0], [0, 5, 1, 0]],
-                jazz: [[1, 4, 0, 0], [1, 4, 0, 5], [0, 5, 1, 4], [2, 5, 1, 4]]
-            };
-            // Styles: tempo range, meter, modes, harmony colour, and which parts play how.
-            const STYLES = {
-                chamber: { tempo: [72, 88], meter: 4, modes: ['major', 'lydian', 'mixolydian'], sevenths: true, keys: 'sustain', bass: 'round', arp: 'broken', lead: 'flute', drums: null, pad: .018, cutoff: 1500, reverb: .32 },
-                waltz: { tempo: [84, 104], meter: 3, modes: ['major', 'lydian'], sevenths: false, keys: 'waltz', bass: 'waltz', arp: 'broken', lead: 'flute', drums: null, pad: .012, cutoff: 1600, reverb: .3 },
-                jazz: { tempo: [92, 118], meter: 4, modes: ['jazz'], sevenths: true, ninths: true, keys: 'comp', bass: 'walking', arp: null, lead: 'vibes', drums: 'brush', swing: .55, pad: 0, cutoff: 1800, reverb: .22 },
-                ambient: { tempo: [62, 72], meter: 4, modes: ['lydian', 'dorian', 'aeolian', 'major'], sevenths: true, ninths: true, keys: null, bass: 'drone', arp: 'sparse', lead: 'bell', drums: null, pad: .045, cutoff: 1500, reverb: .5, chordBars: 2, gain: 1.3 },
-                dusk: { tempo: [60, 68], meter: 4, modes: ['aeolian', 'phrygian', 'dorian'], sevenths: true, keys: null, bass: 'drone', arp: 'sparse', lead: 'bell', drums: null, pad: .045, cutoff: 1100, reverb: .5, chordBars: 2, gain: 1.3 },
-                pulse: { tempo: [104, 120], meter: 4, modes: ['dorian', 'mixolydian', 'major', 'aeolian'], sevenths: false, ninths: true, keys: null, bass: 'eighths', arp: 'sixteenths', lead: 'pluck', drums: 'soft', pad: .014, cutoff: 1700, reverb: .22, gain: 2 },
-                folk: { tempo: [78, 94], meter: 4, modes: ['major', 'mixolydian', 'dorian'], sevenths: false, ninths: true, keys: 'lofi', bass: 'round', arp: 'broken', lead: 'flute', drums: 'lofi', swing: .25, pad: .012, cutoff: 1400, reverb: .26 },
-                march: { tempo: [84, 96], meter: 4, modes: ['aeolian', 'dorian'], sevenths: false, keys: 'sustain', bass: 'halves', arp: null, lead: 'flute', drums: 'march', pad: .02, cutoff: 1100, reverb: .34 }
-            };
-            const MOOD_STYLE = { cosmic: 'ambient', aquatic: 'ambient', austere: 'ambient', sacred: 'ambient', mythic: 'ambient', antique: 'ambient', shadow: 'dusk', martial: 'march',
-                salon: 'waltz', jazz: 'jazz', reel: 'jazz', amped: 'pulse', circuit: 'pulse', kinetic: 'pulse', transit: 'pulse', ledger: 'pulse', civic: 'pulse', verdant: 'folk', hearth: 'folk' };
-            const NOTE_NAMES = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
-
-            // Everything about a song follows from its seed, so an article always plays the same tune.
-            function compose(seed, moodLabel) {
-                let s = (seed | 0) || 7;
-                const rand = () => { s = (s * 1103515245 + 12345) | 0; return ((s >>> 16) & 0x7fff) / 0x7fff; };
-                const pick = list => list[Math.floor(rand() * list.length)];
-                const styleName = MOOD_STYLE[moodLabel] || 'chamber', style = STYLES[styleName];
-                const modeKey = pick(style.modes), mode = MODES[modeKey === 'jazz' ? 'major' : modeKey];
-                const tonic = Math.floor(rand() * 12), bpm = Math.round(style.tempo[0] + rand() * (style.tempo[1] - style.tempo[0]));
-                const progression = pick(PROGRESSIONS[modeKey]);
-                // Melody: a two-bar motif of rhythm cells and scale steps, reused as A A' B A over eight bars.
-                const CELLS = style.meter === 3 ? [[4, 4, 4], [8, 4], [6, 2, 4], [4, 8]] : [[4, 4, 8], [2, 2, 4, 8], [6, 2, 8], [8, 8], [4, 4, 4, 4], [8, 4, 4]];
-                const motif = [];
-                for (let bar = 0; bar < 2; bar++) { let pos = bar * style.meter * 4; for (const len of pick(CELLS)) { motif.push({ pos, len, step: 0 }); pos += len; } }
-                let degree = pick([0, 2, 4]);
-                motif.forEach((n, i) => { if (i) degree += rand() < .7 ? pick([-1, 1]) : pick([-3, -2, 2, 3]); degree = Math.max(-2, Math.min(9, degree)); n.step = degree; n.rest = i > 0 && rand() < .12; });
-                return { styleName, style, modeKey, mode, tonic, bpm, progression, motif, rand, label: `${NOTE_NAMES[tonic]} ${modeKey === 'jazz' ? 'major' : modeKey} · ${bpm} bpm` };
-            }
-            // Chord for a scale degree as MIDI pitch classes above the tonic.
-            function chordTones(song, degree, withSeventh) {
-                const n = [0, 2, 4].concat(withSeventh ? [6] : []), m = song.mode;
-                return n.map(k => { const d = degree + k; return m[d % 7] + 12 * Math.floor(d / 7); });
-            }
-            // Voice-lead: place the chord's pitch classes in 52–74, closest to the previous voicing.
-            function voiceLead(prev, tones, tonic) {
-                const pcs = tones.map(t => (t + tonic) % 12), options = [];
-                for (let base = 50; base <= 62; base++) {
-                    const v = pcs.map(pc => { let m = base + ((pc - base) % 12 + 12) % 12; return m; }).sort((a, b) => a - b);
-                    if (v[v.length - 1] <= 76) options.push(v);
-                }
-                if (!prev) return options[Math.floor(options.length / 2)];
-                const cost = v => v.reduce((sum, m, i) => sum + Math.abs(m - (prev[i] ?? prev[prev.length - 1])), 0);
-                return options.reduce((best, v) => cost(v) < cost(best) ? v : best);
-            }
-
-            /* ---------- player ---------- */
-            function playSong(seed, moodLabel) {
-                if (!ensureRunning()) return null;
-                stopAmbient();
-                const c = compose(seed, moodLabel), st = c.style;
-                const bus = ctx.createGain(); bus.gain.value = 0;
-                const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = st.cutoff * 4.5; tone.Q.value = .3;
-                const hall = ctx.createConvolver(); hall.buffer = makeImpulse(st.reverb > .4 ? 3.2 : 2.2, 3);
-                const wet = ctx.createGain(); wet.gain.value = st.reverb;
-                const echo = ctx.createDelay(1.5), fb = ctx.createGain(), echoOut = ctx.createGain(), echoLp = ctx.createBiquadFilter();
-                const beat = 60 / c.bpm; echo.delayTime.value = beat * .75; fb.gain.value = .28; echoOut.gain.value = .22; echoLp.type = 'lowpass'; echoLp.frequency.value = 2500;
-                echo.connect(echoLp).connect(fb).connect(echo); echoLp.connect(echoOut);
-                const dry = ctx.createGain(), send = ctx.createGain(), echoSend = ctx.createGain();
-                dry.connect(tone); send.connect(hall).connect(wet).connect(tone); echoSend.connect(echo); echoOut.connect(tone); echoOut.connect(send);
-                tone.connect(bus).connect(masterGain);
-                // Parts: each has its own level and reverb/echo sends.
-                const part = (level, rev, ech = 0, pan = 0) => { const g = ctx.createGain(), p = ctx.createStereoPanner(); g.gain.value = level; p.pan.value = pan; g.connect(p); p.connect(dry); const r = ctx.createGain(); r.gain.value = rev; p.connect(r).connect(send); if (ech) { const e = ctx.createGain(); e.gain.value = ech; p.connect(e).connect(echoSend); } return g; };
-                const parts = { pad: part(.8, .9), keys: part(1.5, .45, 0, -.3), bass: part(.9, .06), arp: part(1.4, .55, .6, .35), lead: part(1.5, .55, .45, .12), drums: part(1.1, .15) };
-                const level = st.gain || 1;
-                bus.gain.linearRampToValueAtTime(level, ctx.currentTime + 3);
-
-                const sixteenth = beat / 4, barSteps = st.meter * 4, chordBars = st.chordBars || 1;
-                let step = 0, nextTime = ctx.currentTime + .15, voicing = null, chord = null, intensity = 0, stopped = false;
-                const state = { c, intensity: () => intensity, chord: () => chord, voicing: () => voicing };
-                const swingOffset = pos => (st.swing && pos % 4 === 2) ? st.swing * sixteenth * .66 : 0;
-                const humanise = () => (c.rand() - .5) * .012;
-                const vel = base => base * (.85 + c.rand() * .3);
-
-                function schedule(stepIndex, t) {
-                    const bar = Math.floor(stepIndex / barSteps), pos = stepIndex % barSteps, section = Math.floor(bar / 8), sectionBar = bar % 8;
-                    const layer = [2, 4, 3, 4][section % 4]; // 2: bed + arp, 3: bed + lead, 4: everything
-                    const arpOn = st.arp && (layer === 2 || layer === 4 || intensity >= 1), leadOn = st.lead && (layer >= 3 || intensity >= 2), drumsOn = st.drums && (bar >= 2 && (layer !== 1 || intensity >= 2));
-                    const degree = c.progression[Math.floor(bar / chordBars) % c.progression.length];
-                    if (pos === 0 && bar % chordBars === 0) {
-                        chord = chordTones(c, degree, st.sevenths || st.modes[0] === 'jazz');
-                        if (st.ninths && c.rand() < .5) { const d = degree + 8; chord = chord.slice(0, 3).concat([c.mode[d % 7] + 12 * Math.floor(d / 7)]); }
-                        voicing = voiceLead(voicing, chord, c.tonic);
-                        const len = barSteps * chordBars * sixteenth;
-                        if (st.pad) voicing.forEach(m => pad(parts.pad, m, t, len - .1, st.pad * (1 + intensity * .15), st.cutoff * (1 + intensity * .2)));
-                    }
-                    const root = 36 + ((c.tonic + c.mode[degree % 7]) % 12), fifth = root + 7;
-                    const at = t + swingOffset(pos) + humanise();
-                    // Bass
-                    if (st.bass === 'drone' && pos === 0 && bar % chordBars === 0) bass(parts.bass, root, t, barSteps * chordBars * sixteenth * .95, .45);
-                    if (st.bass === 'round' && pos === 0) bass(parts.bass, root, at, sixteenth * 10, vel(.6));
-                    if (st.bass === 'round' && pos === 10 && c.rand() < .6) bass(parts.bass, c.rand() < .5 ? fifth : root + 12, at, sixteenth * 5, vel(.4));
-                    if (st.bass === 'halves' && pos % 8 === 0) bass(parts.bass, pos ? fifth : root, at, sixteenth * 7, vel(.55));
-                    if (st.bass === 'waltz' && pos === 0) bass(parts.bass, root, at, sixteenth * 3.5, vel(.6));
-                    if (st.bass === 'eighths' && pos % 2 === 0) bass(parts.bass, pos % 8 === 6 ? root + 12 : root, at, sixteenth * 1.6, vel(pos % 4 ? .2 : .3));
-                    if (st.bass === 'walking' && pos % 4 === 0) {
-                        const nextDegree = c.progression[(bar + 1) % c.progression.length], nextRoot = 36 + ((c.tonic + c.mode[nextDegree % 7]) % 12);
-                        const third = root + (chord ? (chord[1] - chord[0] + 12) % 12 : 4);
-                        const walk = [root, third, fifth, nextRoot + (c.rand() < .5 ? -1 : 1)];
-                        bass(parts.bass, walk[pos / 4], at, sixteenth * 3.6, vel(.5));
-                    }
-                    // Keys
-                    if (voicing) {
-                        const hit = (len, v) => voicing.forEach((m, i) => epiano(parts.keys, m, at + i * .012, sixteenth * len, vel(v)));
-                        if (st.keys === 'sustain' && (pos === 0 || (pos === barSteps / 2 && c.rand() < .5))) hit(pos ? 6 : 12, pos ? .32 : .42);
-                        if (st.keys === 'waltz' && (pos === 4 || pos === 8)) hit(3, .3);
-                        if (st.keys === 'comp' && (pos === 0 || pos === 6 || (pos === 12 && c.rand() < .4))) hit(pos ? 2 : 3, .36);
-                        if (st.keys === 'lofi' && (pos === 0 || pos === 6 || pos === 12)) hit(pos === 0 ? 5 : 3, pos ? .28 : .38);
-                    }
-                    // Arpeggio
-                    if (arpOn && voicing) {
-                        const tones = voicing.concat(voicing.map(m => m + 12));
-                        if (st.arp === 'broken' && pos % 2 === 0) mallet(parts.arp, tones[[0, 2, 1, 3, 2, 4, 3, 5, 4, 2, 3, 1][(pos / 2) % 12] % tones.length] + 12, at, vel(.45));
-                        if (st.arp === 'sixteenths') { const i = [0, 1, 2, 3, 4, 3, 2, 1][pos % 8]; if (c.rand() < .92) pluck(parts.arp, tones[i % tones.length] + 12, at, vel(pos % 4 ? .35 : .5)); }
-                        if (st.arp === 'sparse' && pos % 2 === 0 && c.rand() < (pos % 4 ? .3 : .75)) mallet(parts.arp, tones[Math.floor(c.rand() * tones.length)] + 12, at, vel(.5), 2.4);
-                    }
-                    // Lead melody: motif A (bars 1–2), A' (3–4), B up a third (5–6), A resolving to the tonic (7–8).
-                    if (leadOn) {
-                        const half = Math.floor(sectionBar / 2), local = (sectionBar % 2) * barSteps + pos;
-                        c.motif.forEach((n, i) => {
-                            if (n.pos !== local || n.rest) return;
-                            let stepDeg = n.step + (half === 2 ? 2 : 0);
-                            if (half === 1 && i === c.motif.length - 1) stepDeg = 4;
-                            if (half === 3 && i === c.motif.length - 1) stepDeg = 0;
-                            const oct = Math.floor(stepDeg / 7), m = 72 + c.tonic % 12 - (c.tonic > 6 ? 12 : 0) + c.mode[((stepDeg % 7) + 7) % 7] + 12 * oct;
-                            const dur = n.len * sixteenth * .92;
-                            if (st.lead === 'flute') flute(parts.lead, m, at, dur, vel(.6));
-                            else if (st.lead === 'bell') bell(parts.lead, m, at, vel(.75));
-                            else if (st.lead === 'vibes') mallet(parts.lead, m, at, vel(.6), 1.4);
-                            else pluck(parts.lead, m, at, vel(.6));
-                        });
-                    }
-                    // Drums
-                    if (drumsOn) {
-                        const d = st.drums;
-                        if (d === 'soft') { if (pos % 8 === 0) kick(parts.drums, t, vel(.4)); if (pos % 2 === 0) hat(parts.drums, at, vel(pos % 4 ? .5 : .3)); if (pos === 12 && intensity >= 2) rim(parts.drums, at, .5); }
-                        if (d === 'lofi') { if (pos === 0 || pos === 10) kick(parts.drums, t, vel(.55)); if (pos === 4 || pos === 12) rim(parts.drums, at, vel(.5)); if (pos % 2 === 0) hat(parts.drums, at, vel(.3)); }
-                        if (d === 'brush') { if (pos % 4 === 0) brush(parts.drums, at, vel(pos % 8 ? .7 : .45)); if (pos % 4 === 2) hat(parts.drums, at, vel(.25)); }
-                        if (d === 'march') { if (pos % 8 === 0) kick(parts.drums, t, vel(.5)); if (pos === 12 || (pos === 14 && c.rand() < .5)) rim(parts.drums, at, vel(.45)); if (intensity >= 1 && pos % 2 === 1 && c.rand() < .3) hat(parts.drums, at, .2); }
-                    }
-                    // Final seconds: a quiet pulse on every beat keeps time for the player.
-                    if (intensity >= 3 && pos % 4 === 0 && !st.drums) hat(parts.drums, at, .35);
-                }
-                const timer = setInterval(() => {
-                    if (stopped || !ctx) return;
-                    // Fell behind (background tab): skip ahead rather than bunching notes.
-                    if (nextTime < ctx.currentTime - .2) nextTime = ctx.currentTime + .05;
-                    while (nextTime < ctx.currentTime + .18) { if (!muted) schedule(step, nextTime); nextTime += sixteenth; step++; }
-                }, 25);
-                song = {
-                    ...state,
-                    label: c.label,
-                    setIntensity(level) { intensity = level; tone.frequency.linearRampToValueAtTime(st.cutoff * (4.5 + level * .8), ctx.currentTime + 1.5); bus.gain.linearRampToValueAtTime((st.gain || 1) * (1 + level * .06), ctx.currentTime + 1.5); },
-                    stop() {
-                        stopped = true; clearInterval(timer);
-                        const now = ctx.currentTime;
-                        bus.gain.cancelScheduledValues(now); bus.gain.setValueAtTime(bus.gain.value, now); bus.gain.linearRampToValueAtTime(0, now + .8);
-                        setTimeout(() => { try { [bus, tone, hall, wet, echo, fb, echoOut, echoLp, dry, send, echoSend].forEach(n => n.disconnect()); } catch {} }, 4000);
-                    }
-                };
-                return c.label;
-            }
-            function stopAmbient() { if (song) { song.stop(); song = null; } }
-            function intensify(level) { song?.setIntensity(level); }
-
-            /* ---------- in-key game sounds ---------- */
-            // Current harmony, or a C major fallback before any song starts.
-            const harmony = () => song ? { tonic: song.c.tonic, mode: song.c.mode, chord: song.chord() || [0, 4, 7] } : { tonic: 0, mode: MODES.major, chord: [0, 4, 7] };
-            const upper = (h, i) => 72 + ((h.chord[i % h.chord.length] + h.tonic) % 12) + 12 * Math.floor(i / h.chord.length);
+            // Lock chime — two-note ascending arpeggio
             function playLock() {
                 if (!ensureRunning() || muted) return;
-                const h = harmony(), t = ctx.currentTime;
-                [0, 1, 2].forEach(i => bell(sfxBus, upper(h, i + 1), t + i * .07, .7, 1.6));
+                const t = ctx.currentTime;
+                [523.25, 783.99].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const gain = ctx.createGain();
+                    const start = t + i * 0.06;
+                    gain.gain.setValueAtTime(0, start);
+                    gain.gain.linearRampToValueAtTime(0.18, start + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(start);
+                    osc.stop(start + 0.42);
+                });
             }
+
+            // Error thump
+            function playError() {
+                if (!ensureRunning() || muted) return;
+                const t = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, t);
+                osc.frequency.exponentialRampToValueAtTime(60, t + 0.2);
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.18, t + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                const lp = ctx.createBiquadFilter();
+                lp.type = 'lowpass';
+                lp.frequency.value = 800;
+                osc.connect(lp).connect(gain).connect(masterGain);
+                osc.start(t);
+                osc.stop(t + 0.27);
+            }
+
+            // Round start: typewriter bell ding
             function playBell() {
                 if (!ensureRunning() || muted) return;
-                const h = harmony(), t = ctx.currentTime;
-                bell(sfxBus, 72 + h.tonic % 12, t, .8, 2.6); bell(sfxBus, 79 + h.tonic % 12, t + .09, .5, 2.4);
+                const t = ctx.currentTime;
+                [1760, 2349].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const gain = ctx.createGain();
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(i === 0 ? 0.16 : 0.08, t + 0.005);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+                    osc.connect(gain).connect(masterGain);
+                    osc.start(t);
+                    osc.stop(t + 1.5);
+                });
             }
-            // Scoring ledger: a pentatonic climb in the song's key.
-            let tickStep = 0;
+
+            // Scoring tick — for the per-word ledger reveal
             function playTick() {
                 if (!ensureRunning() || muted) return;
-                const h = harmony(), penta = [0, 2, 4, 7, 9], i = tickStep++ % 10;
-                mallet(sfxBus, 72 + h.tonic % 12 + penta[i % 5] + 12 * Math.floor(i / 5), ctx.currentTime, .35, .35);
+                const t = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                osc.type = 'square';
+                osc.frequency.value = 1200 + Math.random() * 400;
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.06, t + 0.003);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                osc.connect(gain).connect(masterGain);
+                osc.start(t);
+                osc.stop(t + 0.06);
             }
-            function playMarker(pitch) {
-                if (!ensureRunning() || muted) return;
-                const h = harmony(), t = ctx.currentTime, lift = pitch === 'low' ? 0 : pitch === 'mid' ? 2 : 4;
-                [0, 1].forEach(i => bell(sfxBus, upper(h, lift + i), t + i * .08, .55, 1.8));
+
+            // Ambient: take an audio URL, route through lowpass + reverb, loop
+            async function playAmbient(url) {
+                if (!ensureRunning()) return false;
+                stopAmbient();
+                const version=ambientVersion;
+                const controller=new AbortController();mediaRequest=controller;
+                try {
+                    const res = await fetch(url, { mode: 'cors', signal:controller.signal });
+                    if (!res.ok) return false;
+                    const arr = await res.arrayBuffer();
+                    const buf = await ctx.decodeAudioData(arr);
+                    if(version!==ambientVersion)return false;
+
+                    const src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.loop = true;
+
+                    const lp = ctx.createBiquadFilter();
+                    lp.type = 'lowpass';
+                    lp.frequency.value = 600;
+                    lp.Q.value = 0.7;
+
+                    const conv = ctx.createConvolver();
+                    conv.buffer = impulseBuffer;
+
+                    const dryGain = ctx.createGain();
+                    dryGain.gain.value = 0.4;
+                    const wetGain = ctx.createGain();
+                    wetGain.gain.value = 0.5;
+
+                    const ambGain = ctx.createGain();
+                    ambGain.gain.value = 0;
+
+                    src.connect(lp);
+                    lp.connect(dryGain).connect(ambGain);
+                    lp.connect(conv).connect(wetGain).connect(ambGain);
+                    ambGain.connect(masterGain);
+                    src.start();
+
+                    // Fade in
+                    ambGain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 2);
+
+                    ambientNodes = { source: src, gain: ambGain, lp: lp, baseLpFreq: 600, baseGain: 0.22, dispose:()=>[src,lp,conv,dryGain,wetGain,ambGain].forEach(n=>n.disconnect()) };
+                    return true;
+                } catch (e) {
+                    return false; // The caller falls back to the article soundscape.
+                }
             }
-            function playLoss() {
-                if (!ensureRunning() || muted) return;
-                const h = harmony(), t = ctx.currentTime, m = h.mode, base = 60 + h.tonic % 12;
-                [m[4] + 12, m[3] + 12, m[2] + 12, m[0] + 12].forEach((d, i) => flute(sfxBus, base + d - 12, t + i * .32, .5, .55));
-                [0, m[2], m[4]].forEach(d => epiano(sfxBus, 48 + h.tonic % 12 + d, t + 1.28, 2.2, .35));
-            }
-            function playWin() {
-                if (!ensureRunning() || muted) return;
-                const h = harmony(), t = ctx.currentTime, base = 60 + h.tonic % 12;
-                [0, 4, 7, 12, 16].forEach((d, i) => bell(sfxBus, base + d + 12, t + i * .09, .6, 2.4));
+
+            function stopAmbient() {
+                ambientVersion++;
+                mediaRequest?.abort();mediaRequest=null;
+                if (!ambientNodes) return;
+                const { source, gain, dispose } = ambientNodes;
+                try {
+                    gain.gain.cancelScheduledValues(ctx.currentTime);
+                    gain.gain.setValueAtTime(gain.gain.value,ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+                    setTimeout(() => { try { source.stop(); dispose?.(); } catch (e) {} }, 600);
+                } catch (e) {}
+                ambientNodes = null;
             }
 
             function setMuted(m) {
                 muted = m;
-                if (masterGain) masterGain.gain.linearRampToValueAtTime(m ? 0 : MASTER, (ctx?.currentTime || 0) + .05);
+                if (masterGain) masterGain.gain.linearRampToValueAtTime(m ? 0 : 0.55, (ctx?.currentTime || 0) + 0.05);
             }
             function setEra(e) { era = e; }
+
+            // Synthesize an evolving ambient bed in a given root + chord.
+            // Components:
+            //  - drone pad: detuned voices on chord tones
+            //  - noise wash: bandpass noise for air
+            //  - arpeggio: slow plucks drawn from the chord
+            //  - chord progression: gentle voice-leading every ~22s
+            //  - LFO: slow filter breathing
+            // `seed` lets two articles in the same mood sound different.
+            function playDrone(rootHz, intervals, seed, profile = SOUND_PALETTES.neutral) {
+                if (!ensureRunning()) return;
+                stopAmbient();
+
+                // Seeded PRNG for stable per-article variation
+                let s = (seed | 0) || 1;
+                const rand = () => { s = (s * 1103515245 + 12345) | 0; return ((s >>> 16) & 0x7fff) / 0x7fff; };
+
+                // Octave shift (-1, 0, or +1) and inversion add variety
+                const octaveShift = profile.octave || 0;
+                let root = rootHz * Math.pow(2, octaveShift);
+                while (root < 146) root *= 2;   // keep the pad warm, never a sub-bass rumble
+                const inv = Math.floor(rand() * intervals.length);
+                const variant = intervals.slice(inv).concat(intervals.slice(0, inv).map(x => x + 12));
+
+                const t0 = ctx.currentTime;
+                const ambGain = ctx.createGain();
+                ambGain.gain.value = 0;
+
+                const conv = ctx.createConvolver();
+                conv.buffer = impulseBuffer;
+                const dryGain = ctx.createGain();
+                dryGain.gain.value = 1-profile.wet;
+                const wetGain = ctx.createGain();
+                wetGain.gain.value = profile.wet;
+
+                const lp = ctx.createBiquadFilter();
+                lp.type = 'lowpass';
+                lp.frequency.value = profile.cutoff*(.9+rand()*.2);
+                lp.Q.value = 0.5 + rand() * 0.4;
+
+                // Slow LFO breathing on cutoff
+                const lfo = ctx.createOscillator();
+                lfo.frequency.value = profile.breath;
+                const lfoGain = ctx.createGain();
+                lfoGain.gain.value = profile.cutoff*.18;
+                lfo.connect(lfoGain).connect(lp.frequency);
+                lfo.start();
+
+                // Drone voices — store .frequency.value handles so we can move
+                // them slowly for chord progression.
+                const drones = [];
+                const oscTypes = profile.waves;
+                variant.slice(0,profile.voices).forEach((semis, i) => {
+                    const baseFreq = root * Math.pow(2, semis / 12);
+                    [-profile.detune, profile.detune].forEach((detune) => {
+                        const osc = ctx.createOscillator();
+                        osc.type = oscTypes[i % oscTypes.length];
+                        osc.frequency.value = baseFreq;
+                        osc.detune.value = detune;
+                        const g = ctx.createGain();
+                        g.gain.value = profile.pad / (i * 0.6 + 1);
+                        osc.connect(g).connect(lp);
+                        osc.start();
+                        drones.push({ osc, g, semis, level: g.gain.value });
+                    });
+                });
+
+                // Soft noise wash
+                const noise = ctx.createBufferSource();
+                noise.buffer = noiseBuffer;
+                noise.loop = true;
+                const noiseFilter = ctx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = profile.air;
+                noiseFilter.Q.value = 1 + rand();
+                const noiseGain = ctx.createGain();
+                noiseGain.gain.value = profile.noise;
+                const swell=ctx.createOscillator(),swellGain=ctx.createGain();
+                swell.frequency.value=profile.breath*.7;
+                swellGain.gain.value=profile.noise*.65;
+                swell.connect(swellGain).connect(noiseGain.gain);swell.start();
+                noise.connect(noiseFilter).connect(noiseGain).connect(lp);
+                noise.start();
+
+                lp.connect(dryGain).connect(ambGain);
+                lp.connect(conv).connect(wetGain).connect(ambGain);
+                ambGain.connect(masterGain);
+
+                ambGain.gain.linearRampToValueAtTime(0.16, t0 + 5);
+
+                // Arpeggio: slow plucks drawn from the chord. Different
+                // articles get different patterns and tempos.
+                const arpInterval = profile.gap*(.9+rand()*.2);     // 1.2–3.0s between notes
+                const arpOctaves  = profile.registers;        // pluck registers
+                const arpPattern = [];
+                const arpLen = 6 + Math.floor(rand() * 6);
+                for (let i = 0; i < arpLen; i++) {
+                    arpPattern.push({
+                        semis: variant[Math.floor(rand() * variant.length)],
+                        oct:   arpOctaves[Math.floor(rand() * arpOctaves.length)],
+                        rest:  rand() < profile.rest  // occasional rests
+                    });
+                }
+
+                let arpStep = 0, phrase = 0, chordStep = 0;
+                const activeNotes=new Set();
+                const arpTimer = setInterval(() => {
+                    if (muted) return;
+                    const step = arpPattern[arpStep % arpPattern.length];
+                    arpStep++;
+                    if (step.rest) return;
+                    const freq = root * Math.pow(2, (step.semis + step.oct + profile.progression[chordStep%profile.progression.length]) / 12);
+                    const t = ctx.currentTime;
+                    const o = ctx.createOscillator();
+                    o.type = profile.pluck;
+                    o.frequency.value = freq;
+                    const g = ctx.createGain();
+                    g.gain.setValueAtTime(0, t);
+                    g.gain.linearRampToValueAtTime(profile.note, t + profile.attack);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + profile.decay);
+                    const pluckLp = ctx.createBiquadFilter();
+                    pluckLp.type = 'lowpass';
+                    pluckLp.frequency.value = Math.min(profile.cutoff*2.5,freq*profile.brightness);
+                    const pan=ctx.createStereoPanner();pan.pan.value=(rand()-.5)*profile.width;
+                    o.connect(pluckLp).connect(g).connect(pan);
+                    pan.connect(conv);pan.connect(dryGain);
+                    activeNotes.add(o);
+                    o.onended=()=>{activeNotes.delete(o);[o,pluckLp,g,pan].forEach(n=>n.disconnect());};
+                    o.start(t);o.stop(t + profile.decay + .1);
+                    if(arpStep%arpPattern.length===0){
+                        phrase++;
+                        // Alter one motif note per phrase while staying in the scale.
+                        const index=Math.floor(rand()*arpPattern.length);
+                        arpPattern[index].semis=variant[(index+phrase)%variant.length];
+                    }
+                }, arpInterval * 1000);
+
+                // Move the whole harmony through a defined progression, not random chromatic drift.
+                const progTimer=setInterval(()=>{
+                    if(muted)return;
+                    const shift=profile.progression[++chordStep%profile.progression.length];
+                    const now=ctx.currentTime,fade=Math.min(1.2,profile.glide/3),base=drones.length;
+                    drones.forEach(({osc,g,semis,level})=>{
+                        g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(g.gain.value,now);
+                        g.gain.linearRampToValueAtTime(0,now+fade);               // fade the old chord out
+                        osc.frequency.setValueAtTime(root*Math.pow(2,(semis+shift)/12),now+fade+.02); // retune while silent: no pitch slide
+                        g.gain.linearRampToValueAtTime(level,now+fade*2+.3);       // fade the new chord in
+                    });
+                },profile.phrase*1000);
+
+                ambientNodes = {
+                    source: { stop: () => {
+                        clearInterval(arpTimer);
+                        clearInterval(progTimer);
+                        drones.forEach(({ osc }) => { try { osc.stop(); } catch (e) {} });
+                        try { noise.stop(); } catch (e) {}
+                        try { lfo.stop(); swell.stop(); } catch (e) {}
+                        activeNotes.forEach(o=>{try{o.stop();}catch{}});
+                        drones.forEach(({osc,g})=>{osc.disconnect();g.disconnect();});
+                        [noise,noiseFilter,noiseGain,swell,swellGain,lfo,lfoGain,lp,conv,dryGain,wetGain,ambGain].forEach(n=>n.disconnect());
+                    }},
+                    gain: ambGain,
+                    lp: lp,
+                    baseLpFreq: lp.frequency.value,
+                    baseGain: 0.16
+                };
+            }
+
+            // Intensify the drone for a phase boundary: raise filter cutoff
+            // and bump volume. `level` 0-3 corresponds to start/2/3, 1/3, final.
+            function intensify(level) {
+                if (!ambientNodes || !ctx) return;
+                const t = ctx.currentTime;
+                if (ambientNodes.lp && ambientNodes.baseLpFreq) {
+                    const targetLp = ambientNodes.baseLpFreq * (1 + level * 0.2);
+                    ambientNodes.lp.frequency.linearRampToValueAtTime(targetLp, t + 1.5);
+                }
+                if (ambientNodes.gain && ambientNodes.baseGain != null) {
+                    const targetGain = Math.min(0.22, ambientNodes.baseGain + level * 0.015);
+                    ambientNodes.gain.gain.linearRampToValueAtTime(targetGain, t + 1.5);
+                }
+            }
+
+            // Soft marker chime — used at thirds boundaries
+            function playMarker(pitch) {
+                if (!ensureRunning() || muted) return;
+                const t = ctx.currentTime;
+                const freqs = pitch === 'low' ? [392, 587] : pitch === 'mid' ? [523, 784] : [659, 988];
+                freqs.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const g = ctx.createGain();
+                    const start = t + i * 0.05;
+                    g.gain.setValueAtTime(0, start);
+                    g.gain.linearRampToValueAtTime(0.12, start + 0.01);
+                    g.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
+                    osc.connect(g).connect(masterGain);
+                    osc.start(start);
+                    osc.stop(start + 0.62);
+                });
+            }
+
+            function playLoss() {
+                if(!ensureRunning() || muted)return;
+                const now=ctx.currentTime;
+                [220,174.61,130.81].forEach((frequency,i)=>{
+                    const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='triangle';osc.frequency.value=frequency;
+                    const t=now+i*.17;gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(.12,t+.015);gain.gain.exponentialRampToValueAtTime(.001,t+.85);
+                    osc.connect(gain).connect(masterGain);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(t);osc.stop(t+.9);
+                });
+            }
+
+            function isMuted() { return muted; }
+            function hasAmbient() { return !!ambientNodes; }
+
             return {
-                playKey, playSpace, playEnter, playLock, playError, playBell, playTick, playMarker, playLoss, playWin,
-                playSong, intensify, stopAmbient, setMuted, setEra, isMuted: () => muted, hasAmbient: () => !!song, ensureRunning,
-                nowPlaying: () => song?.label || null
+                playKey, playSpace, playEnter, playLock, playError, playBell, playTick, playMarker, playLoss,
+                playAmbient, playDrone, intensify, stopAmbient, setMuted, setEra, isMuted, hasAmbient, ensureRunning
             };
         })();
         const MAX_FETCH_ATTEMPTS = 5;       // give up loading after this many random-article tries
@@ -2809,12 +2959,30 @@
             variantCache.set(id,u);return u;
         }
         function templateById(id) {
+            if(typeof id==='string'&&id.endsWith(TIMES_SUFFIX))return timesVariant(templateById(id.slice(0,-TIMES_SUFFIX.length)));
             for(const def of BUFF_FAMILIES.values()){
                 let params;
                 try{params=def.parse(id||'');}catch{return null;}
                 if(params)return buffVariant(def.key,...params);
             }
             return null;
+        }
+        // Some word-multiplier cards roll a × twin: instead of adding to the word multiplier, they multiply it
+        // after every addition. Alone a twin is a little weaker than the + card; stacked with other word buffs it is stronger.
+        const TIMES_SUFFIX = '*x', TIMES_CHANCE = .25, TIMES_RATE = .8;
+        const TIMES_FAMILIES = new Set(['format-combo','flourish','morpheme','summit','alliterative','figures','position']);
+        function timesVariant(u) {
+            if(!u||!TIMES_FAMILIES.has(u.template)||u.times)return null;
+            const id=u.id+TIMES_SUFFIX;
+            if(variantCache.has(id))return variantCache.get(id);
+            const m=/\+([\d.]+)( to the)? word multiplier/.exec(u.richDesc||'');
+            if(!m)return null;
+            const factor=Math.max(1.25,roundMult(1+Number(m[1])*TIMES_RATE));
+            const rich=(u.richDesc||'').replace(/\+[\d.]+ to the word multiplier/,`Word multiplier ${P('×'+factor)}`).replace(/\+[\d.]+ word multiplier/,`${P('×'+factor)} word multiplier`);
+            const tier=Math.min(4,BUFF_TIERS.indexOf(u.rarity)+1);
+            const v={...u,id,times:factor,...buffEconomy(tier),richName:`${u.richName} ${P('×')}`,name:`${u.name} ×`,richDesc:rich,desc:plainText(rich),
+                action:ctx=>{const e=u.action(ctx);if(!e||!e.multAdd)return e;const {multAdd,...rest}=e;return {...rest,multMul:factor};}};
+            variantCache.set(id,v);return v;
         }
         // Every card the families can offer on this article.
         const familyVariants = (sentences=[])=>[...BUFF_FAMILIES.values()].flatMap(def=>def.options(sentences).map(ps=>buffVariant(def.key,...ps)).filter(Boolean));
@@ -3324,7 +3492,9 @@
                 const families=[...new Set(pool.map(u=>u.template||u.id))];
                 const family=families[Math.min(families.length-1,Math.floor(random()*families.length))];
                 const variants=pool.filter(u=>(u.template||u.id)===family);
-                const chosen=variants[Math.min(variants.length-1,Math.floor(random()*variants.length))];
+                let chosen=variants[Math.min(variants.length-1,Math.floor(random()*variants.length))];
+                const twin=TIMES_FAMILIES.has(chosen.template)&&random()<TIMES_CHANCE&&timesVariant(chosen);
+                if(twin&&!ownedIds.has(twin.id)&&!excluded.includes(twin.id))chosen=twin;
                 offers.push(chosen);
                 available=available.filter(u=>u.id!==chosen.id && (!chosen.template||u.template!==chosen.template) && (chosen.type!=='RUN'||u.type!=='RUN'));
             }
@@ -3747,61 +3917,120 @@
         }
 
         // Pick a mood from the article's title, categories and lead; the audio engine turns it into a musical style.
+        const SOUND_PALETTES = (() => {
+            const base={waves:['sine','triangle'],voices:3,detune:3,pad:.028,wet:.45,cutoff:1400,breath:.07,air:900,noise:.012,gap:1.8,rest:.25,registers:[0,12],pluck:'sine',note:.09,attack:.02,decay:1.8,brightness:3,width:1,progression:[0,5,0,7],phrase:16,glide:4};
+            const settings={
+                neutral:{},
+                verdant:{voices:2,cutoff:2200,breath:.16,air:2600,noise:.025,gap:1.1,rest:.4,registers:[12,24],attack:.06,decay:.65,wet:.3,progression:[0,7,5,0]},
+                aquatic:{voices:3,cutoff:750,breath:.055,air:500,noise:.07,gap:3.8,rest:.3,registers:[0,12],decay:4.5,wet:.75,phrase:28,glide:9},
+                cosmic:{waves:['sine'],voices:4,detune:6,cutoff:1800,breath:.023,noise:.005,gap:4.4,rest:.45,registers:[12,24],attack:.3,decay:5,wet:.8,width:1.8,phrase:30,glide:12},
+                circuit:{waves:['triangle'],voices:2,pad:.013,detune:0,cutoff:2400,noise:0,gap:.42,rest:.18,registers:[0,12,24],pluck:'square',note:.045,attack:.005,decay:.18,wet:.18,phrase:8,glide:.1},
+                jazz:{voices:2,pad:.012,detune:0,cutoff:1500,noise:.004,gap:.7,rest:.32,registers:[0,12],pluck:'triangle',note:.12,decay:.6,wet:.22,progression:[0,5,2,7],phrase:7,glide:.3},
+                salon:{voices:2,pad:.014,cutoff:2400,noise:0,gap:.85,rest:.12,registers:[0,12,24],note:.1,decay:1.15,wet:.5,progression:[0,5,7,0],phrase:10,glide:.7},
+                lyric:{voices:3,cutoff:1700,gap:1.1,rest:.16,registers:[0,12],decay:1.4,progression:[0,7,5,0],phrase:12},
+                shadow:{waves:['triangle','sawtooth'],voices:2,octave:-1,cutoff:450,detune:11,noise:.04,air:170,gap:4.1,rest:.55,registers:[0,12],attack:.8,decay:4,wet:.7,progression:[0,-4,-2,0],phrase:24,glide:8},
+                martial:{waves:['triangle'],voices:2,octave:-1,cutoff:600,gap:.9,rest:.15,registers:[0,0,12],attack:.006,decay:.25,note:.12,wet:.35,progression:[0,0,5,0],phrase:12},
+                austere:{waves:['sine'],voices:2,octave:-1,cutoff:600,air:1800,noise:.055,gap:5,rest:.6,decay:4,wet:.8,phrase:32,glide:10},
+                sacred:{waves:['sine'],voices:4,detune:1,cutoff:1900,noise:0,gap:3,rest:.4,attack:1.2,decay:5.5,wet:.8,progression:[0,5,0,-5],phrase:24,glide:8},
+                mythic:{cutoff:1200,air:650,gap:2.4,rest:.3,registers:[0,12,24],decay:3.5,wet:.7,progression:[0,2,5,0]},
+                gallery:{voices:2,pad:.018,cutoff:1800,noise:0,gap:2.1,rest:.5,attack:.015,decay:2.5,wet:.6,progression:[0,4,5,0]},
+                logic:{waves:['sine'],voices:2,detune:0,noise:0,gap:1.25,rest:.1,decay:.8,wet:.25,progression:[0,5,10,0],phrase:14},
+                humane:{voices:2,cutoff:1100,noise:.006,gap:2.2,rest:.35,attack:.08,decay:2.2,wet:.4},
+                civic:{waves:['triangle'],voices:2,cutoff:1200,air:350,noise:.02,gap:.8,rest:.3,decay:.55,wet:.25,phrase:10},
+                kinetic:{voices:2,pad:.012,cutoff:1900,noise:.008,gap:.36,rest:.15,decay:.16,note:.06,wet:.15,progression:[0,0,5,7],phrase:6,glide:.15},
+                hearth:{voices:2,cutoff:1000,air:1800,noise:.025,gap:1.6,rest:.3,decay:1.1,wet:.2,progression:[0,5,0,0]},
+                reel:{waves:['triangle','sine'],voices:4,cutoff:1400,detune:5,gap:2.7,attack:.25,decay:3,wet:.6,progression:[0,-2,5,7],phrase:18},
+                forum:{voices:3,cutoff:850,gap:1.8,rest:.2,registers:[0],decay:1,wet:.3,progression:[0,5,0,7]},
+                ledger:{voices:2,detune:0,noise:0,gap:.65,rest:.2,pluck:'triangle',decay:.3,wet:.2,phrase:8},
+                transit:{waves:['triangle'],voices:2,cutoff:1000,air:450,noise:.035,gap:.55,rest:.08,registers:[0,12],decay:.3,wet:.25,progression:[0,0,5,7],phrase:10,glide:1},
+                lexical:{voices:2,noise:0,gap:.95,rest:.3,registers:[0,12,24],decay:.65,wet:.4,phrase:12},
+                clinical:{waves:['sine'],voices:2,detune:0,cutoff:1600,noise:.005,gap:2,rest:.2,decay:1,wet:.3,progression:[0,5,0,2]},
+                couture:{voices:2,cutoff:2300,noise:.005,gap:.75,rest:.25,registers:[12],decay:.4,wet:.3,phrase:8},
+                antique:{waves:['triangle','sine'],voices:2,octave:-1,cutoff:650,air:700,noise:.03,gap:3.2,rest:.4,attack:.15,decay:3.5,wet:.7,progression:[0,5,0,3],phrase:25,glide:8}
+            };
+            // Warm-up pass: every article keeps its own tempo, register, chord family and density,
+            // but timbres are always soft (no saw/square, no sub-bass, no heavy detune or hiss)
+            // and the reverb/rests are capped so nothing sounds hollow or eerie.
+            const soften=p=>({...p,
+                waves:p.waves.map(w=>w==='sawtooth'||w==='square'?'triangle':w),
+                pluck:p.pluck==='square'||p.pluck==='sawtooth'?'triangle':p.pluck,
+                octave:0,
+                detune:Math.min(p.detune,4),
+                noise:Math.min(p.noise,.008),
+                air:Math.max(p.air,700),
+                cutoff:Math.max(1300,Math.min(p.cutoff,2400)),
+                wet:Math.min(p.wet,.5),
+                rest:Math.min(p.rest,.3),
+                gap:Math.min(Math.max(p.gap,.6),2.6),
+                attack:Math.min(Math.max(p.attack,.02),.35),
+                decay:Math.min(p.decay,2.6),
+                width:Math.min(p.width,.8),
+                pad:p.pad*1.15,
+                note:Math.min(p.note,.08),
+                phrase:Math.max(p.phrase,12),
+                glide:Math.max(p.glide,3),
+                progression:p.progression.every(x=>[0,-5,-3,-7,5,7,9,-2,4,2,-4].includes(x))?p.progression:[0,5,7,0]
+            });
+            return Object.freeze(Object.fromEntries(Object.entries(settings).map(([id,p])=>[id,Object.freeze(soften({...base,...p}))])));
+        })();
+
+        // Pick an ambient mood based on article categories. Each mood is a
+        // (rootHz, intervals) pair — intervals is a chord shape in semitones.
+        // Falls back to a neutral suspended drone if nothing matches.
         function classifyMood(categories, title, excerpt = '') {
 
             const moods = [
                 { keys: ['horror', 'death', 'tragedy', 'disaster', 'massacre', 'extinction', 'crime', 'murder', 'serial killer'],
-                  label: 'shadow' },
+                  label: 'shadow',    root: 110.00, intervals: [0, 3, 7, 14] },        // half-dim
                 { keys: ['battle', 'war', 'military', 'conflict', 'siege', 'army', 'navy', 'regiment'],
-                  label: 'martial' },
+                  label: 'martial',   root: 130.81, intervals: [0, 7, 12, 16] },        // C minor7
                 { keys: ['music', 'composer', 'song', 'opera', 'symphony', 'jazz', 'album', 'band', 'singer'],
-                  label: 'lyric' },
+                  label: 'lyric',     root: 174.61, intervals: [0, 4, 7, 11, 14] },    // F maj9
                 { keys: ['classical music', 'baroque', 'romantic music', 'sonata', 'concerto'],
-                  label: 'salon' },
-                { keys: ['rock music', 'rock band', 'rock', 'punk', 'hip hop', 'funk', 'metal', 'electronic music', 'dance music', 'pop music', 'rapper', 'record label'],
-                  label: 'amped' },
+                  label: 'salon',     root: 196.00, intervals: [0, 4, 7, 9, 14] },     // G6 add9
                 { keys: ['physics', 'astronom', 'space', 'galaxy', 'planet', 'cosmolog', 'star', 'nebula'],
-                  label: 'cosmic' },
-                { keys: ['science', 'chemistry', 'mathematic', 'geometry', 'algebra'], label:'logic' },{ keys: ['technology', 'computing', 'computer', 'software', 'internet', 'digital', 'algorithm'],
-                  label: 'circuit' },
+                  label: 'cosmic',    root: 98.00,  intervals: [0, 7, 12, 16] },        // G sus open
+                { keys: ['science', 'chemistry', 'mathematic', 'geometry', 'algebra'], label:'logic',root:164.81,intervals:[0,5,10] },
+                { keys: ['technology', 'computing', 'computer', 'software', 'internet', 'digital', 'algorithm'],
+                  label: 'circuit',   root: 220.00, intervals: [0, 2, 5, 7] },         // A2 add4
                 { keys: ['nature', 'animal', 'plant', 'forest', 'flora', 'fauna', 'bird', 'fish', 'insect', 'mammal', 'reptile', 'botan', 'species', 'octopus', 'fung', 'ecolog', 'zoolog', 'tree'],
-                  label: 'verdant' },
+                  label: 'verdant',   root: 146.83, intervals: [0, 4, 7, 9] },         // D6
                 { keys: ['ocean', 'sea', 'river', 'lake', 'water', 'island', 'coast', 'maritime', 'reef'],
-                  label: 'aquatic' },
+                  label: 'aquatic',   root: 87.31,  intervals: [0, 7, 9, 14] },        // F sus7
                 { keys: ['mountain', 'desert', 'volcano', 'glacier', 'arctic', 'tundra', 'plateau', 'basalt', 'rock', 'geology', 'igneous', 'mineral'],
-                  label: 'austere' },
+                  label: 'austere',   root: 73.42,  intervals: [0, 7, 12, 16] },           // low D5
                 { keys: ['religion', 'theology', 'church', 'monastery', 'saint', 'mystic', 'spiritual', 'cathedral', 'priest'],
-                  label: 'sacred' },
+                  label: 'sacred',    root: 130.81, intervals: [0, 7, 12, 19] },       // open fifths
                 { keys: ['mythology', 'legend', 'folklore', 'mythical', 'deity'],
-                  label: 'mythic' },
+                  label: 'mythic',    root: 116.54, intervals: [0, 3, 7, 14] },        // dorian-ish
                 { keys: ['art', 'painting', 'sculpture', 'literature', 'poem', 'novel', 'museum', 'poet'],
-                  label: 'gallery' },
+                  label: 'gallery',   root: 196.00, intervals: [0, 4, 7, 11] },        // G maj7
                 { keys: ['philosoph', 'ethic', 'epistemolog', 'metaphysic', 'ontolog'],
-                  label: 'logic' },
+                  label: 'logic',     root: 164.81, intervals: [0, 5, 10] },           // E sus quartal
                 { keys: ['biograph', 'people', 'born', 'died', 'living person', 'novelist', 'actor', 'actress'],
-                  label: 'humane' },
+                  label: 'humane',    root: 164.81, intervals: [0, 4, 7, 9] },         // E6
                 { keys: ['city', 'cities', 'town', 'village', 'urban', 'capital', 'metropolitan', 'borough'],
-                  label: 'civic' },
+                  label: 'civic',     root: 110.00, intervals: [0, 4, 7, 11] },        // A maj7
                 { keys: ['sport', 'athlet', 'olympic', 'football', 'basketball', 'soccer', 'baseball', 'tennis'],
-                  label: 'kinetic' },
+                  label: 'kinetic',   root: 220.00, intervals: [0, 5, 7, 10] },        // A sus7
                 { keys: ['food', 'cuisine', 'recipe', 'cooking', 'beverage', 'wine', 'beer'],
-                  label: 'hearth' },
+                  label: 'hearth',    root: 174.61, intervals: [0, 4, 7] },            // F major
                 { keys: ['film', 'cinema', 'movie', 'television', 'tv series', 'director', 'producer'],
-                  label: 'reel' },
+                  label: 'reel',      root: 138.59, intervals: [0, 3, 7, 10] },        // C# m7
                 { keys: ['politic', 'election', 'government', 'parliament', 'senate', 'president'],
-                  label: 'forum' },
+                  label: 'forum',     root: 123.47, intervals: [0, 4, 7, 9] },         // B6
                 { keys: ['economic', 'finance', 'market', 'currency', 'bank', 'stock'],
-                  label: 'ledger' },
+                  label: 'ledger',    root: 155.56, intervals: [0, 3, 7, 10] },        // Eb m7
                 { keys: ['transport', 'aviation', 'aircraft', 'railway', 'ship', 'train', 'automobile', 'printing press', 'bicycle', 'locomotive', 'airport'],
-                  label: 'transit' },
+                  label: 'transit',   root: 103.83, intervals: [0, 5, 7, 9] },         // Ab sus6
                 { keys: ['language', 'linguistic', 'grammar', 'dialect', 'phonolog'],
-                  label: 'lexical' },
+                  label: 'lexical',   root: 185.00, intervals: [0, 4, 7, 14] },        // F# maj add9
                 { keys: ['medicine', 'medical', 'disease', 'pathology', 'anatom', 'biology'],
-                  label: 'clinical' },
+                  label: 'clinical',  root: 138.59, intervals: [0, 5, 7] },            // C# sus
                 { keys: ['fashion', 'design', 'style', 'textile', 'jewelry'],
-                  label: 'couture' },
+                  label: 'couture',   root: 207.65, intervals: [0, 4, 9, 11] },        // G# maj7add6
                 { keys: ['archaeology', 'ancient', 'prehistor', 'fossil', 'ruin', 'antiquit', 'sundial'],
-                  label: 'antique' },
+                  label: 'antique',   root: 92.50,  intervals: [0, 4, 7, 14] },        // F# minor low
             ];
 
             const clean=x=>String(x||'').toLowerCase().replace(/[_–—-]/g,' ');
@@ -3809,11 +4038,11 @@
             const stems=new Set(['mathematic','astronom','cosmolog','philosoph','ethic','epistemolog','metaphysic','ontolog','athlet','politic','economic','phonolog','anatom','prehistor','antiquit','botan','fung','ecolog','zoolog']);
             const hit=(text,key)=>new RegExp('\\b'+(stems.has(key)?key+'[a-z]*':key.endsWith('y')?key.slice(0,-1)+'(?:y|ies)':key+'(?:s|es)?')+'\\b','i').test(text);
             const ranked=moods.map(m=>({...m,score:m.keys.reduce((n,k)=>n+(hit(heading,k)?12:0)+Math.min(3,cats.filter(c=>hit(c,k)).length)*3+(hit(lead,k)?1:0),0)})).sort((a,b)=>b.score-a.score);
-            let selected=ranked[0]?.score>0?ranked[0]:{label:'neutral' };
+            let selected=ranked[0]?.score>0?ranked[0]:{label:'neutral',root:130.81,intervals:[0,4,7,14]};
             // Specific musical traditions take precedence over generic composer/music categories.
-            if(/\b(jazz|bebop|swing)\b/i.test([title,...categories].join(' ')))selected={label:'jazz' };
-            else if(/\b(classical|baroque|sonata|concerto|symphony)\b/i.test([title,...categories].join(' ')))selected={label:'salon' };
-            return selected;
+            if(/\b(jazz|bebop|swing)\b/i.test([title,...categories].join(' ')))selected={label:'jazz',root:146.83,intervals:[0,3,7,10,14]};
+            else if(/\b(classical|baroque|sonata|concerto|symphony)\b/i.test([title,...categories].join(' ')))selected={label:'salon',root:196,intervals:[0,4,7,9,14]};
+            return {...selected,profile:SOUND_PALETTES[selected.label]||SOUND_PALETTES.neutral};
         }
 
         function extractSentencesFromParagraph(pEl, pageId, initialCounter) {
@@ -3876,22 +4105,37 @@
             const label=[...keys.map(k=>FORMAT_LABELS[k]),...(format.cit?['Citation']:[])].join(' + ')||'Plain text';
             return {count:keys.length,mask,color:FORMAT_PALETTE[mask],ribbon,label};
         }
-        const RenderedText = React.memo(({ chars, matchState, onNavigate, typedLength }) => {
-            // Group consecutive chars sharing the same format into spans
+        // Word index of every character, split exactly as scoreSentence splits words (-1: spaces and citations).
+        function charWordIndex(chars) {
+            const out = []; let w = 0, open = false;
+            chars.forEach(c => {
+                if (c.cit) { out.push(-1); return; }
+                if (c.c === ' ') { if (open) { w++; open = false; } out.push(-1); }
+                else { open = true; out.push(w); }
+            });
+            return out;
+        }
+        const RenderedText = React.memo(({ chars, matchState, onNavigate, typedLength, sid }) => {
+            // Group consecutive chars sharing the same format (and, when hoverable, the same word) into spans
             const spans = useMemo(() => {
             const spans = [];
             let buf = [];
             let curFmt = null;
             let curTarget = null;
+            let bufWords = [];
+            const wordOf = sid ? charWordIndex(chars) : null;
 
             const flush = () => {
                 if (buf.length > 0) {
-                    spans.push({ text: buf.join(''), fmt: curFmt, target: curTarget });
-                    buf = [];
+                    // Hoverable text also records which word each run of characters belongs to.
+                    const pieces = [];
+                    if (wordOf) buf.forEach((c, k) => { const last = pieces[pieces.length - 1]; if (last && last.word === bufWords[k]) last.text += c; else pieces.push({ text: c, word: bufWords[k] }); });
+                    spans.push({ text: buf.join(''), fmt: curFmt, target: curTarget, pieces: wordOf ? pieces : null });
+                    buf = []; bufWords = [];
                 }
             };
 
-            chars.forEach(charObj => {
+            chars.forEach((charObj, k) => {
                 const fmtStr = `${charObj.b}-${charObj.i}-${charObj.l}-${charObj.cit}-${!!charObj.bul}-${!!charObj.exp}`;
                 if (fmtStr !== curFmt || charObj.target !== curTarget) {
                     flush();
@@ -3899,10 +4143,11 @@
                     curTarget = charObj.target;
                 }
                 buf.push(charObj.c);
+                if (wordOf) bufWords.push(wordOf[k]);
             });
             flush();
             return spans;
-            }, [chars]);
+            }, [chars, sid]);
 
             const containerClass =
                 matchState === 'GREEN'    ? 'state-locked'   :
@@ -3911,7 +4156,7 @@
                 matchState === 'YELLOW'   ? 'state-yellow'   : '';
 
             return (
-                <span className={`excerpt-text relative ${containerClass}`}>
+                <span className={`excerpt-text relative ${containerClass}`} data-sid={sid}>
                     {(() => {
                         let charOffset = 0;
                         return spans.map((span, idx) => {
@@ -3929,11 +4174,20 @@
 
                             // Only split at the typing boundary, not at every character.
                             // The range-based inspector still reads the exact hovered character.
-                            const typed = Math.max(0,Math.min(span.text.length,(typedLength || 0)-charOffset));
+                            const typedIn = (text, start) => Math.max(0, Math.min(text.length, (typedLength || 0) - start));
+                            const spanStart = charOffset;
                             charOffset += span.text.length;
+                            const typed = typedIn(span.text, spanStart);
+                            let pieceStart = spanStart;
                             const inner = <span className="typeable-char" data-fmt={span.fmt}>
-                                {typed > 0 && <span className="char-typed">{span.text.slice(0,typed)}</span>}
-                                {span.text.slice(typed)}
+                                {span.pieces ? span.pieces.map((piece, k) => {
+                                    const t = typedIn(piece.text, pieceStart); pieceStart += piece.text.length;
+                                    const body = <>{t > 0 && <span className="char-typed">{piece.text.slice(0, t)}</span>}{piece.text.slice(t)}</>;
+                                    return piece.word >= 0 ? <span key={k} data-w={piece.word}>{body}</span> : <React.Fragment key={k}>{body}</React.Fragment>;
+                                }) : <>
+                                    {typed > 0 && <span className="char-typed">{span.text.slice(0,typed)}</span>}
+                                    {span.text.slice(typed)}
+                                </>}
                             </span>;
 
                             // Render hyperlinks as clickable anchors (except inside locked or fully-typed sentences)
@@ -3951,7 +4205,7 @@
                                 );
                             }
 
-                            return <span key={idx} style={inkStyle} title={ink.label} data-format-mask={ink.mask} className={classes.join(' ')}>{inner}</span>;
+                            return <span key={idx} style={inkStyle} title={sid ? undefined : ink.label} data-format-mask={ink.mask} className={classes.join(' ')}>{inner}</span>;
                         });
                     })()}
                 </span>
@@ -4011,7 +4265,7 @@
                         else if (matchStates[fragId] === 'COMPLETE')        state = 'COMPLETE';
                         else if (matchStates[fragId] === 'YELLOW')          state = 'YELLOW';
                         return ReactDOM.createPortal(
-                            <RenderedText chars={sentence.chars} matchState={state} typedLength={state === 'YELLOW' ? typedLength : null} onNavigate={onNavigate} />,
+                            <RenderedText chars={sentence.chars} sid={fragId} matchState={state} typedLength={state === 'YELLOW' ? typedLength : null} onNavigate={onNavigate} />,
                             el,
                             fragId
                         );
@@ -4103,6 +4357,7 @@
 
                 let upgradeBase = 0;
                 let upgradeMult = 0;
+                let upgradeTimes = 1;
                 const appliedWordUpgrades = [];
                 const wordEffects = [];
 
@@ -4111,21 +4366,25 @@
                     if (effect) {
                         if (effect.baseAdd) upgradeBase += effect.baseAdd * rules.wordBonus;
                         if (effect.multAdd) upgradeMult += effect.multAdd * rules.wordBonus;
+                        const times = effect.multMul ? 1 + (effect.multMul - 1) * rules.wordBonus : 1;
+                        upgradeTimes *= times;
                         appliedWordUpgrades.push(u.name);
-                        wordEffects.push({name:u.name,base:(effect.baseAdd||0)*rules.wordBonus,mult:(effect.multAdd||0)*rules.wordBonus});
+                        wordEffects.push({name:u.name,base:(effect.baseAdd||0)*rules.wordBonus,mult:(effect.multAdd||0)*rules.wordBonus,times});
                     }
                 });
 
                 const characterBase=base, formatBaseMult=formatMult;
                 base       += formatAdd + upgradeBase;
                 formatMult += upgradeMult;
+                // × buffs multiply the word multiplier after every addition.
+                formatMult *= upgradeTimes;
 
                 const total = Math.floor(base * lenMult * formatMult) * posMult;
 
                 return {
                     chars: wChars,
                     charDetails,
-                    base, characterBase, upgradeBase, upgradeMult, formatBaseMult, len, lenMult, formatMult, formatAdd,
+                    base, characterBase, upgradeBase, upgradeMult, upgradeTimes, formatBaseMult, len, lenMult, formatMult, formatAdd,
                     isFirstLast: isFirst || isLast,
                     posMult, total,
                     text,
@@ -4261,57 +4520,82 @@
             </aside>;
         });
 
+        // Hover any word of an excerpt: a small card shows its base, its word multiplier and their product.
+        const fmtMult = x => Number(x.toFixed(x < 10 ? 2 : 1)).toLocaleString();
+        const WordTipCard = ({ tip }) => <div className={`word-tip ${tip.below ? 'is-below' : ''}`} style={{ left: tip.x, top: tip.y }} role="tooltip">
+            <span><b>{tip.word.base.toLocaleString()}</b><small>base</small></span><i>×</i>
+            <span><b>{fmtMult(tip.word.lenMult * tip.word.formatMult)}</b><small>mult</small></span><i>=</i>
+            <span className="is-total"><b>{tip.word.total.toLocaleString()}</b><small>score</small></span>
+        </div>;
+        function useWordHover(detailFor) {
+            // The card keeps its own state, so hovering never re-renders the article around it.
+            const show = useRef(() => {});
+            const cur = useRef({ key: null, els: [] });
+            const Host = useMemo(() => function WordTipHost() {
+                const [tip, setTip] = useState(null);
+                useEffect(() => { show.current = setTip; return () => { show.current = () => {}; }; }, []);
+                return tip ? <WordTipCard tip={tip}/> : null;
+            }, []);
+            const clear = () => {
+                if (!cur.current.key) return;
+                cur.current.els.forEach(x => x.classList.remove('word-hover'));
+                cur.current = { key: null, els: [] }; show.current(null);
+            };
+            const onMouseOver = e => {
+                const el = e.target.closest?.('[data-w]'), host = el?.closest('[data-sid]');
+                if (!el || !host) { clear(); return; }
+                const key = host.dataset.sid + ':' + el.dataset.w;
+                if (key === cur.current.key) return;
+                const word = detailFor(host.dataset.sid)?.words[Number(el.dataset.w)];
+                if (!word) { clear(); return; }
+                cur.current.els.forEach(x => x.classList.remove('word-hover'));
+                const els = [...host.querySelectorAll(`[data-w="${el.dataset.w}"]`)];
+                els.forEach(x => x.classList.add('word-hover'));
+                cur.current = { key, els };
+                const r = el.getBoundingClientRect(), below = r.top < 90;
+                show.current({ x: Math.max(110, Math.min(window.innerWidth - 110, r.left + r.width / 2)), y: below ? r.bottom + 8 : r.top - 8, below, word });
+            };
+            return { onMouseOver, onMouseLeave: clear, clear, node: <Host/> };
+        }
+
         const ScoringOverlay = ({sentences,onComplete,targetScore,ante,upgrades,rules,market,practice=false}) => {
             const [step,setStep]=useState(0);
-            const [selected,setSelected]=useState([0,0]);
-            const [inspectorOpen,setInspectorOpen]=useState(false);
             const dialogRef=useRef(null);
             const details=useMemo(()=>sentences.map(s=>scoreSentence(s,upgrades,rules)),[sentences,upgrades,rules]);
             const result=useMemo(()=>scoreRun(sentences,upgrades,rules,details),[sentences,upgrades,rules,details]);
-            const word=selected ? details[selected[0]]?.words[selected[1]] : null;
+            const hover=useWordHover(sid=>details[sentences.findIndex(s=>s.id===sid)]);
             const success=result.runTotal>=targetScore;
+            const symmetric=upgrades.some(u=>u.id==='symmetric')?rules.symmetric:0;
             useEffect(()=>{const dialog=dialogRef.current;dialog.showModal();return ()=>dialog.close();},[]);
             useEffect(()=>{const timer=setInterval(()=>setStep(n=>{if(n>=6){clearInterval(timer);return 6;}return n+1;}),250);return ()=>clearInterval(timer);},[]);
-            return <dialog ref={dialogRef} className="tally-dialog" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()}>
+            // One quiet line per excerpt, only when something beyond the word scores shaped its total.
+            const modifiers=d=>{
+                const words=d.words.reduce((n,w)=>n+w.total,0),parts=[];
+                if(d.sentenceBase>words)parts.push(`+${(d.sentenceBase-words).toLocaleString()} sentence base`);
+                if(d.sentenceMultiplier!==1)parts.push(`×${fmtMult(d.sentenceMultiplier)} sentence`);
+                if(d.chainMultiplier!==1)parts.push(`×${fmtMult(d.chainMultiplier)} chain`);
+                if(symmetric)parts.push(`+${symmetric} Symmetric`);
+                return parts.length?`Words ${words.toLocaleString()} · ${parts.join(' · ')}`:null;
+            };
+            const runNames=result.appliedRunUpgrades.join(', ');
+            return <dialog ref={dialogRef} className="tally-dialog is-simple" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()}>
                 <header className="tally-head"><div><span className="print-label">Round {ante} of 7</span><h1 id="tally-title">Tally</h1></div>{step<6 && <button onClick={()=>setStep(6)}>Skip</button>}</header>
-                <div className="tally-body">
-                    <section className="tally-ledger" aria-label="Excerpt scores">{details.map((d,i)=><article key={d.id}>
-                        <div className="tally-excerpt-head"><span className="print-label">Excerpt {i+1}</span><strong title={result.finalSentenceTotals[i].toLocaleString()}>{step>=3?formatScore(result.finalSentenceTotals[i]):'—'}</strong></div>
-                        <p className="tally-quote">{d.text}</p>
-                        <div className="tally-words">{d.words.map((w,j)=><button key={j} className={selected?.[0]===i&&selected?.[1]===j?'selected':''} aria-pressed={selected?.[0]===i&&selected?.[1]===j} aria-label={`${w.text}: ${w.total.toLocaleString()} points. Inspect word`} onMouseEnter={()=>setSelected([i,j])} onFocus={()=>setSelected([i,j])} onClick={()=>{setSelected([i,j]);setInspectorOpen(true);}}><span>{w.text}</span><b>{step>=2?formatScore(w.total):'—'}</b></button>)}</div>
-                        {step>=3&&<><ScoreEffects detail={d} rules={rules}/><div className="excerpt-calculation">
-                            <div><span>Word scores added together</span><b>{d.words.reduce((n,w)=>n+w.total,0).toLocaleString()}</b></div>
-                            {d.sentenceEffects.filter(e=>e.base).map(e=><div key={e.name}><span>{e.name}</span><b>+{e.base.toLocaleString()}</b></div>)}
-                            <div><span>Sentence subtotal</span><b>{d.sentenceBase.toLocaleString()}</b></div>
-                            {d.citationBlocks>0&&<div><span>{d.citationBlocks} citation block{d.citationBlocks===1?'':'s'} · {rules.citation}<sup>{d.citationBlocks}</sup></span><b>×{Number(Math.pow(rules.citation,d.citationBlocks).toFixed(3))}</b></div>}
-                            {d.sentenceEffects.filter(e=>e.mult).map(e=><div key={e.name}><span>{e.name} · added to sentence multiplier</span><b>+{e.mult}</b></div>)}
-                            <div><span>Combined sentence multiplier</span><b>×{Number(d.sentenceMultiplier.toFixed(3))}</b></div>
-                            <div><span>{d.triggeredUpgrades.length} distinct upgrade triggers · chain</span><b>×{d.chainMultiplier}</b></div>
-                            <p>{d.triggeredUpgrades.join(' + ')||'No scoring upgrades triggered'}</p>
-                            <div className="calculation-total"><span>floor({d.sentenceBase.toLocaleString()} × {Number(d.sentenceMultiplier.toFixed(3))} × {d.chainMultiplier})</span><b>{d.sentenceTotal.toLocaleString()}</b></div>
-                            {upgrades.some(u=>u.id==='symmetric')&&<div><span>Symmetric · added before round multiplication</span><b>+{rules.symmetric}</b></div>}
-                        </div></>}
-
-                    </article>)}</section>
-                    <aside className={`word-inspector ${inspectorOpen?'inspector-open':''}`} tabIndex={0} aria-label="Word breakdown"><button className="word-inspector-toggle" aria-expanded={inspectorOpen} onClick={()=>setInspectorOpen(x=>!x)}>Word details · {word?.text} <span>{inspectorOpen?'Hide':'Show'}</span></button><span className="print-label">Select a word to inspect</span>{word&&<><h2>{word.text}</h2><dl>
-                        <div><dt>Character points</dt><dd>{word.characterBase}</dd></div><div className="character-score-sum">{word.charDetails.map((c,i)=><span key={i}>{c.c}: {c.score}{i<word.charDetails.length-1?' + ':''}</span>)}</div>
-                        {word.formatAdd>0&&<div><dt>Linked word</dt><dd>+{word.formatAdd}</dd></div>}
-                        {word.wordEffects.filter(e=>e.base).map(e=><div key={e.name}><dt>{e.name}</dt><dd>+{e.base}</dd></div>)}
-                        <div><dt>Word subtotal</dt><dd>{word.base}</dd></div>
-                        {word.lenMult!==1&&<div><dt>Length · {word.len} characters</dt><dd>×{Number(word.lenMult.toFixed(3))}</dd></div>}
-                        {word.chars.some(c=>c.b)&&<div><dt>Bold</dt><dd>×{rules.bold}</dd></div>}
-                        {word.chars.some(c=>c.i)&&<div><dt>Italic</dt><dd>×{rules.italic}</dd></div>}
-                        {word.wordEffects.filter(e=>e.mult).map(e=><div key={e.name}><dt>{e.name} · added to format multiplier</dt><dd>+{e.mult}</dd></div>)}
-                        <div><dt>Combined format multiplier</dt><dd>×{Number(word.formatMult.toFixed(3))}</dd></div>
-                        
-                    </dl><p className="word-formula">floor({word.base} × {Number(word.lenMult.toFixed(3))} × {Number(word.formatMult.toFixed(3))})</p><div className="word-total"><span>Word total</span><strong>{word.total.toLocaleString()}</strong></div></>}</aside>
-                </div>
-                <footer className="tally-footer"><div className="tally-result"><span className="print-label">{step<5?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span><strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
-                    <div className="tally-equation"><b>Multiply the three excerpt totals: </b>{step>=4?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}{step>=4&&result.multiplier!==1&&` × ${Number(result.multiplier.toFixed(3))} (run bonuses)`}</div>
-                    {step>=5&&result.appliedRunUpgrades.length>0&&<p className="tally-run-effects">{result.appliedRunUpgrades.map(name=>{const u=upgrades.find(u=>u.name===name);if(u.id==='symmetric')return `Symmetric: +${rules.symmetric} to each excerpt${rules.runTrigger!==1?` · amplifier ×${rules.runTrigger}`:''}`;return `${name}: ×${Number(((1+(u.action(sentences)?.multAdd||0)*rules.runBonus)*rules.runTrigger).toFixed(3))}`;}).join(' · ')}</p>}
+                <section className="tally-ledger" aria-label="Excerpt scores" onMouseOver={hover.onMouseOver} onMouseLeave={hover.onMouseLeave}>
+                    <p className="tally-hint">Hover a word for its base, multiplier and score.</p>
+                    {details.map((d,i)=>{const note=modifiers(d);return <article key={d.id} className="tally-row">
+                        <p className="tally-quote"><RenderedText chars={sentences[i].chars} sid={sentences[i].id} matchState="NONE"/></p>
+                        <strong title={result.finalSentenceTotals[i].toLocaleString()}>{step>=i+1?formatScore(result.finalSentenceTotals[i]):'—'}</strong>
+                        {note&&<small>{note}</small>}
+                    </article>;})}
+                </section>
+                <footer className="tally-footer">
+                    <div className="tally-result"><div><span className="print-label">{step<5?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span>
+                        <p className="tally-equation">{step>=4?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}{step>=4&&result.multiplier!==1&&<> × <b title={runNames}>{fmtMult(result.multiplier)}</b> <span className="tally-run-names">{runNames}</span></>}</p></div>
+                        <strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
                     {!practice&&step>=5&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market);return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
                     <div className="tally-next">{!practice&&step>=5&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={step<6} onClick={()=>onComplete(result.runTotal,success)}>{practice?'Finish practice':success?(ante>=MAX_ANTE?'Complete the run':'Visit the shop'):'See results'}</button></div>
                 </footer>
+                {hover.node}
             </dialog>;
         };
 
@@ -4485,6 +4769,18 @@
             })}</div>
         </div>;
 
+        // Owned buffs, always in view. Cards the current excerpt triggers light up; run cards already ruled out dim.
+        const BuildRail = ({ upgrades, rules, fired = [], lost = [], label = 'Your buffs' }) => {
+            const on = new Set(fired), off = new Set(lost);
+            return <aside className="build-rail" aria-label={label}>
+                <div className="rail-head"><span>{label}</span><b>{upgrades.length}</b></div>
+                {upgrades.length ? <ul>{upgrades.map(u => <li key={u.id} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}`} title={plainText(upgradeDescription(u, rules))}>
+                    <b><RichText text={u.richName || u.name}/>{u.temporary && <em>this round</em>}</b>
+                    <span><RichText text={shopBlurb(u, rules)}/></span>
+                </li>)}</ul> : <p className="rail-empty">None yet. The shop sells them between rounds.</p>}
+            </aside>;
+        };
+
         const BuildDrawer = ({ upgrades, rules }) => {
             const ref = useRef(null);
             useEffect(() => {
@@ -4510,7 +4806,7 @@
                     <p>The pace gauge on the left fills toward <b>Goal</b> as you bank excerpts. The notch marks exactly-on-pace; fill above it means you are ahead. The striped segment previews the excerpt you are typing, and <b>This one</b> compares it to what the slot needs.</p><table><thead><tr><th>Round</th><th>Target</th><th>Clock</th></tr></thead><tbody>{ROUND_SECONDS.map((seconds,i) => <tr key={i}><td>{i+1}</td><td>{formatScore(getRoundTarget(i+1))}</td><td>{seconds}s</td></tr>)}</tbody></table></details>
                 <details><summary>02 / Typing & formatting</summary><p>Click the typing field to focus it. Formatting buttons are toggles, not keys you hold down. Turn each required format on before typing that part, then off when it ends. Multiple formats can be on at once. The toggles stay on until you change them, including between excerpts. After three seconds without typing in an unfinished excerpt, a hint appears above the input when the next character is unambiguous. It shows the character and any formatting toggles that need changing. If only the last character is wrong, it shows how to replace it. Typing or changing a format dismisses the hint. The format-button values show the standard word multiplier for bold/italic, link points per word, and citation multiplier per citation block; bullet formatting itself adds no points.</p><table><thead><tr><th>Action</th><th>Shortcut</th></tr></thead><tbody>{[['Bold','B'],['Italic','I'],['Link','L'],['Citation',';'],['Bullet','O'],['Compose','M']].map(([label,key]) => <tr key={key}><td>{label}</td><td>Ctrl / ⌘ + {key}</td></tr>)}<tr><td>Special characters</td><td>Hold Ctrl, then Ctrl + shown key</td></tr><tr><td>Use item in bag slot 1–3</td><td>Ctrl + 1–3</td></tr></tbody></table><p>Enter locks only a complete match. Backspace removes the last character. Ctrl, ⌘ or Alt + Backspace clears the input. Clear or Escape clears the unfinished sentence and resets formatting; locked sentences stay. Escape first closes Compose or the special-character panel when either is open. An unmatched character or format turns the input red; edit it to restore a match. Straight quotes also match curly quotes; a hyphen matches an en dash or em dash. Spaces still require the correct formatting.</p><p>Citation mode applies to references and annotations such as [which?] and [citation needed], including brackets. These use small baseline brackets with a dotted underline, without internal link or italic toggles. Math superscripts and area exponents are ordinary text, never citations. Each format combination has its own ink color and an underline showing its component colors. Hover a word or check the active-format preview to see the combination; bullet-only text and bullet markers stay green. Bullet mode matches the text of a list item; do not type its decorative bullet. Special characters typed from the Ctrl panel use your active formats.</p><p>Practice has three excerpts, no clock and no target. Complete the plain, bold and italic excerpts to finish; it does not replace your saved run.</p></details>
                 <details><summary>03 / Navigation, clock & saving</summary><p>The clock starts with your first typed character, inserted special character or article link, except for an unused Scout’s Honor free click. Following a link clears unfinished input after the new article loads; locked excerpts and upgrades remain. Back returns to a previously visited article.</p><p>The clock pauses while the game menu is open, during article loading, Rules, dev mode and scoring. Practice is untimed. Switching browser tabs alone does not pause a running clock. Save & leave stores the run in this browser; Continue resumes with the clock paused until typing or navigation begins. The run also autosaves while playing. Restart starts at round one with a new article and resets upgrades and credits; Keep playing cancels it. The clock pauses while choosing. New run replaces the saved run.</p></details>
-                <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
+                <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers. Cards marked × multiply the word multiplier instead, after every addition, so they grow with the rest of your build. Hover any word, in the article or the tally, to see its base, its multiplier (length × format) and its score.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
                 <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
                 <details><summary>06 / Special characters</summary><p>Hold Ctrl for a moment to open the character panel: every special character on the current page, each with a key. While still holding Ctrl, press that key to type the character with your active formatting; release Ctrl to close the panel. Keys are fixed for the whole article, with the most frequent characters on single keys. Pages with more characters than keys use two-key labels (for example Ctrl+0 then Ctrl+S). Experienced players can press Ctrl+key without waiting for the panel. The Ω button pins the panel open for mouse and touch; click a character to type it. Hint keys never reuse the format toggles (B I L ; O M) or the item slots (1–3). Characters that match plain keys are left out: straight quotes match curly quotes, a hyphen matches en and em dashes, and superscript digits accept ordinary digits (² → 2); exponents do not require Citation mode. Combining marks are shown on a dotted circle for legibility; only the mark is inserted.</p><p>Compose also works for common Latin accents and typography: toggle Compose, then type a two-character combination. A supported pair inserts one character with the active formatting and exits Compose. An unsupported pair inserts both characters literally. Escape or Enter cancels composition without clearing the existing input.</p><table><thead><tr><th>Pair</th><th>Character</th></tr></thead><tbody>{Object.entries(COMPOSE_SYMBOLS).map(([pair,char]) => <tr key={pair}><td><code>{pair}</code></td><td>{char}</td></tr>)}</tbody></table><p>Combine a letter with an accent marker in either order: apostrophe for acute, backtick for grave, double quote for diaeresis, ^ for circumflex, ~ for tilde, comma for cedilla, / for stroke, or o for ring. An accented character is inserted when the combination forms a single character; otherwise the pair is inserted literally. Example: apostrophe + e gives é.</p></details>
                 <details><summary>07 / Dev mode & sandbox</summary><p>Dev mode pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
@@ -4550,7 +4846,8 @@
             const familyChoices = useMemo(() => [...BUFF_FAMILIES.values()].map(def => {
                 const cards = def.options(sentences).map(ps => buffVariant(def.key, ...ps)).filter(Boolean);
                 const live = cards.filter(u => u.type === 'RUN' || triggersOn(u, sentences));
-                return { key: def.key, title: def.title, cards: live.length ? live : cards };
+                const pool = live.length ? live : cards;
+                return { key: def.key, title: def.title, cards: TIMES_FAMILIES.has(def.key) ? pool.flatMap(u => [u, timesVariant(u)].filter(Boolean)) : pool };
             }), [sentences]);
             const [familyPick, setFamilyPick] = useState({});
             const sandboxCards = useMemo(() => {
@@ -4898,14 +5195,34 @@
             useEffect(() => {
                 if (!contentBlocks.length) return;
                 let disposed=false;
-                const t = setTimeout(() => {
+                const t = setTimeout(async () => {
                     const root = document.querySelector('.wiki-content');
-                    if (!root || disposed) return;
+                    if (!root) return;
+                    const candidates = [];
+                    root.querySelectorAll('audio source, audio').forEach(el => {
+                        const s = el.getAttribute('src');
+                        if (s) candidates.push(s);
+                    });
+                    // Wikipedia audio links: <a href="//upload.../File.ogg"> or .mp3/.wav
+                    root.querySelectorAll('a').forEach(a => {
+                        const href = a.getAttribute('href') || '';
+                        if (/\.(ogg|oga|mp3|wav|flac|m4a)(\?|$)/i.test(href)) candidates.push(href);
+                    });
+
                     const titleStr=articleMeta.title||article||'';
-                    const m=classifyMood(articleMeta.categories||[],titleStr,root.textContent.slice(0,1400));
+                    const lead=root.textContent.slice(0,1400);
+                    const m=classifyMood(articleMeta.categories||[],titleStr,lead);
                     let seed=0;for(let i=0;i<titleStr.length;i++)seed=(seed*31+titleStr.charCodeAt(i))|0;
-                    const label=AudioEngine.playSong(seed,m.label);
-                    setMood({...m,song:label});
+                    if(candidates.length){
+                        let url=candidates[0];
+                        if(url.startsWith('//'))url='https:'+url;
+                        else if(url.startsWith('/'))url='https://en.wikipedia.org'+url;
+                        const played=await AudioEngine.playAmbient(url);
+                        if(disposed)return;
+                        if(played){setMood({label:'media'});return;}
+                    }
+                    if(disposed)return;
+                    AudioEngine.playDrone(m.root,m.intervals,seed,m.profile);setMood(m);
                 }, 400);
                 return () => { disposed=true;clearTimeout(t);AudioEngine.stopAmbient(); };
             }, [contentBlocks, articleMeta.categories, article]);
@@ -4987,6 +5304,9 @@
             const requiredPace=useMemo(()=>remainingExcerptPace(lockedSentences,activeUpgrades,rules,targetScore),[lockedSentences,activeUpgrades,rules,targetScore]);
             // Best case: every conditional run bonus the locked excerpts have not ruled out also lands.
             const bonusOutlook=useMemo(()=>runBonusOutlook(lockedSentences,activeUpgrades,rules),[lockedSentences,activeUpgrades,rules]);
+            const sentenceById=useMemo(()=>{const m=new Map();contentBlocks.forEach(b=>[...(b.sentences||[]),...(b.fragments||[])].forEach(x=>m.set(x.id,x)));return m;},[contentBlocks]);
+            const articleHover=useWordHover(sid=>{const x=sentenceById.get(sid);return x?scoreSentence(x,activeUpgrades,rules):null;});
+            const typedWords=useMemo(()=>charWordIndex(buffer).reduce((n,w)=>Math.max(n,w+1),0),[buffer]);
             const bonusPace=useMemo(()=>remainingExcerptPace(lockedSentences,activeUpgrades,rules,targetScore,bonusOutlook.multiplier),[lockedSentences,activeUpgrades,rules,targetScore,bonusOutlook]);
             // Credits: word income is paid only when the round clears.
             const lockedIncome=useMemo(()=>lockedSentences.map(s=>excerptIncome(s,activeUpgrades)),[lockedSentences,activeUpgrades]);
@@ -4999,7 +5319,7 @@
             const pacePercent=paceRatio===null?null:Math.floor(paceRatio*100);
             const isRed = buffer.length > 0 && matchStates._activeCount === 0;
 
-            useEffect(()=>{if(gameState==='LOST'){AudioEngine.playLoss();AudioEngine.stopAmbient();}if(gameState==='VICTORY'){AudioEngine.playWin();AudioEngine.stopAmbient();}},[gameState]);
+            useEffect(()=>{if(gameState==='LOST'){AudioEngine.stopAmbient();AudioEngine.playLoss();}if(gameState==='VICTORY')AudioEngine.stopAmbient();},[gameState]);
 
             // Sound cue when buffer transitions from "matching" → "no match"
             const wasRedRef = React.useRef(false);
@@ -5635,6 +5955,7 @@
                             </section>
                         </main>
 
+                        <BuildRail upgrades={owned} rules={rules} label="Your buffs"/>
                         <footer className="shop-foot">
                             <div className="shop-kit">
                                 <div className="shop-bag" role="group" aria-label={`Bag, ${bagCount(market.bag)} of 3. Use items mid-round with ${ITEM_KEY_HINT}.`}>
@@ -5731,9 +6052,9 @@
                                 {isDevMode && <button onClick={() => setShowSandbox(true)} className="is-on">Scoring sandbox</button>}
                                 <button
                                     onClick={() => { const next = !muted; setMuted(next); AudioEngine.setMuted(next); }}
-                                                                        aria-label={muted ? "Unmute sound" : "Mute sound"} aria-pressed={muted} title={muted ? "Unmute" : (mood?.song ? `Now playing: ${mood.song}` : "Mute")}
+                                                                        aria-label={muted ? "Unmute sound" : "Mute sound"} aria-pressed={muted} title={muted ? "Unmute" : "Mute"}
                                 >
-                                    {muted ? 'Sound off' : 'Sound on'}{mood?.song && !muted && <small>{mood.song}</small>}
+                                    {muted ? 'Sound off' : 'Sound on'}
                                 </button>
                                 <button
                                     onClick={() => setShowCommandsModal(true)}
@@ -5749,7 +6070,7 @@
                         <section className="score-hud" aria-label="Round score dashboard">
                             <div className="score-hud-metrics">
                                 {!isPractice&&<div><span>Target</span><strong title={targetScore.toLocaleString()}>{formatScore(targetScore)}</strong></div>}
-                                <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><strong title={liveScore!==null?liveScore.toLocaleString():''}>{liveScore!==null?formatScore(liveScore):'—'}</strong>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}</div>
+                                <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><strong title={liveScore!==null?liveScore.toLocaleString():''}>{liveScore!==null?formatScore(liveScore):'—'}</strong>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}{(liveDetail||typedWords>0)&&<em className="hud-words" title="Words typed / words in this sentence">{liveDetail?`${Math.min(typedWords,liveDetail.words.length)}/${liveDetail.words.length}`:typedWords} {(liveDetail?liveDetail.words.length:typedWords)===1?'word':'words'}</em>}</div>
                                 {!isPractice&&(()=>{
                                     const bonusCount=bonusOutlook.live.length, split=bonusCount>0&&bonusPace!==requiredPace, fmt=n=>Number.isFinite(n)?formatScore(n):'unreachable';
                                     const names=bonusOutlook.live.map(u=>u.name).join(', ');
@@ -5788,7 +6109,9 @@
                     
                     {!isPractice&&<PaceMeter locked={lockedSentences} live={liveExcerpt} liveScore={liveScore} needed={neededScore} upgrades={activeUpgrades} rules={rules} target={targetScore}/>}
                     {/* Wikipedia article canvas */}
-                    <div className="flex-1 overflow-y-auto px-6 pt-3 pb-24 font-article relative" style={{
+                    {!isPractice&&<BuildRail upgrades={activeUpgrades} rules={rules} fired={liveDetail?.triggeredUpgrades||[]} lost={bonusOutlook.lost.map(u=>u.name)}/>}
+                    {articleHover.node}
+                    <div className="flex-1 overflow-y-auto px-6 pt-3 pb-24 font-article relative" onScroll={articleHover.clear} style={{
                         backgroundImage: halftoneBg ? `url("${halftoneBg}")` : 'none',
                         backgroundRepeat: 'repeat-y',
                         backgroundSize: '100% auto',
@@ -5797,7 +6120,7 @@
                         backgroundColor: '#f3f5f8',
                         transition: 'background-image 0.6s ease'
                     }}>
-                        <div className="max-w-4xl mx-auto bg-white border-2 border-zinc-900 p-8 md:p-10 wiki-content relative" onClick={handleWikiClick}
+                        <div className="max-w-4xl mx-auto bg-white border-2 border-zinc-900 p-8 md:p-10 wiki-content relative" onClick={handleWikiClick} onMouseOver={articleHover.onMouseOver} onMouseLeave={articleHover.onMouseLeave}
                              style={{boxShadow: '6px 6px 0 -1px #d6d3d1', borderRadius:'4px 16px 6px 12px / 12px 6px 16px 4px', zIndex: 1}}>
                             <div className="tape absolute -top-2 left-1/2 transform -translate-x-1/2 w-24 h-5 wobble-l"></div>
 
@@ -5828,7 +6151,7 @@
 
                                     return (
                                         <React.Fragment key={s.id}>
-                                            <RenderedText chars={s.chars} matchState={state} typedLength={state === 'YELLOW' ? buffer.length : null} onNavigate={handleNavigation} />
+                                            <RenderedText chars={s.chars} sid={s.id} matchState={state} typedLength={state === 'YELLOW' ? buffer.length : null} onNavigate={handleNavigation} />
                                             {' '}
                                         </React.Fragment>
                                     );
