@@ -2087,6 +2087,110 @@
         /* ---- Score heat: one small mark before the best few excerpts, nothing else ---- */
         .excerpt-text.heat-1::before,.excerpt-text.heat-2::before { content:''; display:inline-block; width:.4em; height:.4em; margin:0 .35em .14em 0; vertical-align:middle; border:1.5px solid var(--c-ink); }
         .excerpt-text.heat-2::before { background:var(--c-ink); }
+
+        /* ============================================================
+           STARK: fewer small things. One offset shadow per screen's main
+           action and the article; plain numbers; no underlines; strong halftone.
+           ============================================================ */
+        #root :is(button,span,div,li,em,b,strong,kbd,input,textarea,aside,article,section,p,a,i,small,summary,details,table,figure,img):not(.wiki-content):not(.lock-action):not(.shop-go):not(.home-primary) { box-shadow:none!important; }
+        .round-card { transform:none!important; }
+        /* Labels: no mono caps */
+        .score-hud-metrics>div>span,.excerpt-counter,.pm-label,.pm-cap,.rail-head,.menu-heading,.print-label,.shop-label,.shop-ledger dt,.shop-type,.tally-hint,.result-kicker,.home-kicker,.shop-kicker,.rc-head span,.shop-foot-label {
+            font:600 11.5px 'Inter',sans-serif!important; letter-spacing:0!important; text-transform:none!important; }
+        .rc-head small,.tally-stamp,.shop-stamp { font-family:'Inter',sans-serif!important; font-weight:800!important; }
+        /* HUD: WORDS × MULT as plain coloured numbers */
+        .current-excerpt-score>span:first-child,.hud-locks,.hud-words,.hud-credits>span,.hud-credits .hud-earn { display:none!important; }
+        .sb-box { background:none!important; border:0!important; min-width:0!important; padding:0!important; }
+        .sb-box small { display:none!important; }
+        .sb-words b { color:var(--c-words)!important; } .sb-mult b { color:var(--c-mult)!important; }
+        .sb-box b,.score-bar>strong { font-size:22px!important; }
+        .score-bar.is-empty .sb-box b { color:var(--c-faint)!important; }
+        .hud-credits strong { font-size:16px!important; color:var(--c-muted)!important; }
+        /* Round gauge: no box, thin bar */
+        .round-card { background:none!important; border:0!important; padding:4px 0!important; }
+        .rc-head span { color:var(--c-faint)!important; }
+        .rc-head small { font:600 12px 'Inter',sans-serif!important; color:var(--c-faint)!important; }
+        .rc-bar { height:10px!important; border:0!important; background:#15171c14!important; }
+        .rc-block { border-right:1px solid var(--c-card)!important; } .rc-block i,.rc-tick { display:none!important; }
+        .rc-goal { width:2px!important; background:var(--c-ink)!important; } .rc-goal em { display:none!important; }
+        .rc-foot { color:var(--c-muted)!important; font-size:11.5px!important; }
+        /* Pops: just the number */
+        .score-pop { background:none!important; border:0!important; padding:0!important; color:var(--c-words)!important; font:800 16px/1 'Inter',sans-serif!important; text-shadow:0 0 3px var(--c-card),0 0 3px var(--c-card),0 0 6px var(--c-card); }
+        .score-pop.is-buffed { color:var(--c-ink)!important; }
+        .score-pop.is-lock { color:var(--c-ink)!important; font:900 30px/1 'Inter',sans-serif!important; }
+        /* Format toolbar: one ink */
+        .format-controls>button,.format-controls>button * { color:var(--c-ink)!important; }
+        .format-controls>button[aria-pressed="true"] { background:var(--c-ink)!important; } .format-controls>button[aria-pressed="true"] * { color:#fff!important; }
+        /* Tally: contributions as one quiet line, no stamp */
+        .tally-stamp { display:none!important; }
+        .tally-head { background:var(--c-card)!important; border-bottom:2px solid var(--c-ink)!important; }
+        .tally-steps { gap:0 14px!important; }
+        .tally-steps li { border:0!important; background:none!important; padding:0!important; font:500 12px/1.5 'Inter',sans-serif!important; color:var(--c-muted)!important; }
+        .tally-steps li b { font:700 12px 'Inter',sans-serif!important; }
+        /* Shop: no stripes or tags */
+        .shop-card::before,.shop-card>.shop-card-body::before { display:none!important; }
+        .shop-card { border-top-width:2px!important; border-top-color:var(--c-ink)!important; }
+        .shop-type { display:none!important; }
+        .rarity-badge { border:0!important; background:none!important; padding:0!important; color:var(--c-faint)!important; font:600 11px 'Inter',sans-serif!important; letter-spacing:0!important; text-transform:none!important; }
+        /* Links: colour only */
+        .excerpt-text .fmt-link,.wiki-content a,.wiki-content .excerpt-text a.fmt-link { text-decoration:none!important; box-shadow:none!important; }
+        .excerpt-text .fmt-mixed,.wiki-content .excerpt-text a.fmt-mixed { background-image:none!important; text-decoration:none!important; padding-bottom:0!important; }
+        .excerpt-text .fmt-cit,.excerpt-text .fmt-cit.fmt-mixed { border-bottom:0!important; }
+        .frag-host .excerpt-text:not(.state-locked):not(.state-yellow):not(.state-used) { text-decoration:none!important; }
+        .wiki-content .dablink a { text-decoration:none!important; }
+        /* Infobox: a ruled column, not a boxed form */
+        .wiki-content .infobox { border:0!important; border-top:3px solid var(--c-ink)!important; background:var(--c-card)!important; padding:.5em 0 0!important; font-size:.86em; }
+        .wiki-content .infobox-title,.wiki-content .infobox-above,.wiki-content .infobox caption,.wiki-content .infobox > tbody > tr:first-child th {
+            font:900 1.15rem/1.2 'Inter',sans-serif!important; letter-spacing:-.02em!important; text-align:left!important; background:none!important; padding:.1em 0 .5em!important; }
+        .wiki-content .infobox :is(.infobox-title,.infobox-above,caption) a { color:inherit!important; }
+        .wiki-content .infobox .infobox-header,.wiki-content .infobox :is(th,td,caption,div)[style*="background"] { background:none!important; }
+        .wiki-content .infobox .infobox-header { text-align:left!important; font:800 .8rem 'Inter',sans-serif!important; padding:1em 0 .3em!important; border-bottom:1.5px solid var(--c-ink)!important; }
+        .wiki-content .infobox th { color:var(--c-muted)!important; font:500 .8rem/1.4 'Inter',sans-serif!important; padding:.35em .6em .35em 0!important; }
+        .wiki-content .infobox td { padding:.35em 0!important; }
+        .wiki-content .infobox > tbody > tr:not(:first-child) { border-top:1px solid var(--c-line)!important; }
+        .wiki-content .infobox .infobox-image { padding:0 0 .4em!important; }
+        .wiki-content .infobox .infobox-image img { border:0!important; width:100%; height:auto; }
+        .wiki-content .infobox ul { margin:0!important; padding-left:1em!important; }
+
+        /* Buff rail as icons; the card opens on hover or focus (click in the shop to sell). */
+        #root .game-shell .build-rail,#root .shop .build-rail { width:auto!important; max-height:none!important; padding:8px!important; border:2px solid var(--c-ink)!important; background:var(--c-card)!important; overflow:visible!important; }
+        #root .shop .build-rail { top:50%!important; bottom:auto!important; transform:translateY(-50%); z-index:40!important; }
+        #root .build-rail ul.rail-tiles { overflow:visible; }
+        @media (min-width:1200px) { .shop:has(.build-rail) { padding-right:calc(66px + 18px + clamp(16px,2.4vw,36px))!important; } }
+        @media (min-width:900px) { .game-shell:has(.build-rail) > .flex-1.overflow-y-auto { padding-right:96px!important; } }
+        #root .rail-tile > .rt-glyph.is-long { font-size:12.5px; letter-spacing:-.02em; }
+        .build-rail .rail-head { display:block!important; margin:0 0 6px!important; padding:0!important; border:0!important; text-align:center; }
+        .build-rail .rail-head b { font:700 11px 'Inter',sans-serif; color:var(--c-faint); }
+        .rail-tiles { display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none; }
+        #root .rail-tile { position:relative; display:grid; place-items:center; width:46px; height:46px; margin:0!important; padding:0!important; border:2px solid var(--c-ink)!important; background:var(--c-card)!important; cursor:default; outline:0; transition:background .12s,color .12s,opacity .15s; }
+        #root .rail-tile.is-double { height:98px; }
+        #root .rail-tile::after { content:''; position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--c-ink); }
+        #root .rail-tile.type-word::after { background:var(--c-words); } #root .rail-tile.type-sentence::after { background:var(--c-mult); } #root .rail-tile.type-run::after { background:var(--c-gold); }
+        #root .rail-tile.is-effect { border-style:dashed!important; }
+        #root .rail-tile > .rt-glyph { display:block; overflow:visible; margin:-3px 0 0; font:900 17px/1 'Inter',sans-serif; letter-spacing:-.03em; color:var(--c-ink); white-space:nowrap; }
+        #root .rail-tile::before { display:none!important; }
+        #root .rail-tiles.has-live .rail-tile:not(.is-live) { opacity:.4; }
+        .rt-glyph i { font-family:'PT Serif',serif; font-weight:700; }
+        .rt-mark { position:absolute; top:3px; right:4px; font:700 9px/1 'Inter',sans-serif; color:var(--c-muted); }
+        .rt-times { position:absolute; bottom:6px; right:4px; font:900 10px/1 'Inter',sans-serif; color:var(--c-mult); }
+        #root .rail-tile.is-live { border-color:var(--c-ink)!important; }
+        #root .rail-tile.is-off { opacity:.35; }
+        #root .rail-tile:is(:hover,:focus-visible,:focus-within) { outline:2px solid var(--c-accent); outline-offset:2px; }
+        .rt-card { display:none; position:absolute; right:calc(100% + 12px); top:-2px; z-index:30; width:250px; padding:10px 12px; border:2px solid var(--c-ink); background:var(--c-card); text-align:left; cursor:auto; }
+        #root .rail-tile:is(:hover,:focus-within) .rt-card { display:block; }
+        .rt-card::after { content:''; position:absolute; top:0; right:-14px; width:14px; height:46px; }
+        .rt-card > b { display:block; font:800 13.5px/1.3 'Inter',sans-serif; color:var(--c-ink); }
+        .rt-card > b em { margin-left:6px; font:500 11px 'Inter',sans-serif; font-style:normal; color:var(--c-muted); }
+        .rt-card > span { display:block; margin-top:4px; font:400 12px/1.45 'Inter',sans-serif; color:var(--c-ink2); }
+        .rt-card .rail-gain { display:inline-block; margin-top:5px; padding:0!important; border:0!important; background:none!important; font:800 12px 'Inter',sans-serif!important; color:var(--c-words)!important; }
+        .rt-card .rt-note { display:block; margin-top:6px; font:500 11.5px 'Inter',sans-serif; color:var(--c-warn); }
+        .rt-card .rail-actions { display:flex; gap:6px; margin-top:8px; }
+        .rt-card .rail-actions button { padding:3px 8px; border:1.5px solid var(--c-ink); background:var(--c-card); font:700 11.5px 'Inter',sans-serif; }
+        .rt-card .rail-sell.is-armed { background:var(--c-mult); color:#fff; }
+        #root .build-rail .rail-slot { width:46px; height:46px; margin:0!important; padding:0!important; border:2px dashed #15171c40!important; background:none!important; font-size:0; }
+        .build-rail .rail-empty { width:46px; margin:0; font:500 10.5px/1.3 'Inter',sans-serif; color:var(--c-faint); text-align:center; }
+        .build-rail .rail-letters { flex-direction:column; align-items:center; gap:4px; width:46px; margin:8px 0 0!important; padding:8px 0 0!important; }
+        @keyframes rail-pulse { 0% { transform:scale(1.18); } 100% { transform:scale(1); } }
 </style>
 </head>
 <body>
@@ -5378,6 +5482,33 @@
         // In the shop each card can be sold and, for Understudy, moved. Cards the current excerpt triggers light up;
         // run cards already ruled out dim.
         const sellValue = u => Math.floor(shopPrice(u) / 2);
+        // Buff icons: the buff's own token when it has one (T, 10+, –ing, a bold B), else a mark for its kind.
+        const BUFF_MARKS = { length:'↔', double:'×2', position:'#', lexical:'“”', flourish:'~', resonant:'≈', morpheme:'-', figures:'9', summit:'▲', alliterative:'AA', snowball:'◢', count:'W', span:'↔', census:'Σ', ending:'.', mark:'( )', cited:'†', 'citation-content':'†', echo:'↻', overprint:'▣', vintage:'⌛', pyramid:'△', every:'∞', 'round-tally':'Σ', shape:'Aa',
+            bookends:'[ ]', illuminated:'Aa', footnotes:'†', resonance:'≈', pocketwatch:'◷', breathing:'~', scout:'◎', curator:'⊕', mulligan:'⟲', naturalist:'❦', historian:'Ⅻ', wayfarer:'→', prismatic:'◆', singularity:'●', mosaic:'▦', encyclopedist:'E', patron:'¢', 'clean-copy':'✓', tempo:'♩', marginalia:'✎', lede:'¶', 'title-drop':'H', polyglot:'αβ',
+            'rabbit-hole':'⤵', 'safety-net':'#', understudy:'⇡', 'tip-jar':'¢', bounty:'★', 'long-form':'≡', anchor:'⚓︎', frugal:'□', 'face-value':'¤', 'glass-cannon':'×5', royalties:'¢', interest:'%', chain:'∞', 'chain-forged':'∞', diacritics:'é', numerologist:'123', tiny:'a',
+            'carbon-effect':'⧉', 'ink-effect':'✒︎', 'highlighter-effect':'▬', hourglass:'⧗', loupe:'⌕' };
+        const TOKEN_MARKS = { Bold:<b key="b">B</b>, Italic:<i key="i">I</i>, Linked:'↗', Bullet:'•', Cited:'[1]', Rising:'↗', Falling:'↘', 'Country name':'⚑' };
+        const buffIcon = u => {
+            const tokens = [...(u.richName || '').matchAll(/⟦([^⟧]+)⟧/g)].map(m => m[1]).filter(t => t !== '×');
+            const kind = BUFF_MARKS[u.template] || BUFF_MARKS[u.id];
+            if (!tokens.length) return { main: kind || u.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2), mark: null };
+            const t = tokens[0].replace(/[“”"]/g, '');
+            const main = t.split(/\s*\+\s*/).map(x => TOKEN_MARKS[x] ?? TOKEN_MARKS[x.split(' ')[0]] ?? (x.length > 5 ? x.slice(0, 4) : x));
+            const mark = ['letter', 'ink', 'format-combo'].includes(u.template) ? (tokens[1] || null) : tokens[1] ? `${kind || ''}${tokens[1]}` : kind;
+            return { main, mark };
+        };
+        const BuffTile = ({ u, rules, gain, live, off, effect, children }) => {
+            const { main, mark } = buffIcon(u);
+            return <li data-name={u.name} tabIndex={0} aria-label={u.name} className={`rail-item rail-tile type-${(u.type || 'UTILITY').toLowerCase()}${live ? ' is-live' : ''}${off ? ' is-off' : ''}${effect ? ' is-effect' : ''}${u.slots > 1 ? ' is-double' : ''}`}>
+                <span className={`rt-glyph${[].concat(main).map(x => typeof x === 'string' ? x : 'x').join('').length > 3 ? ' is-long' : ''}`} lang="und">{main}</span>{mark && <sup className="rt-mark">{mark}</sup>}{u.times && <sub className="rt-times">×</sub>}
+                <div className="rt-card" role="tooltip">
+                    <b><RichText text={u.richName || u.name}/>{effect && <em>this round</em>}{u.slots > 1 && <em>2 slots</em>}</b>
+                    {gain && <em className="rail-gain">{gain}</em>}
+                    <span><RichText text={upgradeDescription(u, rules)}/></span>
+                    {children}
+                </div>
+            </li>;
+        };
         const BuildList = ({ upgrades, rules, fired = [], lost = [], onSell, onMove, detail }) => {
             const gains = buffGains(detail);
             const showEmpty = !!onSell;
@@ -5386,25 +5517,24 @@
             useEffect(() => { if (!armed) return; const t = setTimeout(() => setArmed(null), 3000); return () => clearTimeout(t); }, [armed]);
             const slotted = slottedBuffs(upgrades), effects = upgrades.filter(u => u.temporary), letters = upgrades.filter(u => u.booster);
             const reorder = onMove && slotted.some(u => u.id === 'understudy');
+            const gainOf = u => gains.has(u.name) ? gainText(gains.get(u.name)) : null;
             return <>
-                <ul>{slotted.map((u, i) => <li key={u.id} data-name={u.name} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}${u.slots > 1 ? ' is-double' : ''}`} title={plainText(upgradeDescription(u, rules))}>
-                        <b><RichText text={u.richName || u.name}/>{u.slots > 1 && <em className="rail-slots">2 slots</em>}</b>
-                        {gains.has(u.name) && <em className="rail-gain">{gainText(gains.get(u.name))}</em>}
-                        <span><RichText text={u.id === 'understudy' ? (i && ['WORD','SENTENCE','RUN'].includes(slotted[i - 1].type) && slotted[i - 1].id !== 'safety-net' ? `Copying ${slotted[i - 1].name}.` : 'Copies nothing: put a scoring buff directly above it.') : shopBlurb(u, rules)}/></span>
+                <ul className={`rail-tiles${slotted.some(u => on.has(u.name)) || effects.some(u => on.has(u.name)) ? ' has-live' : ''}`}>{slotted.map((u, i) => <BuffTile key={u.id} u={u} rules={rules} gain={gainOf(u)} live={on.has(u.name)} off={off.has(u.name)}>
+                        {u.id === 'understudy' && <small className="rt-note">{i && ['WORD','SENTENCE','RUN'].includes(slotted[i - 1].type) && slotted[i - 1].id !== 'safety-net' ? `Copying ${slotted[i - 1].name}.` : 'Copies nothing: put a scoring buff directly above it.'}</small>}
                         {(onSell || reorder) && <div className="rail-actions">
                             {reorder && <><button type="button" aria-label={`Move ${u.name} up`} disabled={!i} onClick={() => onMove(u.id, -1)}>↑</button><button type="button" aria-label={`Move ${u.name} down`} disabled={i === slotted.length - 1} onClick={() => onMove(u.id, 1)}>↓</button></>}
                             {onSell && <button type="button" className={`rail-sell${armed === u.id ? ' is-armed' : ''}`} onClick={() => { if (armed === u.id) { setArmed(null); onSell(u.id); } else setArmed(u.id); }}>{armed === u.id ? `Confirm +${sellValue(u, upgrades)}¢` : `Sell ${sellValue(u, upgrades)}¢`}</button>}
                         </div>}
-                    </li>)}
-                    {showEmpty && Array.from({ length: Math.max(0, BUFF_SLOTS - slotUse(upgrades)) }, (_, i) => <li key={`empty-${i}`} className="rail-slot">Empty slot</li>)}
-                    {effects.map(u => <li key={u.id} data-name={u.name} className={`rail-item rail-effect${on.has(u.name) ? ' is-live' : ''}`} title={plainText(upgradeDescription(u, rules))}><b>{u.name}<em>this round</em></b>{gains.has(u.name) && <em className="rail-gain">{gainText(gains.get(u.name))}</em>}</li>)}
+                    </BuffTile>)}
+                    {showEmpty && Array.from({ length: Math.max(0, BUFF_SLOTS - slotUse(upgrades)) }, (_, i) => <li key={`empty-${i}`} className="rail-slot" aria-label="Empty slot"/>)}
+                    {effects.map(u => <BuffTile key={u.id} u={u} rules={rules} gain={gainOf(u)} live={on.has(u.name)} effect/>)}
                 </ul>
-                {!showEmpty && !slotted.length && !effects.length && <p className="rail-empty">None yet. The shop sells them between rounds.</p>}
-                {letters.length > 0 && <p className="rail-letters" title={letters.map(u => u.name).join(', ')}><span>Letters</span>{letters.map(u => <i key={u.id} lang="und">{u.glyph}<sup>{u.level}</sup></i>)}</p>}
+                {!showEmpty && !slotted.length && !effects.length && <p className="rail-empty">No buffs yet</p>}
+                {letters.length > 0 && <p className="rail-letters" title={letters.map(u => u.name).join(', ')}>{letters.map(u => <i key={u.id} lang="und">{u.glyph}<sup>{u.level}</sup></i>)}</p>}
             </>;
         };
         const BuildRail = ({ label = 'Your buffs', ...props }) => <aside className="build-rail" aria-label={label}>
-            <div className="rail-head"><span>{label}</span><b>{slotUse(props.upgrades)}/{BUFF_SLOTS}</b></div>
+            <div className="rail-head" title={`${label}: ${slotUse(props.upgrades)} of ${BUFF_SLOTS} slots`}><b>{slotUse(props.upgrades)}/{BUFF_SLOTS}</b></div>
             <BuildList {...props}/>
         </aside>;
 
@@ -5774,10 +5904,10 @@
                     octx.fillStyle = '#efe9dc';
                     octx.fillRect(0, 0, out.width, out.height);
                     // One blue ink on paper: the photo survives as a halftone behind the page.
-                    octx.fillStyle = 'rgba(33,70,224,0.16)';
+                    octx.fillStyle = 'rgba(33,70,224,0.3)';
 
-                    const step = 5;
-                    const maxR = step * 0.62;
+                    const step = 7;
+                    const maxR = step * 0.7;
 
                     let sliceStart = performance.now();
                     for (let y = 0; y < out.height; y += step) {
@@ -5790,7 +5920,7 @@
                         for (let x = 0; x < out.width; x += step) {
                             const idx = (y * out.width + x) * 4;
                             const lum = (0.299*pixels[idx] + 0.587*pixels[idx+1] + 0.114*pixels[idx+2]) / 255;
-                            const radius = (1 - lum) * maxR;
+                            const radius = Math.pow(1 - lum, .8) * maxR;
                             if (radius < 0.35) continue;
                             octx.moveTo(x + step/2 + radius, y + step/2);
                             octx.arc(x + step/2, y + step/2, radius, 0, Math.PI * 2);
