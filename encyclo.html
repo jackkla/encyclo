@@ -1421,6 +1421,7 @@
         /* The detail a family card names (letter, length, format, mark, century…): teal ink on a highlighter stroke. */
         .rolled { color:#0b6b5f; font-weight:750; white-space:nowrap; padding:0 .12em; margin:0 -.04em; border-radius:2px;
             background:linear-gradient(transparent 58%, #aef0d8 58%, #aef0d8 92%, transparent 92%); }
+        .sandbox-family select { max-width:100%; font-weight:700; border:1px solid #c9d1dd; border-radius:4px; padding:1px 4px; background:#fff; }
         .rolled.is-glyph { font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.05em; padding:0 .28em; margin:0 .06em;
             background:#d9f7ec; box-shadow:inset 0 0 0 1px #8fdcc2; border-radius:4px; }
         .shop-card:disabled .rolled:not(.is-glyph), .shop-card.is-owned .rolled:not(.is-glyph) { background:linear-gradient(transparent 58%, #d6ece4 58%, #d6ece4 92%, transparent 92%); }
@@ -1455,9 +1456,30 @@
             { id: 'practice-2', chars: Array.from('Small details matter.', c => ({ c, ...EMPTY_FORMAT, b: true })) },
             { id: 'practice-3', chars: Array.from('Follow the unexpected.', c => ({ c, ...EMPTY_FORMAT, i: true })) }
         ];
+        // Saves pack each article sentence as its text plus run-length format runs ([count, flags, link target]):
+        // about 20× smaller than one object per character, so long articles fit in browser storage.
+        const PACK_FLAGS = ['b', 'i', 'l', 'cit', 'bul', 'exp'];
+        function packChars(chars) {
+            const runs = [];
+            chars.forEach(c => {
+                const mask = PACK_FLAGS.reduce((m, k, i) => c[k] ? m | 1 << i : m, 0), target = c.target || null, last = runs[runs.length - 1];
+                if (last && last[1] === mask && (last[2] ?? null) === target) last[0]++; else runs.push(target ? [1, mask, target] : [1, mask]);
+            });
+            return { t: chars.map(c => c.c).join('\u0000'), r: runs };
+        }
+        function unpackChars({ t, r }) {
+            const text = t.split('\u0000'), chars = [];
+            r.forEach(([n, mask, target]) => { for (let k = 0; k < n; k++) chars.push({ c: text[chars.length], ...Object.fromEntries(PACK_FLAGS.map((f, i) => [f, !!(mask & 1 << i)])), target: target || null }); });
+            return chars;
+        }
+        const packSentence = s => { const { chars, ...rest } = s; return { ...rest, packed: packChars(chars) }; };
+        const unpackSentence = s => { if (!s.packed) return s; const { packed, ...rest } = s; return { ...rest, chars: unpackChars(packed) }; };
+        const packBlocks = blocks => blocks.map(b => b.type === 'PARAGRAPH' ? { ...b, sentences: b.sentences.map(packSentence) } : b.fragments ? { ...b, fragments: b.fragments.map(packSentence) } : b);
+        const unpackBlocks = blocks => (blocks || []).map(b => b?.type === 'PARAGRAPH' && Array.isArray(b.sentences) ? { ...b, sentences: b.sentences.map(unpackSentence) } : Array.isArray(b?.fragments) ? { ...b, fragments: b.fragments.map(unpackSentence) } : b);
         function readSavedRun() {
             try {
                 const run = JSON.parse(localStorage.getItem(SAVE_KEY));
+                if (run && Array.isArray(run.contentBlocks)) run.contentBlocks = unpackBlocks(run.contentBlocks);
                 if (!run || run.version !== 1 || !['PLAYING', 'SCORING', 'UPGRADE_SELECT'].includes(run.gameState)) return null;
                 if (!Number.isInteger(run.ante) || run.ante < 1 || run.ante > MAX_ANTE || !Number.isFinite(run.timeLeft) || run.timeLeft <= 0 || !Number.isFinite(run.totalScore)) return null;
                 if (typeof run.article !== 'string' || !run.contentBlocks?.length || !Array.isArray(run.lockedSentences) || !Array.isArray(run.buffer)) return null;
@@ -1479,7 +1501,7 @@
             ['lengthStart', 'Length bonus after letters', 1, 20, 1, 7],
             ['lengthStep', 'Length bonus per letter', 0, Infinity, 0.05, 0.1],
             ['citation', 'Each citation block ×', 1, Infinity, 0.1, 1.5],
-            ['symmetric', 'Symmetric sentence bonus', 0, 200, 1, 80],
+            ['symmetric', 'Symmetric sentence bonus', 0, 300, 1, 120],
             ['wordBonus', 'Word upgrade strength ×', 0, Infinity, 0.1, 1],
             ['sentenceBonus', 'Sentence upgrade strength ×', 0, Infinity, 0.1, 1],
             ['runBonus', 'Run upgrade strength ×', 0, Infinity, 0.1, 1],
@@ -1497,7 +1519,7 @@
         const guaranteedRunMultiplier=(upgrades,rules)=>(hasUpgrade(upgrades,'symmetric')?rules.runTrigger:1)*(hasUpgrade(upgrades,'carbon-effect')?(1+rules.runBonus)*rules.runTrigger:1);
         // Conditional run upgrades whose condition the locked excerpts have not already ruled out,
         // with the largest multiplier each can still pay. Unknown upgrades are assumed possible.
-        const RUN_BONUS_MAX={rooted:.8,divergent:5,pyramidal:1.5,bibliophile:3,orthography:.5,vintage:.6,tonal:.6,mosaic:3,encyclopedist:11};
+        const RUN_BONUS_MAX={rooted:1.2,divergent:5,pyramidal:1.5,bibliophile:3,orthography:1,vintage:.6,tonal:1.2,mosaic:4,encyclopedist:11};
         function runBonusOutlook(locked, upgrades, rules) {
             const conditional=upgrades.filter(u=>u.type==='RUN'&&!['symmetric','carbon-effect'].includes(u.id));
             const text=s=>s.chars.filter(c=>!c.cit).map(c=>c.c).join('');
@@ -2215,7 +2237,7 @@
                 desc: 'x1.8 Final Yield if all 3 sentences come from the SAME article',
                 action: (sentences) => {
                     const articles = sentences.map(s => s.articleTitle);
-                    return (articles.length === 3 && new Set(articles).size === 1) ? { multAdd: 0.8 } : null;
+                    return (articles.length === 3 && new Set(articles).size === 1) ? { multAdd: 1.2 } : null;
                 }
             },
             {
@@ -2481,20 +2503,20 @@
         const SHOP_BALANCE = {
             stitched:{price:5},leaden:{price:4},oblique:{price:5},sibilant:{price:4},rare:{price:6},numeric:{price:7},doubled:{price:7},
             verbose:{price:11,desc:'+12 base per word in excerpts of 15+ words.',action:s=>s.words.length>=15?{baseAdd:s.words.length*12}:null},
-            syllabic:{price:10},bookends:{price:10,desc:'+60 word base for the first and last word of each excerpt. A one-word excerpt receives this once.',action:w=>w.isFirst||w.isLast?{baseAdd:60}:null},vocalic:{price:7},
+            syllabic:{price:10},bookends:{price:7,desc:'+30 word base for the first and last word of each excerpt. A one-word excerpt receives this once.',action:w=>w.isFirst||w.isLast?{baseAdd:30}:null},vocalic:{price:7},
             illuminated:{price:6},quoted:{price:6},overprint:{price:9},
             footnotes:{price:6,desc:'+90 base per citation block. Every reference counts.',action:s=>s.citationBlocks?{baseAdd:90*s.citationBlocks}:null},
-            prismatic:{price:13,desc:'+0.6 excerpt multiplier with two of bold, italic, link. +1.5 with all three.',action:s=>{const n=['b','i','l'].filter(k=>s.words.some(w=>w.charDetails.some(c=>c[k]))).length;return n>=2?{multAdd:n===3?1.5:.6}:null;}},
-            mosaic:{price:13,desc:'×2.5 round score with any three of bold, italic, link and citation across your excerpts. ×4 with all four.',action:ss=>{if(ss.length!==3)return null;const n=['b','i','l','cit'].filter(k=>ss.some(s=>s.chars.some(c=>c[k]))).length;return n>=3?{multAdd:n===4?3:1.5}:null;}},
-            tonal:{price:5,desc:'×1.6 round score when all three excerpts end in the same . ! or ? Ignore citations.',action:ss=>{if(ss.length!==3)return null;const ends=ss.map(s=>s.chars.filter(c=>!c.cit).map(c=>c.c).join('').trim().slice(-1));return /^[.!?]$/.test(ends[0])&&ends.every(e=>e===ends[0])?{multAdd:.6}:null;}},
-            orthography:{price:4,desc:'×1.5 round score without ! ? quotes, brackets or dashes. Citations are ignored.',action:ss=>ss.length===3&&ss.every(s=>!s.chars.some(c=>!c.cit&&/[!?"“”()\[\]{}—–]/u.test(c.c)))?{multAdd:.5}:null},
+            prismatic:{price:13,desc:'+1 excerpt multiplier with two of bold, italic, link. +2.5 with all three.',action:s=>{const n=['b','i','l'].filter(k=>s.words.some(w=>w.charDetails.some(c=>c[k]))).length;return n>=2?{multAdd:n===3?2.5:1}:null;}},
+            mosaic:{price:13,desc:'×3 round score with any three of bold, italic, link and citation across your excerpts. ×5 with all four.',action:ss=>{if(ss.length!==3)return null;const n=['b','i','l','cit'].filter(k=>ss.some(s=>s.chars.some(c=>c[k]))).length;return n>=3?{multAdd:n===4?4:2}:null;}},
+            tonal:{price:5,desc:'×2.2 round score when all three excerpts end in the same . ! or ? Ignore citations.',action:ss=>{if(ss.length!==3)return null;const ends=ss.map(s=>s.chars.filter(c=>!c.cit).map(c=>c.c).join('').trim().slice(-1));return /^[.!?]$/.test(ends[0])&&ends.every(e=>e===ends[0])?{multAdd:1.2}:null;}},
+            orthography:{price:4,desc:'×2 round score without ! ? quotes, brackets or dashes. Citations are ignored.',action:ss=>ss.length===3&&ss.every(s=>!s.chars.some(c=>!c.cit&&/[!?"“”()\[\]{}—–]/u.test(c.c)))?{multAdd:1}:null},
             vintage:{price:4,desc:'×1.6 round score with a year from 1000–2099.',action:ss=>ss.length===3&&ss.some(s=>/\b(?:1\d{3}|20\d{2})\b/.test(s.chars.filter(c=>!c.cit).map(c=>c.c).join('')))?{multAdd:.6}:null},
             consonantal:{price:5},palindromic:{retired:true},tiny:{retired:true},numerologist:{retired:true},
             diacritics:{price:5,desc:'+30 base to words with accented Latin letters, including ø, æ, ß, þ and ð.',action:w=>w.charDetails.some(c=>isAccentedLatin(c.c))?{baseAdd:30}:null},
             chain:{price:6},'chain-forged':{price:7},
             pocketwatch:{price:6,retired:true},breathing:{price:5},scout:{price:3},curator:{price:4},mulligan:{price:5},
             naturalist:{price:5},historian:{price:5},wayfarer:{price:4},patron:{price:8},
-            resonance:{price:14},singularity:{price:20},encyclopedist:{price:18}
+            resonance:{price:14},singularity:{price:20},encyclopedist:{price:18},rooted:{price:7},symmetric:{price:10}
         };
         UPGRADE_POOL.forEach(u=>Object.assign(u,SHOP_BALANCE[u.id]||{}));
         // Fixed cards replaced by the buff families below. Owned copies from older saves keep working.
@@ -2521,8 +2543,18 @@
         const buffEconomy = difficulty=>{const d=Math.max(0,Math.min(4,difficulty));return {rarity:BUFF_TIERS[d],price:4+d*3};};
         // Share = chance a word (or excerpt) qualifies. Scarcer triggers sit in rarer, pricier tiers and pay more.
         const scarcityTier = share=>share>=.06?0:share>=.025?1:share>=.008?2:3;
-        const scarcityPay = (scale,share,k=.72)=>niceNumber(scale*Math.pow(share,-k));
-        const scarcityMult = (scale,share,k=.72)=>{const x=scale*Math.pow(share,-k);return x<.5?Math.round(x*100)/100:Math.round(x*20)/20;};
+        // Per-family strength and spread, tuned against real Wikipedia excerpts: strength scales every amount a
+        // family pays; spread sets how much more its scarce details pay than its common ones.
+        const FAMILY_STRENGTH = {letter:3.53,length:1.27,double:2.56,resonant:1.63,count:2.22,span:3.15,echo:2.15};
+        const FAMILY_SPREAD = {letter:.57,length:.42,double:.57,resonant:.65,count:.42,span:.42,echo:.42};
+        // A 'family:detail' entry fine-tunes one card of a table family, e.g. 'ink:b' for Bold Type.
+        const strength = (key,sub)=>(FAMILY_STRENGTH[key]??1)*(sub===undefined?1:FAMILY_STRENGTH[`${key}:${sub}`]??1);
+        const spread = (key,k)=>FAMILY_SPREAD[key]??k;
+        const roundMult = x=>x<.5?Math.max(.01,Math.round(x*100)/100):Math.round(x*20)/20;
+        const tunedBase = (key,x,sub)=>Math.max(1,niceNumber(x*strength(key,sub)));
+        const tunedMult = (key,x,sub)=>roundMult(x*strength(key,sub));
+        const scarcityPay = (scale,share,k=.72,key,sub)=>Math.max(1,niceNumber(scale*(key?strength(key,sub):1)*Math.pow(share,-(key?spread(key,k):k))));
+        const scarcityMult = (scale,share,k=.72,key,sub)=>roundMult(scale*(key?strength(key,sub):1)*Math.pow(share,-(key?spread(key,k):k)));
 
         const BUFF_FAMILIES = new Map();
         const variantCache = new Map();
@@ -2561,7 +2593,7 @@
             const contexts=sentences.map(s=>{const d=scoreSentence(s,NO_UPGRADES),outline=d.words.map(w=>wordOutline(w.chars));return {words:d.words.map((w,index,all)=>({...w,isFirst:index===0,isLast:index===all.length-1,index,count:all.length,prev:outline[index-1]||null,words:outline})),citationBlocks:d.citationBlocks,citationTexts:d.citationTexts};});
             probeCache.set(sentences,contexts);return contexts;
         }
-        const triggersOn = (u,sentences)=>probeContexts(sentences).some(ctx=>u.type==='WORD'?ctx.words.some(w=>u.action(w)):u.type==='SENTENCE'?!!u.action(ctx):true);
+        const triggersOn = (u,sentences)=>u.type==='RUN'?!u.availableIn||u.availableIn(sentences):probeContexts(sentences).some(ctx=>u.type==='WORD'?ctx.words.some(w=>u.action(w)):!!u.action(ctx));
 
         /* ---------- WORD families ---------- */
         // Shares of words in English prose that start or end with each letter (outer punctuation ignored).
@@ -2579,7 +2611,7 @@
                 if(!spot||!/^[a-z]$/.test(l))return null;
                 const share=spot[2]?own(spot[2],l):INLAID_LETTERS.includes(l)?inlaidShare(l):undefined;
                 if(!share)return null;
-                const amount=scarcityPay(2.4,share),L=P(l.toUpperCase());
+                const amount=scarcityPay(2.4,share,.72,'letter'),L=P(l.toUpperCase());
                 const test=place==='start'?t=>t.startsWith(l):place==='end'?t=>t.endsWith(l):t=>t.includes(l);
                 return {difficulty:scarcityTier(share),name:`${spot[0]} ${L}`,desc:`+${amount} word base for words ${spot[1]} ${L}. Ignores case and outer punctuation.`,
                     action:w=>test(cleanWord(w.text))?{baseAdd:amount}:null};
@@ -2593,7 +2625,7 @@
             build:(dir,n)=>{
                 const long=dir==='long',share=['long','short'].includes(dir)?own(long?LONG_WORD_SHARE:SHORT_WORD_SHARE,n):undefined;
                 if(!share||(long&&n<7))return null;
-                n=Number(n);const amount=scarcityPay(long?7.6:4.8,share);
+                n=Number(n);const amount=scarcityPay(long?7.6:4.8,share,.72,'length');
                 return {difficulty:scarcityTier(share),name:long?`Prolix ${P(n+'+')}`:`Stout ${P('≤'+n)}`,
                     desc:`+${amount} word base for words of ${P(n)} or ${long?'more':'fewer'} characters. Attached punctuation counts.`,
                     action:w=>(long?w.len>=n:w.len<=n)?{baseAdd:amount}:null};
@@ -2604,8 +2636,9 @@
             options:()=>Object.keys(INK_TYPES).map(k=>[k]),
             build:k=>{
                 const t=own(INK_TYPES,k);if(!t)return null;
-                return {difficulty:t[1],name:`${P(FORMAT_TITLES[k])} Type`,desc:`+${t[0]} word base for ${P(FORMAT_NAMES[k])} words. Citation styling does not count.`,
-                    action:w=>hasFormat(w,k)?{baseAdd:t[0]}:null};
+                const amount=tunedBase('ink',t[0],k);
+                return {difficulty:t[1],name:`${P(FORMAT_TITLES[k])} Type`,desc:`+${amount} word base for ${P(FORMAT_NAMES[k])} words. Citation styling does not count.`,
+                    action:w=>hasFormat(w,k)?{baseAdd:amount}:null};
             }});
         // Format Ink keeps its old ids (format-bi, format-3…); bullet-only format-bul survives for old saves.
         defineFamily({key:'format-combo',type:'WORD',idOf:code=>`format-${code}`,parse:id=>{const m=/^format-(.+)$/.exec(id);return m?[m[1]]:null;},
@@ -2614,7 +2647,7 @@
             build:code=>{
                 const minimum=code==='3'?3:0,keys=minimum?[]:(code.match(/bul|[bil]/g)||[]);
                 if(!minimum&&(!keys.length||keys.length>2||keys.join('')!==code||new Set(keys).size!==keys.length))return null;
-                const amount=minimum?8:keys.length===1?1.5:3,label=minimum?'Three or More':keys.map(k=>FORMAT_TITLES[k]).join(' + ');
+                const amount=tunedMult('format-combo',minimum?8:keys.length===1?1.5:3,code),label=minimum?'Three or More':keys.map(k=>FORMAT_TITLES[k]).join(' + ');
                 return {difficulty:minimum?3:keys.length===1?1:2,name:`${P(label)} Ink`,
                     desc:`+${amount} to the word multiplier for ${minimum?`words with at least ${P('three')} of bold, italic, link and bullet`:`${P(keys.map(k=>FORMAT_NAMES[k]).join(' + '))} words`}. All formats must occur in the same word; citation styling does not count.`,
                     action:w=>(minimum?formatCount(w)>=minimum:keys.every(k=>hasFormat(w,k)))?{multAdd:amount}:null};
@@ -2634,14 +2667,14 @@
         defineFamily({key:'shape',type:'WORD',...plainIds('shape'),
             title:'Word shapes',summary:`Word base for words of a named ${P('shape')}: capitalized, hyphenated, with a digit, an apostrophe, an accent and so on.`,
             options:()=>Object.keys(WORD_SHAPES).map(k=>[k]),
-            build:k=>{const s=own(WORD_SHAPES,k);return s&&{difficulty:s.tier,name:s.name,desc:`+${s.amount} word base for ${s.words}.`,action:w=>s.test(w)?{baseAdd:s.amount}:null};}});
+            build:k=>{const s=own(WORD_SHAPES,k);if(!s)return null;const amount=tunedBase('shape',s.amount,k);return {difficulty:s.tier,name:s.name,desc:`+${amount} word base for ${s.words}.`,action:w=>s.test(w)?{baseAdd:amount}:null};}});
         const DOUBLE_SHARE = {any:.09,l:.03,s:.018,e:.015,o:.012,t:.012,f:.006,r:.006,p:.006,n:.005,m:.005,c:.004,d:.003,g:.002,b:.0006,z:.0004};
         defineFamily({key:'double',type:'WORD',...plainIds('double'),
             title:'Doubled',summary:`Word base for words with a named ${P('double letter')}, or any doubled letter.`,
             options:()=>Object.keys(DOUBLE_SHARE).map(k=>[k]),
             build:k=>{
                 const share=own(DOUBLE_SHARE,k);if(!share)return null;
-                const amount=scarcityPay(4.4,share),pair=k.toUpperCase().repeat(2);
+                const amount=scarcityPay(4.4,share,.72,'double'),pair=k.toUpperCase().repeat(2);
                 return {difficulty:scarcityTier(share),name:k==='any'?'Doubled':`Doubled ${P(pair)}`,
                     desc:k==='any'?`+${amount} word base for words with ${P('any doubled letter')}, ignoring case.`:`+${amount} word base for words containing ${P(pair)}, ignoring case.`,
                     action:w=>{const t=w.text.toLocaleLowerCase('en');return (k==='any'?/(\p{L})\1/u.test(t):t.includes(k+k))?{baseAdd:amount}:null;}};
@@ -2650,7 +2683,7 @@
         defineFamily({key:'position',type:'WORD',...plainIds('position'),
             title:'Word positions',summary:`Base and word multiplier for the word in a named ${P('position')} of each excerpt.`,
             options:()=>Object.keys(POSITIONS).map(k=>[k]),
-            build:k=>{const p=own(POSITIONS,k);return p&&{difficulty:1,name:p[0],desc:`+45 base and +1.5 word multiplier for the ${P(p[1])} word of each excerpt.`,action:w=>p[2](w)?{baseAdd:45,multAdd:1.5}:null};}});
+            build:k=>{const p=own(POSITIONS,k);if(!p)return null;const base=tunedBase('position',45),mult=tunedMult('position',1.5);return {difficulty:1,name:p[0],desc:`+${base} base and +${mult} word multiplier for the ${P(p[1])} word of each excerpt.`,action:w=>p[2](w)?{baseAdd:base,multAdd:mult}:null};}});
         const LEXICAL_KINDS = ['word','prefix','suffix'];
         defineFamily({key:'lexical',type:'WORD',idOf:(kind,value)=>`lex-${kind}-${encodeURIComponent(value)}`,parse:id=>{const m=/^lex-(word|prefix|suffix)-(.+)$/.exec(id);return m?[m[1],decodeURIComponent(m[2])]:null;},
             title:'Wordcraft',summary:`Word base for an exact ${P('word')}, ${P('prefix')} or ${P('suffix')} found in the current article. Longer targets pay more.`,
@@ -2666,20 +2699,20 @@
             },
             build:(kind,value)=>{
                 if(!LEXICAL_KINDS.includes(kind)||!/^\p{L}{2,30}$/u.test(value))return null;
-                const amount=kind==='word'?180+value.length*20:40+value.length*20;
+                const amount=tunedBase('lexical',kind==='word'?180+value.length*20:40+value.length*20);
                 const label=kind==='word'?`“${P(value)}”`:kind==='prefix'?`${P(value)}–`:`–${P(value)}`;
                 return {difficulty:kind==='word'?(value.length>=8?3:2):value.length>=4?2:1,name:`Wordcraft · ${label}`,
                     desc:`+${amount} word base ${kind==='word'?`for the exact word “${P(value)}”`:`for words ${kind==='prefix'?'starting':'ending'} with “${P(value)}”`}. Ignores case and outer punctuation.`,
                     action:w=>{const text=cleanWord(w.text);return (kind==='word'?text===value:kind==='prefix'?text.startsWith(value)&&text.length>value.length:text.endsWith(value)&&text.length>value.length)?{baseAdd:amount}:null;}};
             }});
-        const FORMAT_WORD_SHARE = {b:.02,i:.03,l:.12};
+        const FORMAT_WORD_SHARE = {i:.03,l:.12};
         defineFamily({key:'flourish',type:'WORD',...plainIds('flourish'),
             title:'Flourish',summary:`Word multiplier for words in a named ${P('format')} that reach a named ${P('length')}.`,
             options:()=>Object.keys(FORMAT_WORD_SHARE).flatMap(k=>[6,7,8,9,10,11,12].map(n=>[k,n])),
             build:(k,n)=>{
                 const f=own(FORMAT_WORD_SHARE,k),len=own(LONG_WORD_SHARE,n);
-                if(!f||!len||n>12)return null;
-                const share=f*len,amount=Math.min(4,scarcityMult(.75*Math.pow(.03,.45),share,.45));
+                if(!f||!len||n>12||n<6)return null;
+                const share=f*len,amount=Math.min(6,scarcityMult(.75*Math.pow(.03,.45),share,.45,'flourish',k));
                 return {difficulty:share>=.02?1:share>=.006?2:3,name:`${P(FORMAT_TITLES[k])} Flourish ${P(n+'+')}`,
                     desc:`+${amount} to the word multiplier for ${P(FORMAT_NAMES[k])} words of ${P(n)} or more characters. Attached punctuation counts.`,
                     action:w=>w.len>=n&&hasFormat(w,k)?{multAdd:amount}:null};
@@ -2690,13 +2723,13 @@
             options:()=>Array.from('abcdefghijklmnopqrstuvwxyz',l=>[l]),
             build:l=>{
                 if(!/^[a-z]$/.test(l))return null;
-                const f=CHAR_FREQ[l]/LETTER_TOTAL,amount=Math.min(3,scarcityMult(.06,f,.5)),L=P(l.toUpperCase());
+                const f=CHAR_FREQ[l]/LETTER_TOTAL,amount=Math.min(4,scarcityMult(.06,f,.5,'resonant')),L=P(l.toUpperCase());
                 return {difficulty:scarcityTier(inlaidShare(l)),name:`Resonant ${L}`,desc:`+${amount} to the word multiplier for each ${L} in the word, ignoring case.`,
                     action:w=>{const n=Array.from(w.text.toLocaleLowerCase('en')).filter(c=>c===l).length;return n?{multAdd:amount*n}:null;}};
             }});
         const MORPHEMES = {
-            suffix:{ing:.03,ed:.06,al:.04,er:.05,tion:.02,ly:.02,ity:.006,ous:.006,ment:.006,est:.004,ness:.003,able:.003,ist:.003,ism:.002,ship:.001,ology:.001},
-            prefix:{re:.02,un:.01,pre:.004,inter:.003,sub:.003,trans:.002,over:.002,non:.002,anti:.001,counter:.0003}
+            suffix:{ed:.06,er:.05,al:.04,ing:.03,tion:.02,ly:.02,ic:.01,ity:.006,ous:.006,ment:.006,ive:.005},
+            prefix:{in:.03,re:.02,con:.015,de:.015,un:.01,pre:.004}
         };
         defineFamily({key:'morpheme',type:'WORD',...plainIds('morpheme'),
             title:'Morpheme',summary:`Word multiplier for words that begin or end with a named ${P('prefix')} or ${P('suffix')}. Rarer morphemes add more.`,
@@ -2704,7 +2737,7 @@
             build:(kind,value)=>{
                 const table=own(MORPHEMES,kind),share=table&&own(table,value);
                 if(!share)return null;
-                const amount=Math.min(4,scarcityMult(.9*Math.pow(.03,.5),share,.5)),label=kind==='suffix'?`–${value}`:`${value}–`;
+                const amount=Math.min(6,scarcityMult(.9*Math.pow(.03,.5),share,.5,'morpheme')),label=kind==='suffix'?`–${value}`:`${value}–`;
                 const test=kind==='suffix'?t=>t.endsWith(value)&&t.length>value.length+1:t=>t.startsWith(value)&&t.length>value.length+2;
                 return {difficulty:Math.max(1,scarcityTier(share)),name:`Morpheme ${P(label)}`,
                     desc:`+${amount} to the word multiplier for words ${kind==='suffix'?'ending':'starting'} with ${P(label)}. Ignores case and outer punctuation.`,
@@ -2718,9 +2751,10 @@
             options:()=>Object.keys(FIGURE_SHARE).map(n=>[n]),
             build:n=>{
                 const share=own(FIGURE_SHARE,n);if(!share)return null;
-                n=Number(n);const amount=Math.min(4,scarcityMult(1.2*Math.pow(.02,.5),share,.5)),label=n===6?'6+':String(n);
-                return {difficulty:FIGURE_TIER[n],name:`Figures ${P(label)}`,desc:`+${amount} to the word multiplier for numbers of ${n===6?`${P('6')} or more`:`exactly ${P(n)}`} digit${n===1?'':'s'}: no letters, commas and points ignored.`,
-                    action:w=>{if(/\p{L}/u.test(w.text))return null;const d=(w.text.match(/\d/g)||[]).length;return (n===6?d>=6:d===n)?{multAdd:amount}:null;}};
+                n=Number(n);const amount=Math.min(6,scarcityMult(1.2*Math.pow(.02,.5),share,.5,'figures')),label=n===6?'6+':String(n);
+                const base=tunedBase('figures',30);
+                return {difficulty:FIGURE_TIER[n],name:`Figures ${P(label)}`,desc:`+${base} base and +${amount} word multiplier for numbers of ${n===6?`${P('6')} or more`:`exactly ${P(n)}`} digit${n===1?'':'s'}: no letters, commas and points ignored.`,
+                    action:w=>{if(/\p{L}/u.test(w.text))return null;const d=(w.text.match(/\d/g)||[]).length;return (n===6?d>=6:d===n)?{baseAdd:base,multAdd:amount}:null;}};
             }});
         const SUMMIT_TYPES = {any:[1.5,0],l:[2.5,1],i:[3,2],b:[3.5,2]};
         defineFamily({key:'summit',type:'WORD',...plainIds('summit'),
@@ -2729,17 +2763,21 @@
             build:k=>{
                 const t=own(SUMMIT_TYPES,k);if(!t)return null;
                 const f=k==='any'?null:k,kind=f?`${P(FORMAT_NAMES[f])} word`:P('word');
-                return {difficulty:t[1],name:f?`Summit ${P(FORMAT_TITLES[f])}`:'Summit',desc:`+${t[0]} to the word multiplier for the longest ${kind} in each excerpt. Ties all qualify; attached punctuation counts.`,
-                    action:w=>{if(f&&!hasFormat(w,f))return null;const pool=(w.words||[]).filter(x=>!f||x.fmt[f]);return pool.length&&w.len===Math.max(...pool.map(x=>x.len))?{multAdd:t[0]}:null;}};
+                const amount=tunedMult('summit',t[0],k);
+                return {difficulty:t[1],name:f?`Summit ${P(FORMAT_TITLES[f])}`:'Summit',desc:`+${amount} to the word multiplier for the longest ${kind} in each excerpt. Ties all qualify; attached punctuation counts.`,
+                    action:w=>{if(f&&!hasFormat(w,f))return null;const pool=(w.words||[]).filter(x=>!f||x.fmt[f]);return pool.length&&w.len===Math.max(...pool.map(x=>x.len))?{multAdd:amount}:null;}};
             }});
         defineFamily({key:'alliterative',type:'WORD',...plainIds('alliterative'),
-            title:'Alliterative',summary:`Word multiplier for a word starting with a named ${P('letter')} right after another word starting with it.`,
-            options:()=>Object.keys(INITIAL_LETTER_SHARE).filter(l=>INITIAL_LETTER_SHARE[l]>=.006).map(l=>[l]),
-            build:l=>{
-                const share=own(INITIAL_LETTER_SHARE,l);if(!share||!/^[a-z]$/.test(l))return null;
-                const pair=share*share,amount=Math.min(4,scarcityMult(1.5*Math.pow(.005,.3),pair,.3)),L=P(l.toUpperCase());
-                return {difficulty:pair>=.004?1:pair>=.0006?2:3,name:`Alliterative ${L}`,desc:`+${amount} to the word multiplier for a word starting with ${L} that follows another word starting with ${L}. Ignores case and outer punctuation.`,
-                    action:w=>w.prev&&cleanWord(w.text).startsWith(l)&&cleanWord(w.prev.text).startsWith(l)?{multAdd:amount}:null};
+            title:'Alliterative',summary:`Word multiplier for every word starting with a named ${P('letter')}, in excerpts with at least ${P('n')} such words.`,
+            options:()=>Object.keys(INITIAL_LETTER_SHARE).filter(l=>INITIAL_LETTER_SHARE[l]>=.01).flatMap(l=>[[l,3],[l,4]]),
+            build:(l,n)=>{
+                const share=own(INITIAL_LETTER_SHARE,l);n=Number(n);
+                if(!share||!/^[a-z]$/.test(l)||![3,4].includes(n))return null;
+                const amount=Math.min(6,scarcityMult(.5*(n===4?1.5:1),share,.72,'alliterative')),L=P(l.toUpperCase());
+                const starts=text=>cleanWord(text).startsWith(l);
+                return {difficulty:Math.min(3,scarcityTier(share)+(n===4?1:0)),name:`Alliterative ${L} ${P(n+'+')}`,
+                    desc:`+${amount} to the word multiplier for each word starting with ${L}, when the excerpt has ${P(n)} or more of them. Ignores case and outer punctuation.`,
+                    action:w=>starts(w.text)&&(w.words||[]).filter(x=>starts(x.text)).length>=n?{multAdd:amount}:null};
             }});
 
         /* ---------- SENTENCE families ---------- */
@@ -2752,7 +2790,7 @@
             build:(dir,n)=>{
                 const long=dir==='long',share=['long','short'].includes(dir)?own(long?LONG_EXCERPT_SHARE:SHORT_EXCERPT_SHARE,n):undefined;
                 if(!share)return null;
-                n=Number(n);const amount=scarcityPay(long?8.1:16.2,share);
+                n=Number(n);const amount=scarcityPay(long?8.1:16.2,share,.72,'count');
                 return long
                     ?{difficulty:scarcityTier(share)+1,name:`Verbose ${P(n+'+')}`,desc:`+${amount} sentence base per word in excerpts of ${P(n)} or more words.`,action:s=>s.words.length>=n?{baseAdd:amount*s.words.length}:null}
                     :{difficulty:scarcityTier(share),name:`Terse ${P('≤'+n)}`,desc:`+${amount} sentence base for excerpts of ${P(n)} or fewer words.`,action:s=>s.words.length&&s.words.length<=n?{baseAdd:amount}:null};
@@ -2762,7 +2800,7 @@
             options:()=>[7,8,9,10,11,12].map(n=>[n]),
             build:n=>{
                 const share=Number(n)<=12?own(LONG_WORD_SHARE,n):undefined;if(!share||n<7)return null;
-                n=Number(n);const amount=scarcityMult(.1*Math.pow(.25,.72),share);
+                n=Number(n);const amount=scarcityMult(.1*Math.pow(.25,.72),share,.72,'span');
                 return {difficulty:scarcityTier(share)+1,name:`Syllabic ${P(n+'+')}`,desc:`+${amount} to the sentence multiplier per word of ${P(n)} or more characters, with no cap.`,
                     action:s=>{const count=s.words.filter(w=>w.len>=n).length;return count?{multAdd:amount*count}:null;}};
             }});
@@ -2771,7 +2809,7 @@
             title:'Census',summary:`Sentence base per word in a named ${P('format')}.`,
             options:()=>Object.keys(CENSUS_TYPES).map(k=>[k]),
             build:k=>{
-                const amount=own(CENSUS_TYPES,k);if(!amount)return null;
+                if(!own(CENSUS_TYPES,k))return null;const amount=tunedBase('census',CENSUS_TYPES[k],k);
                 return {difficulty:1,name:`${P(FORMAT_TITLES[k])} Census`,desc:`+${amount} sentence base per ${P(FORMAT_NAMES[k])} word in the excerpt.`,
                     action:s=>{const count=s.words.filter(w=>hasFormat(w,k)).length;return count?{baseAdd:amount*count}:null;}};
             }});
@@ -2781,7 +2819,7 @@
             options:()=>Object.keys(EXCERPT_ENDINGS).map(k=>[k]),
             build:k=>{
                 const e=own(EXCERPT_ENDINGS,k);if(!e)return null;
-                const amount=scarcityPay(55,e[1],.5);
+                const amount=scarcityPay(55,e[1],.5,'ending',k);
                 return {difficulty:scarcityTier(e[1]),name:`Punctilious ${P(e[0])}`,desc:`+${amount} sentence base when ${P(e[0])} is the last mark of the excerpt${k==='quote'?' (straight or curly quotes)':''}. Citations are ignored.`,
                     action:s=>s.words.length&&e[2].test(s.words[s.words.length-1].text)?{baseAdd:amount}:null};
             }});
@@ -2795,7 +2833,7 @@
             options:()=>Object.keys(EXCERPT_MARKS).map(k=>[k]),
             build:k=>{
                 const m=own(EXCERPT_MARKS,k);if(!m)return null;
-                const amount=scarcityPay(64,m[2],.6);
+                const amount=scarcityPay(64,m[2],.6,'mark',k);
                 return {difficulty:scarcityTier(m[2]),name:m[0],desc:`+${amount} sentence base when ${P(m[1])} appears in the excerpt. Citations are ignored.`,
                     action:s=>s.words.some(w=>m[3].test(w.text))?{baseAdd:amount}:null};
             }});
@@ -2805,7 +2843,7 @@
             options:()=>Object.keys(CITED_SHARE).map(n=>[n]),
             build:n=>{
                 const share=own(CITED_SHARE,n);if(!share)return null;
-                n=Number(n);const amount=scarcityPay(48,share,.6);
+                const amount=scarcityPay(48,share,.6,'cited',n);n=Number(n);
                 return {difficulty:scarcityTier(share)+1,name:`Footnotes ${P(n+'+')}`,desc:`+${amount} sentence base per citation block in excerpts with ${P(n)} or more citation blocks.`,
                     action:s=>s.citationBlocks>=n?{baseAdd:amount*s.citationBlocks}:null};
             }});
@@ -2814,10 +2852,10 @@
             options:()=>[['number'],['text']],
             build:kind=>{
                 if(!['number','text'].includes(kind))return null;
-                const numeric=kind==='number';
-                return {difficulty:numeric?2:1,name:numeric?'Reference Index':'Editorial Notes',
-                    desc:numeric?`+12 excerpt base per point in ${P('citation numbers')}: [12] pays +144; [2, 5] pays +84. Only actual citations count.`:`+25 excerpt base per letter in ${P('textual citation annotations')}: [which?] pays +125; [citation needed] pays +350. Exponents never count.`,
-                    action:s=>{const count=(s.citationTexts||[]).reduce((sum,t)=>sum+(numeric?(t.match(/\d+/g)||[]).reduce((n,d)=>n+Number(d),0):(t.match(/\p{L}/gu)||[]).length),0);return count?{baseAdd:count*(numeric?12:25)}:null;}};
+                const numeric=kind==='number',each=tunedBase('citation-content',numeric?40:25,kind);
+                return {difficulty:numeric?1:1,name:numeric?'Reference Index':'Editorial Notes',
+                    desc:numeric?`+${each} excerpt base per digit in ${P('citation numbers')}: [7] pays +${each}; [2, 105] pays +${each*4}. Only actual citations count.`:`+${each} excerpt base per letter in ${P('textual citation annotations')}: [which?] pays +${each*5}; [citation needed] pays +${each*14}. Exponents never count.`,
+                    action:s=>{const count=(s.citationTexts||[]).reduce((sum,t)=>sum+(numeric?(t.match(/\d/g)||[]).length:(t.match(/\p{L}/gu)||[]).length),0);return count?{baseAdd:count*each}:null;}};
             }});
         const ECHO_SHARE = {2:.5,4:.3,5:.2,6:.12,7:.08};
         defineFamily({key:'echo',type:'SENTENCE',...plainIds('echo'),
@@ -2825,7 +2863,7 @@
             options:()=>Object.keys(ECHO_SHARE).map(n=>[n]),
             build:n=>{
                 const share=own(ECHO_SHARE,n);if(!share)return null;
-                n=Number(n);const amount=scarcityPay(42,share);
+                n=Number(n);const amount=scarcityPay(42,share,.72,'echo');
                 return {difficulty:n>=6?2:1,name:`Echo ${P(n+'+')}`,desc:`+${amount} sentence base per distinct repeated word of ${P(n)} or more letters or digits. Case is ignored; each repeated word counts once.`,
                     action:s=>{const counts=new Map();for(const w of s.words){const key=w.text.toLocaleLowerCase('en').replace(/[^\p{L}\p{N}]/gu,'');if(key.length>=n)counts.set(key,(counts.get(key)||0)+1);}const repeats=[...counts.values()].filter(c=>c>1).length;return repeats?{baseAdd:amount*repeats}:null;}};
             }});
@@ -2835,8 +2873,9 @@
             options:()=>Object.keys(OVERPRINT_TYPES).map(k=>[k]),
             build:k=>{
                 const t=own(OVERPRINT_TYPES,k);if(!t)return null;
-                return {difficulty:t[1],name:`Overprint ${P(FORMAT_TITLES[k])}`,desc:`+${t[0]} sentence base when an excerpt has a citation and ${P(FORMAT_NAMES[k])} text outside citations.`,
-                    action:s=>s.citationBlocks>0&&s.words.some(w=>hasFormat(w,k))?{baseAdd:t[0]}:null};
+                const amount=tunedBase('overprint',t[0],k);
+                return {difficulty:t[1],name:`Overprint ${P(FORMAT_TITLES[k])}`,desc:`+${amount} sentence base when an excerpt has a citation and ${P(FORMAT_NAMES[k])} text outside citations.`,
+                    action:s=>s.citationBlocks>0&&s.words.some(w=>hasFormat(w,k))?{baseAdd:amount}:null};
             }});
 
         /* ---------- RUN families (applied once to the three excerpts) ---------- */
@@ -2845,10 +2884,10 @@
             title:'Vintage',summary:`Round multiplier when an excerpt contains a year from a named ${P('century')}. Older centuries pay more.`,
             options:()=>Object.keys(CENTURY_BONUS).map(c=>[c]),
             build:c=>{
-                const bonus=own(CENTURY_BONUS,c);if(!bonus)return null;
-                const years=new RegExp(`\\b${Number(c)}\\d{2}\\b`);
-                return {difficulty:c>=19?0:c>=18?1:c>=15?2:3,name:`Vintage ${P(c+'00s')}`,bonus,condition:`an excerpt contains a whole year from the ${P(c+'00s')} (${c}00–${c}99)`,
-                    action:ss=>ss.length===3&&ss.some(s=>years.test(excerptText(s)))?{multAdd:bonus}:null};
+                if(!own(CENTURY_BONUS,c))return null;const bonus=tunedMult('vintage',CENTURY_BONUS[c]);
+                const years=new RegExp(`\\b${Number(c)}\\d{2}\\b`),has=s=>years.test(excerptText(s));
+                return {difficulty:c>=19?0:c>=18?1:c>=15?2:3,name:`Vintage ${P(c+'00s')}`,bonus,excerptTest:has,availableIn:ss=>ss.some(has),condition:`an excerpt contains a whole year from the ${P(c+'00s')} (${c}00–${c}99)`,
+                    action:ss=>ss.length===3&&ss.some(has)?{multAdd:bonus}:null};
             }});
         defineFamily({key:'pyramid',type:'RUN',...plainIds('pyramid'),
             title:'Pyramid',summary:`Round multiplier when each excerpt is ${P('longer')} or ${P('shorter')} than the one before.`,
@@ -2856,8 +2895,9 @@
             build:dir=>{
                 if(!['rising','falling'].includes(dir))return null;
                 const rising=dir==='rising',ordered=ss=>ss.every((s,i)=>i===0||(rising?s.chars.length>ss[i-1].chars.length:s.chars.length<ss[i-1].chars.length));
-                return {difficulty:1,name:`Pyramid ${P(rising?'Rising':'Falling')}`,bonus:1.5,condition:`each excerpt has ${P(rising?'more':'fewer')} characters than the one before, in lock order (spaces and citations included)`,
-                    action:ss=>ss.length===3&&ordered(ss)?{multAdd:1.5}:null,
+                const bonus=tunedMult('pyramid',1.5);
+                return {difficulty:1,name:`Pyramid ${P(rising?'Rising':'Falling')}`,bonus,condition:`each excerpt has ${P(rising?'more':'fewer')} characters than the one before, in lock order (spaces and citations included)`,
+                    action:ss=>ss.length===3&&ordered(ss)?{multAdd:bonus}:null,
                     possible:locked=>ordered(locked)&&(!locked.length||(rising?locked[locked.length-1].chars.length<MAX_SENTENCE_LEN:locked[locked.length-1].chars.length>MIN_FRAGMENT_LEN))};
             }});
         const THROUGHLINES = {l:[.8,0,'a link'],i:[2,2,'italic text'],cit:[3,2,'a citation'],b:[4,3,'bold text']};
@@ -2866,9 +2906,9 @@
             options:()=>Object.keys(THROUGHLINES).map(k=>[k]),
             build:k=>{
                 const t=own(THROUGHLINES,k);if(!t)return null;
-                const has=s=>s.chars.some(c=>c[k]);
-                return {difficulty:t[1],name:`Throughline ${P(FORMAT_TITLES[k])}`,bonus:t[0],condition:`every excerpt contains ${P(t[2])}`,
-                    action:ss=>ss.length===3&&ss.every(has)?{multAdd:t[0]}:null,possible:locked=>locked.every(has)};
+                const has=s=>s.chars.some(c=>c[k]),bonus=tunedMult('every',t[0],k);
+                return {difficulty:t[1],name:`Throughline ${P(FORMAT_TITLES[k])}`,bonus,condition:`every excerpt contains ${P(t[2])}`,excerptTest:has,availableIn:ss=>ss.filter(has).length>=3,
+                    action:ss=>ss.length===3&&ss.every(has)?{multAdd:bonus}:null,possible:locked=>locked.every(has)};
             }});
         const MONTH_NAMES = new Set('january february march april may june july august september october november december'.split(' '));
         // Country display names come from the browser's English locale data, with common aliases.
@@ -2903,10 +2943,11 @@
             options:()=>TALLY_CRITERIA.map(k=>[k]),
             build:criterion=>{
                 if(!TALLY_CRITERIA.includes(criterion))return null;
-                const rare=['month','country'].includes(criterion),rate=rare?.35:.08;
+                const rare=['month','country'].includes(criterion),rate=tunedMult('round-tally',rare?.35:.08,criterion);
                 const label=criterion==='country'?'country name':criterion==='month'?'month name':`${FORMAT_NAMES[criterion]} word`;
                 return {difficulty:rare?2:1,name:`${P(label[0].toUpperCase()+label.slice(1))} Collection`,
                     desc:`+${Math.round(rate*100)}% round multiplier per ${P(label)} in your locked excerpts this round. Repeats count; multiword country names count once. Citations excluded. Resets each round.`,
+                    excerptTest:s=>tallyCriterion([s],criterion)>0,availableIn:ss=>tallyCriterion(ss,criterion)>=2,
                     action:ss=>{const count=tallyCriterion(ss,criterion);return count?{multAdd:rate*count}:null;}};
             }});
         // One rules entry per family, with the rarity range its cards span.
@@ -4146,15 +4187,15 @@
                 pyramidal: '×1.5 round score if each locked excerpt has more characters than the previous one, including spaces and citations.'
             };
             const runEffects = {
-                mosaic: [3, 'the three excerpts collectively contain bold, italic, linked and citation characters'],
+                mosaic: [4, 'the three excerpts collectively contain bold, italic, linked and citation characters'],
                 encyclopedist: [11, 'all three excerpts come from different articles and each contains a citation'],
-                rooted: [0.8, 'all three excerpts come from the same article'],
+                rooted: [1.2, 'all three excerpts come from the same article'],
                 divergent: [5, 'all three excerpts come from different articles'],
                 pyramidal: [1.5, 'each excerpt has more characters than the previous one, in lock order (spaces and citations included)'],
                 bibliophile: [3, 'every excerpt contains a citation'],
-                orthography: [0.5, 'no excerpt contains ! ? " ( ) [ ] { } — or –'],
+                orthography: [1, 'no excerpt contains ! ? " ( ) [ ] { } — or –'],
                 vintage: [0.6, 'any excerpt contains a whole year from 1000 through 2029'],
-                tonal: [0.6, 'all three excerpts end with the same character, ignoring trailing spaces']
+                tonal: [1.2, 'all three excerpts end with the same character, ignoring trailing spaces']
             };
             if (u.id === 'symmetric') return `Add ${rules.symmetric} to each excerpt total before multiplying.${rules.runTrigger !== 1 ? ` Then multiply the round score by ${rules.runTrigger}.` : ''} Always applies.`;
             if (runEffects[u.id]) {
@@ -4316,14 +4357,18 @@
             const sample = useMemo(() => ({ ...sourceSample, articleTitle: sourceSample.articleTitle || article, articleCategories: sourceSample.articleCategories || categories }), [sourceSample, article, categories]);
             const selectedUpgrades = useMemo(() => upgradeByIds(selectedIds), [selectedIds]);
             // Fixed cards, the family cards already selected, and one card per family that triggers on this article.
+            // Family cards: every variant that can trigger on this article (run cards: every variant), one picker per family.
+            const familyChoices = useMemo(() => [...BUFF_FAMILIES.values()].map(def => {
+                const cards = def.options(sentences).map(ps => buffVariant(def.key, ...ps)).filter(Boolean);
+                const live = cards.filter(u => u.type === 'RUN' || triggersOn(u, sentences));
+                return { key: def.key, title: def.title, cards: live.length ? live : cards };
+            }), [sentences]);
+            const [familyPick, setFamilyPick] = useState({});
             const sandboxCards = useMemo(() => {
-                const picked = selectedUpgrades.filter(u => u.template);
-                const samples = [...BUFF_FAMILIES.values()].map(def => {
-                    const cards = def.options(sentences).map(ps => buffVariant(def.key, ...ps)).filter(Boolean);
-                    return cards.find(u => triggersOn(u, sentences)) || cards[0];
-                }).filter(u => u && !picked.some(p => p.template === u.template));
-                return [...UPGRADE_POOL.filter(u => !u.retired || selectedIds.includes(u.id)), ...picked, ...samples, ...ROUND_EFFECTS];
-            }, [selectedUpgrades, selectedIds, sentences]);
+                const offered = new Set(familyChoices.flatMap(f => f.cards.map(u => u.id)));
+                return [...UPGRADE_POOL.filter(u => !u.retired || selectedIds.includes(u.id)), ...selectedUpgrades.filter(u => u.template && !offered.has(u.id)), ...ROUND_EFFECTS];
+            }, [familyChoices, selectedUpgrades, selectedIds]);
+            const toggleCard = (id, on) => setSelectedIds(ids => on ? [...ids, id] : ids.filter(x => x !== id));
             const timing = useMemo(() => estimateTrialTime(trial,selectedUpgrades,ante,wpm,article,categories),[trial,selectedUpgrades,ante,wpm,article,categories]);
             const trialSeconds=timing.seconds;
             const detail = useMemo(() => scoreSentence(sample, selectedUpgrades, rules), [sample, selectedUpgrades, rules]);
@@ -4387,7 +4432,16 @@
                         <details className="bg-white border border-zinc-300 rounded p-3 mt-3">
                             <summary className="font-bold text-sm cursor-pointer">Try upgrades ({selectedIds.length} selected)</summary>
                             <div className="flex gap-3 text-xs my-3"><button className="underline" onClick={() => setSelectedIds(upgrades.map(u => u.id))}>Use my upgrades</button><button className="underline" onClick={() => setSelectedIds([])}>Clear</button></div>
-                            <div className="space-y-2">{sandboxCards.map(u => <label key={u.id} className="flex items-start gap-2 text-sm"><input className="mt-1" type="checkbox" checked={selectedIds.includes(u.id)} onChange={e => setSelectedIds(ids => e.target.checked ? [...ids, u.id] : ids.filter(id => id !== u.id))} /><span><strong><RichText text={u.richName||u.name}/></strong> <span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="text-xs text-zinc-500">{u.type.toLowerCase()}</span><span className="block text-xs text-zinc-600"><RichText text={upgradeDescription(u, rules)}/></span></span></label>)}</div>
+                            <div className="space-y-2">{familyChoices.map(f => {
+                                const cur = f.cards.find(u => u.id === familyPick[f.key]) || f.cards.find(u => selectedIds.includes(u.id)) || f.cards[0];
+                                if (!cur) return null;
+                                const others = f.cards.filter(u => u.id !== cur.id && selectedIds.includes(u.id)).length;
+                                return <div key={f.key} className="sandbox-family flex items-start gap-2 text-sm"><input className="mt-1" type="checkbox" aria-label={`Use ${cur.name}`} checked={selectedIds.includes(cur.id)} onChange={e => toggleCard(cur.id, e.target.checked)} /><span className="min-w-0">
+                                    <select aria-label={`${f.title} variant`} value={cur.id} onChange={e => { const next = e.target.value; setFamilyPick(p => ({ ...p, [f.key]: next })); setSelectedIds(ids => ids.includes(cur.id) ? ids.map(id => id === cur.id ? next : id) : ids); }}>
+                                        {f.cards.map(u => <option key={u.id} value={u.id}>{u.name} · {RARITIES[u.rarity].label} · {shopPrice(u)}¢</option>)}
+                                    </select> <span className="text-xs text-zinc-500">{cur.type.toLowerCase()} · {f.cards.length} here{others ? ` · +${others} more selected` : ''}</span>
+                                    <span className="block text-xs text-zinc-600"><RichText text={upgradeDescription(cur, rules)}/></span></span></div>;
+                            })}{sandboxCards.map(u => <label key={u.id} className="flex items-start gap-2 text-sm"><input className="mt-1" type="checkbox" checked={selectedIds.includes(u.id)} onChange={e => toggleCard(u.id, e.target.checked)} /><span><strong><RichText text={u.richName||u.name}/></strong> <span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="text-xs text-zinc-500">{u.type.toLowerCase()}</span><span className="block text-xs text-zinc-600"><RichText text={upgradeDescription(u, rules)}/></span></span></label>)}</div>
                         </details>
                     </section>
                     <section aria-label="Scoring parameters" className="min-w-0">
@@ -4478,8 +4532,9 @@
             const [flash, setFlash]                         = useState(null);  // 'mid' | 'late' | 'final'
 
             const snapshotRef = useRef(null);
+            const packedBlocks = useMemo(() => packBlocks(contentBlocks), [contentBlocks]);
             snapshotRef.current = !isPractice && ['PLAYING', 'SCORING', 'UPGRADE_SELECT'].includes(gameState) && contentBlocks.length && !isNavigating ? {
-                version: 1, balanceVersion: 10, market, gameState, ante, totalScore, timeLeft, article, contentBlocks, navHistory, articleMeta,
+                version: 1, balanceVersion: 10, market, gameState, ante, totalScore, timeLeft, article, contentBlocks: packedBlocks, navHistory, articleMeta,
                 buffer, format, lockedSentences, usedSentenceIds: [...usedSentenceIds],
                 upgradeIds: activeUpgrades.map(u => u.id), optionIds: upgradeOptions.map(u => u.id),
                 utilityUsed, scoutUsed, rerollUsed, isDevMode, useCustomScoring, scoringRules, roundClock, savedAt: Date.now()
