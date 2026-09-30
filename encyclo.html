@@ -1806,6 +1806,26 @@
         .wiki-content a [data-w],.wiki-content a[data-w] { cursor:pointer; }
         @media (max-width:650px) { .tally-dialog.is-simple .tally-ledger { padding:4px 16px 8px; } .tally-dialog .tally-row .tally-quote { font-size:15.5px; } }
         @media (max-width:700px) { .current-excerpt-score .hud-words { display:block; } .current-excerpt-score .hud-earn + .hud-words::before { content:none; } }
+        /* ---- Buff slots: sell, reorder, empty slots, letters ---- */
+        .build-rail-list ul { margin:0; padding:4px 0; list-style:none; }
+        .build-rail-list { padding:6px 8px!important; }
+        .rail-actions { display:flex; gap:4px; margin-top:7px; }
+        .rail-actions button { padding:3px 7px; border:1px solid var(--c-line2); border-radius:6px; background:var(--c-card); font:500 11px/1.2 'Inter',sans-serif; color:var(--c-muted); }
+        .rail-actions button:hover:enabled { color:var(--c-ink); background:var(--c-bg); }
+        .rail-actions button:disabled { opacity:.35; cursor:default; }
+        .rail-actions .rail-sell { margin-left:auto; }
+        .rail-actions .rail-sell.is-armed { border-color:var(--c-warn); background:#fdf1ea; color:var(--c-warn); font-weight:600; }
+        .rail-slot { margin-top:2px; padding:9px 12px; border:1px dashed var(--c-line2); border-radius:8px; font:400 11.5px 'Inter',sans-serif; color:var(--c-faint); }
+        .rail-effect > b em { color:var(--c-warn); }
+        .rail-effect::before { background:var(--c-warn); }
+        .rail-letters { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; margin:8px 0 0; padding:8px 4px 0; border-top:1px solid var(--c-line); font:400 11.5px 'Inter',sans-serif; color:var(--c-muted); }
+        .rail-letters span { margin-right:2px; font-weight:500; }
+        .rail-letters i { font:400 16px/1 'PT Serif',serif; font-style:normal; color:var(--c-ink); }
+        .rail-letters sup { margin-left:1px; font:600 9px 'Inter',sans-serif; color:var(--c-faint); }
+        .item-loupe { --item:#0e7a6b; }
+        .item-highlighter { --item:#c2531a; }
+        .excerpt-text.is-loupe { background:#d6f2e9; border-radius:3px; box-shadow:0 0 0 2px #d6f2e9; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+        @media (max-width:760px) { .shop-build-panel { left:auto; right:0; } }
 </style>
 </head>
 <body>
@@ -1817,19 +1837,23 @@
         /* ================================================================
            CONFIG & CONSTANTS
            ================================================================ */
-        const ROUND_SECONDS = [100, 105, 105, 100, 100, 95, 95];
+        const ROUND_SECONDS = [100, 105, 105, 100, 100, 95, 95, 95];
         const GAME_DURATION_BASE = ROUND_SECONDS[0];
-        const getRoundDuration = ante => ROUND_SECONDS[Math.max(0, Math.min(6, ante - 1))];
+        const getRoundDuration = ante => ROUND_SECONDS[Math.max(0, Math.min(ROUND_SECONDS.length - 1, ante - 1))];
         const REQUIRED_SENTENCES = 3;
+        // New buff numbers (tuned on simulated rounds of real articles).
+        const CLEAN_COPY_MULT=.5, TEMPO_STEP=.25, TEMPO_FLOOR=30, MARGINALIA_MULT=.75, LEDE_MULT=1.25, TITLE_DROP_MULT=4, POLYGLOT_MULT=3,
+            HIGHLIGHTER_TIMES=2, RABBIT_HOLE_STEP=1.25, RABBIT_HOLE_MAX=4, SNOWBALL_STEP=2, TIP_JAR_PAY=1, BOUNTY_MAX=5, LONG_FORM_PAY=1, LONG_FORM_WORDS=25, FRUGAL_PAY=1;
+        const BUFF_SLOTS = 4;
         const IDLE_HINT_DELAY_MS = 3000;
         const MIN_SENTENCE_LEN   = 15;
         const MAX_SENTENCE_LEN   = 300;
         const MIN_FRAGMENT_LEN   = 2;
         const MAX_FRAGMENT_LEN   = MAX_SENTENCE_LEN; // longer captions and cells are split into several targets
         const ANTE_BASE_TARGET   = 5_000_000;
-        const MAX_ANTE           = 7;
-        // Tuned with simulated runs on real articles: a steady climb instead of soft early rounds and a late wall.
-        const ROUND_TARGETS = [ANTE_BASE_TARGET, 50_000_000, 150_000_000, 450_000_000, 1_200_000_000, 3_500_000_000, 12_000_000_000];
+        const MAX_ANTE           = 8;
+        // Tuned with simulated eight-round runs on real articles with four buff slots: the bot wins about 10% / 40% / 70% at 45 / 60 / 80 WPM.
+        const ROUND_TARGETS = [ANTE_BASE_TARGET, 50_000_000, 120_000_000, 240_000_000, 420_000_000, 650_000_000, 950_000_000, 1_300_000_000];
         const getRoundTarget = ante => ROUND_TARGETS[Math.max(0, Math.min(MAX_ANTE - 1, ante - 1))];
         const SAVE_KEY = 'encyclo.run.v1';
         const EMPTY_FORMAT = { b: false, i: false, l: false, cit: false, bul: false };
@@ -1898,18 +1922,32 @@
                     Number.isFinite(saved[key]) ? Math.max(min, Math.min(max, saved[key])) : DEFAULT_SCORING[key]]));
             } catch { return { ...DEFAULT_SCORING }; }
         }
+        // Understudy takes on the scoring effect of the buff directly above it in your buffs list.
+        const understudyCache=new WeakMap();
+        function expandUnderstudy(upgrades){
+            if(!upgrades.some(u=>u.id==='understudy'))return upgrades;
+            if(understudyCache.has(upgrades))return understudyCache.get(upgrades);
+            const out=upgrades.map((u,i)=>{
+                if(u.id!=='understudy')return u;
+                const prev=upgrades[i-1];
+                if(!prev||!['WORD','SENTENCE','RUN'].includes(prev.type)||['symmetric','safety-net'].includes(prev.id))return u;
+                return {...prev,id:'understudy',copyId:prev.id,name:'Understudy',copyOf:prev.name,temporary:false};
+            });
+            understudyCache.set(upgrades,out);return out;
+        }
         const guaranteedRunMultiplier=(upgrades,rules)=>(hasUpgrade(upgrades,'symmetric')?rules.runTrigger:1)*(hasUpgrade(upgrades,'carbon-effect')?(1+rules.runBonus)*rules.runTrigger:1);
         // Conditional run upgrades whose condition the locked excerpts have not already ruled out,
         // with the largest multiplier each can still pay. Unknown upgrades are assumed possible.
         const RUN_BONUS_MAX={rooted:2,divergent:5,pyramidal:1.5,bibliophile:3,orthography:1.6,vintage:.6,tonal:2,mosaic:8,encyclopedist:11};
         function runBonusOutlook(locked, upgrades, rules) {
-            const conditional=upgrades.filter(u=>u.type==='RUN'&&!['symmetric','carbon-effect'].includes(u.id));
+            upgrades=expandUnderstudy(upgrades);
+            const conditional=upgrades.filter(u=>u.type==='RUN'&&!['symmetric','carbon-effect','safety-net'].includes(u.id));
             const text=s=>s.chars.filter(c=>!c.cit).map(c=>c.c).join('');
             const titles=locked.map(s=>s.articleTitle);
             const possible=u=>{
                 if(locked.length>=REQUIRED_SENTENCES)return !!u.action(locked);
                 if(u.possible)return u.possible(locked);
-                switch(u.id){
+                switch(u.copyId||u.id){
                     case 'rooted':return new Set(titles).size<=1;
                     case 'divergent':return new Set(titles).size===titles.length;
                     case 'encyclopedist':return new Set(titles).size===titles.length&&locked.every(s=>s.chars.some(c=>c.cit));
@@ -1921,7 +1959,7 @@
                 }
             };
             let live=conditional.filter(possible);
-            const factor=list=>list.reduce((m,u)=>m*(1+(u.template==='round-tally'?(u.action(locked)?.multAdd||0):(RUN_BONUS_MAX[u.id]??u.runBonus??0))*rules.runBonus)*rules.runTrigger,1);
+            const factor=list=>list.reduce((m,u)=>m*(1+(u.template==='round-tally'?(u.action(locked)?.multAdd||0):(RUN_BONUS_MAX[u.copyId||u.id]??u.runBonus??0))*rules.runBonus)*rules.runTrigger,1);
             // Same-article and all-different-articles bonuses exclude each other: keep the better side.
             const same=live.filter(u=>u.id==='rooted'),different=live.filter(u=>['divergent','encyclopedist'].includes(u.id));
             if(same.length&&different.length)live=live.filter(u=>!(factor(same)>=factor(different)?different:same).includes(u));
@@ -1981,11 +2019,18 @@
             return `${Number((n / scale).toFixed(2))}${suffix}`;
         }
         function scoreRun(sentences, upgrades, rules = DEFAULT_SCORING, details = sentences.map(s => scoreSentence(s, upgrades, rules))) {
+            upgrades = expandUnderstudy(upgrades);
             const appliedRunUpgrades = [];
             let finalSentenceTotals = details.map(d => d.sentenceTotal);
             if (upgrades.some(u => u.id === 'symmetric')) {
                 finalSentenceTotals = finalSentenceTotals.map(t => t + rules.symmetric);
                 appliedRunUpgrades.push('Symmetric');
+            }
+            // Safety Net: the weakest excerpt counts as at least the average of the other two before the three multiply.
+            if (finalSentenceTotals.length === REQUIRED_SENTENCES && upgrades.some(u => u.id === 'safety-net')) {
+                const lo = Math.min(...finalSentenceTotals), at = finalSentenceTotals.indexOf(lo);
+                const floor = Math.floor(finalSentenceTotals.reduce((n, t, i) => i === at ? n : n + t, 0) / 2);
+                if (lo < floor) { finalSentenceTotals = finalSentenceTotals.map((t, i) => i === at ? floor : t); appliedRunUpgrades.push('Safety Net'); }
             }
             let multiplier = upgrades.some(u => u.id === 'symmetric') ? rules.runTrigger : 1;
             for (const upgrade of upgrades) {
@@ -2734,6 +2779,45 @@
             {id:'patron',name:'Patron',rarity:'rare',type:'UTILITY',desc:'Earn 25% more word income on future cleared rounds. Partial credits carry over.'}
         );
 
+        /* ---------- Buffs about how and where you type ---------- */
+        // Writing systems Polyglot counts. Latin (accents included) never counts.
+        const SCRIPTS={Greek:/\p{Script=Greek}/u,Cyrillic:/\p{Script=Cyrillic}/u,CJK:/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u,Arabic:/\p{Script=Arabic}/u,Hebrew:/\p{Script=Hebrew}/u,
+            Indic:/[\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Kannada}\p{Script=Malayalam}]/u,Thai:/[\p{Script=Thai}\p{Script=Lao}]/u,
+            Armenian:/\p{Script=Armenian}/u,Georgian:/\p{Script=Georgian}/u,Ethiopic:/\p{Script=Ethiopic}/u,IPA:/[\u0250-\u02AF\u1D00-\u1DBF]/u};
+        const scriptsIn=text=>Object.keys(SCRIPTS).filter(k=>SCRIPTS[k].test(text));
+        // Title words: letters and digits of the article title, minus its (disambiguation) and short function words.
+        const TITLE_STOP=new Set(['the','and','for','from','with','of','in','on','at','to','a','an','by','de','la','le','von','van','der']);
+        const titleWordCache=new Map();
+        const titleWords=title=>{
+            if(!titleWordCache.has(title))titleWordCache.set(title,new Set(String(title||'').replace(/\s*\([^)]*\)\s*$/,'').toLocaleLowerCase('en').split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>=2&&!TITLE_STOP.has(w))));
+            return titleWordCache.get(title);
+        };
+        const inTitle=(word,title)=>{const t=cleanWord(word),set=titleWords(title);return !!t&&(set.has(t)||set.has(t.replace(/(?:'s|’s|es|s)$/u,'')));};
+        UPGRADE_POOL.push(
+            {id:'clean-copy',name:'Clean Copy',rarity:'uncommon',price:7,type:'SENTENCE',anyArticle:true,desc:`+${CLEAN_COPY_MULT} to the sentence multiplier for an excerpt typed without a mistake. Any slip into red counts, even once fixed; clearing the input starts over.`,
+                action:s=>s.sentence?.typing&&s.sentence.typing.mistakes===0?{multAdd:CLEAN_COPY_MULT}:null},
+            {id:'tempo',name:'Tempo',rarity:'rare',price:10,type:'SENTENCE',anyArticle:true,desc:`+${TEMPO_STEP} to the sentence multiplier for every 10 WPM you typed the excerpt at above ${TEMPO_FLOOR} WPM, timed from its first character to the lock.`,
+                action:s=>{const w=s.sentence?.typing?.wpm||0;return w>TEMPO_FLOOR?{multAdd:Math.round((w-TEMPO_FLOOR)/10*TEMPO_STEP*100)/100}:null;}},
+            {id:'marginalia',name:'Marginalia',rarity:'uncommon',price:7,type:'SENTENCE',desc:`+${MARGINALIA_MULT} to the sentence multiplier for excerpts outside the body paragraphs: captions, headings, infobox and table cells, and notes.`,
+                action:s=>s.sentence?.isFragment?{multAdd:MARGINALIA_MULT}:null},
+            {id:'lede',name:'Lede',rarity:'common',price:4,type:'SENTENCE',desc:`+${LEDE_MULT} to the sentence multiplier for excerpts from the article’s first paragraph.`,
+                action:s=>s.sentence?.lede?{multAdd:LEDE_MULT}:null},
+            {id:'title-drop',name:'Title Drop',rarity:'uncommon',price:7,type:'WORD',anyArticle:true,desc:`+${TITLE_DROP_MULT} to the word multiplier for words that appear in the article’s title. Ignores case and plurals; a bracketed part of the title does not count.`,
+                action:w=>w.title&&inTitle(w.text,w.title)?{multAdd:TITLE_DROP_MULT}:null},
+            {id:'polyglot',name:'Polyglot',rarity:'rare',price:10,type:'SENTENCE',desc:`+${POLYGLOT_MULT} to the sentence multiplier for each non-Latin writing system in the excerpt: Greek, Cyrillic, CJK, Arabic, Hebrew, IPA and others.`,
+                action:s=>{const n=scriptsIn(s.words.map(w=>w.text).join(' ')).length;return n?{multAdd:POLYGLOT_MULT*n}:null;}},
+            {id:'rabbit-hole',name:'Rabbit Hole',rarity:'rare',price:10,type:'RUN',anyArticle:true,runBonus:RABBIT_HOLE_STEP*RABBIT_HOLE_MAX,desc:`+${Math.round(RABBIT_HOLE_STEP*100)}% round score for each article you visited this round after the first, up to ${RABBIT_HOLE_MAX} (×${1+RABBIT_HOLE_STEP*RABBIT_HOLE_MAX}). Counted when you lock.`,
+                possible:()=>true,action:ss=>{if(ss.length!==REQUIRED_SENTENCES)return null;const n=Math.min(RABBIT_HOLE_MAX,Math.max(...ss.map(s=>s.typing?.visited||1))-1);return n>0?{multAdd:RABBIT_HOLE_STEP*n}:null;}},
+            {id:'safety-net',name:'Safety Net',rarity:'uncommon',price:7,type:'RUN',desc:'Your weakest excerpt counts as at least the average of the other two before the three multiply.',action:()=>null},
+            {id:'understudy',name:'Understudy',rarity:'epic',price:13,type:'COPY',desc:'Copies the scoring effect of the buff directly above it in your buffs list. Reorder buffs in the shop.'},
+            // Money
+            {id:'tip-jar',name:'Tip Jar',rarity:'common',price:4,type:'UTILITY',desc:`+${TIP_JAR_PAY}¢ for each excerpt typed without a mistake in a cleared round.`},
+            {id:'bounty',name:'Bounty',rarity:'uncommon',price:7,type:'UTILITY',desc:`+1¢ each time your round score doubles past the target (×2, ×4, ×8…), up to +${BOUNTY_MAX}¢ a round.`},
+            {id:'long-form',name:'Long Form',rarity:'common',price:4,type:'UTILITY',desc:`+${LONG_FORM_PAY}¢ for each excerpt of ${LONG_FORM_WORDS} or more words in a cleared round.`},
+            {id:'frugal',name:'Frugal',rarity:'common',price:4,type:'UTILITY',desc:`+${FRUGAL_PAY}¢ for each empty buff slot when a round clears.`},
+            {id:'scrapper',name:'Scrapper',rarity:'uncommon',price:7,type:'UTILITY',desc:'Sell buffs for their full price instead of half.'}
+        );
+
         /* ================================================================
            CHARACTER BOOSTERS — sold in Small (3) and Large (5) letter packs
            CHAR_FREQ: estimated occurrences per million characters of English
@@ -3189,6 +3273,12 @@
                     action:w=>starts(w.text)&&(w.words||[]).filter(x=>starts(x.text)).length>=n?{multAdd:amount}:null};
             }});
 
+        // Snowball: its level is part of its id and rises by one every round you clear while you own it.
+        defineFamily({key:'snowball',type:'WORD',...plainIds('snowball'),
+            title:'Snowball',summary:'Word base on every word that grows each round you clear.',
+            options:()=>[[1]],
+            build:n=>{n=Math.floor(Number(n));if(!(n>=1&&n<=40))return null;const amount=SNOWBALL_STEP*n;
+                return {difficulty:1,name:`Snowball ${P('+'+amount)}`,desc:`+${amount} word base on every word. Grows by +${SNOWBALL_STEP} each round you clear.`,action:()=>({baseAdd:amount})};}});
         /* ---------- SENTENCE families ---------- */
         // Shares of excerpts with at least / at most n words.
         const LONG_EXCERPT_SHARE = {12:.7,15:.58,18:.47,22:.35,26:.25,30:.17};
@@ -3374,6 +3464,8 @@
             if(u.retired||u.booster)return false;
             // Family cards must be able to trigger on the current article; run cards always qualify.
             if(u.template)return !sentences?.length||triggersOn(u,sentences);
+            if(u.anyArticle)return true;
+            if(u.id==='understudy'&&owned.filter(x=>['WORD','SENTENCE','RUN'].includes(x.type)).length<1)return false;
             const wordCount=owned.filter(x=>x.type==='WORD').length;
             const triggerCount=owned.filter(x=>x.type==='WORD'||x.type==='SENTENCE').length;
             if(u.id==='chain'&&triggerCount<2)return false;
@@ -3384,27 +3476,31 @@
             if(sentences?.length&&['WORD','SENTENCE'].includes(u.type)&&!sentences.some(s=>scoreSentence(s,[u]).triggeredUpgrades.includes(u.name)))return false;
             return true;
         }
-        function ItemIcon({id}){return <svg className="item-icon" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"><circle cx="32" cy="32" r="29" fill="currentColor" opacity=".1"/>{id==='hourglass'?<><path d="M20 12h24M20 52h24M23 13v10l18 18v10M41 13v10L23 41v10"/><path d="M25 45h14l-7-8z" fill="currentColor"/></>:id==='carbon'?<><rect x="16" y="14" width="25" height="31" rx="3"/><rect x="24" y="22" width="25" height="31" rx="3" fill="#f4edff"/><path d="m29 32 14 12m0-12L29 44"/></>:<><path d="M25 13h14v10l8 7v21H17V30l8-7z"/><path d="M24 13h16M18 36h28"/><path d="M32 27c-10 12-5 15 0 15s10-3 0-15" fill="currentColor"/></>}</svg>}
+        function ItemIcon({id}){return <svg className="item-icon" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"><circle cx="32" cy="32" r="29" fill="currentColor" opacity=".1"/>{id==='hourglass'?<><path d="M20 12h24M20 52h24M23 13v10l18 18v10M41 13v10L23 41v10"/><path d="M25 45h14l-7-8z" fill="currentColor"/></>:id==='carbon'?<><rect x="16" y="14" width="25" height="31" rx="3"/><rect x="24" y="22" width="25" height="31" rx="3" fill="#f4edff"/><path d="m29 32 14 12m0-12L29 44"/></>:id==='loupe'?<><circle cx="28" cy="28" r="12"/><path d="m37 37 11 11" strokeWidth="5" strokeLinecap="round"/><path d="M22 25a7 7 0 0 1 6-4"/></>:id==='highlighter'?<><path d="m20 44 22-22 8 8-22 22H20z"/><path d="m38 26 8 8M16 52h32" strokeLinecap="round"/><path d="M20 52v-8h8z" fill="currentColor"/></>:<><path d="M25 13h14v10l8 7v21H17V30l8-7z"/><path d="M24 13h16M18 36h28"/><path d="M32 27c-10 12-5 15 0 15s10-3 0-15" fill="currentColor"/></>}</svg>}
 
         const ROUND_EFFECTS=[
             {id:'carbon-effect',name:'Carbon Copy',rarity:'rare',type:'RUN',temporary:true,desc:'This round only: multiply the final round score by 2. Does not count as a chain trigger.',action:()=>({multAdd:1})},
-            {id:'ink-effect',name:'Fresh Ink',rarity:'uncommon',type:'WORD',temporary:true,desc:'This round only: +8 base per word. Counts as one distinct word-upgrade chain trigger.',action:()=>({baseAdd:8})}
+            {id:'ink-effect',name:'Fresh Ink',rarity:'uncommon',type:'WORD',temporary:true,desc:'This round only: +8 base per word. Counts as one distinct word-upgrade chain trigger.',action:()=>({baseAdd:8})},
+            {id:'highlighter-effect',name:'Highlighter',rarity:'uncommon',type:'WORD',temporary:true,desc:`This round only: bold, italic and linked words get ×${HIGHLIGHTER_TIMES} word multiplier, after every addition.`,action:w=>w.charDetails.some(c=>c.b||c.i||c.l)?{multMul:HIGHLIGHTER_TIMES}:null}
         ];
         const CONSUMABLES=[
             {id:'hourglass',name:'Borrowed Time',rarity:'common',price:4,desc:'+20 seconds. Keep the run alive.',seconds:20},
             {id:'carbon',name:'Carbon Copy',rarity:'rare',price:5,desc:'×2 round score. One round. One copy.',effect:'carbon-effect'},
-            {id:'ink',name:'Fresh Ink',rarity:'uncommon',price:5,desc:'+8 per word this round. Make every word count.',effect:'ink-effect'}
+            {id:'ink',name:'Fresh Ink',rarity:'uncommon',price:5,desc:'+8 per word this round. Make every word count.',effect:'ink-effect'},
+            {id:'loupe',name:'Loupe',rarity:'uncommon',price:4,desc:'Outline the three best excerpts you have not used on this article.'},
+            {id:'highlighter',name:'Highlighter',rarity:'uncommon',price:5,desc:`×${HIGHLIGHTER_TIMES} word multiplier for bold, italic and linked words this round.`,effect:'highlighter-effect'}
         ];
         // Item hotkeys: Ctrl+1–3 uses bag slot 1–3 (Control on a Mac too). The page claims the keys
         // before the browser's tab switching; Alt/Option+1–3 still works as a fallback.
         const BAG_SLOTS=3;
         const itemKeyLabel=i=>`Ctrl+${i+1}`;
         const ITEM_KEY_HINT='Ctrl+1–3';
-        const ITEM_TAGS={hourglass:'+20s',carbon:'×2',ink:'+8/word'};
+        const ITEM_TAGS={hourglass:'+20s',carbon:'×2',ink:'+8/word',loupe:'Top 3',highlighter:'×2 fmt'};
         // The bag has fixed slots: using an item empties its slot, buying fills the lowest empty one.
         const normalizeBag=bag=>Array.from({length:BAG_SLOTS},(_,i)=>{const id=(bag||[])[i];return CONSUMABLES.some(c=>c.id===id)?id:null;});
         const bagCount=bag=>(bag||[]).filter(Boolean).length;
-        const upgradeByIds=ids=>[...[...UPGRADE_POOL,...ROUND_EFFECTS].filter(u=>(ids||[]).includes(u.id)),...(ids||[]).map(id=>boosterById(id)||templateById(id)).filter(Boolean)];
+        // Keeps the saved order: Understudy copies whatever sits above it.
+        const upgradeByIds=ids=>(ids||[]).map(id=>UPGRADE_POOL.find(u=>u.id===id)||ROUND_EFFECTS.find(u=>u.id===id)||boosterById(id)||templateById(id)).filter(Boolean);
         // Clock purchases: +5s for the next round only, or +5s on every future round.
         const TIME_OFFERS=[{key:'next',seconds:5,price:1,label:'Next round'},{key:'all',seconds:5,price:3,label:'Every round'}];
         const newMarket=()=>({credits:7,incomeRemainder:0,totalWords:0,lastWords:0,lastBaseIncome:0,lastBonusIncome:0,lastIncome:null,totalEarned:0,bag:[null,null,null],stock:[],rerolls:0,freeUsed:false,purchased:[],earned:0,lastScore:0,packsBought:[],pack:null,extraSeconds:0,nextSeconds:0});
@@ -3421,18 +3517,27 @@
             return {words:words.length,base,royalty,patron,units:base+royalty+patron,credits:(base+royalty+patron)/INCOME_UNITS};
         }
         const formatCredits=n=>{const r=Math.round(n*100)/100;return `${Number.isInteger(r)?r:r.toFixed(r*10%1?2:1)}¢`;};
-        function shopIncome(sentences, upgrades, market) {
+        // Whole-credit bonuses from money buffs, paid when a round clears.
+        function bonusCredits(sentences, upgrades, {runScore=0, target=0}={}) {
+            const tips=hasUpgrade(upgrades,'tip-jar')?sentences.filter(s=>s.typing&&s.typing.mistakes===0).length*TIP_JAR_PAY:0;
+            const bounty=hasUpgrade(upgrades,'bounty')&&target>0&&runScore>=2*target?Math.min(BOUNTY_MAX,Math.floor(Math.log2(runScore/target))):0;
+            const longForm=hasUpgrade(upgrades,'long-form')?sentences.filter(s=>incomeWords(s).length>=LONG_FORM_WORDS).length*LONG_FORM_PAY:0;
+            const frugal=hasUpgrade(upgrades,'frugal')?Math.max(0,BUFF_SLOTS-slottedBuffs(upgrades).length)*FRUGAL_PAY:0;
+            return {tips,bounty,longForm,frugal,total:tips+bounty+longForm+frugal};
+        }
+        function shopIncome(sentences, upgrades, market, round = {}) {
             const parts=sentences.map(s=>excerptIncome(s,upgrades));
             const sum=k=>parts.reduce((n,p)=>n+p[k],0);
             const words=sum('words'),baseUnits=sum('base'),royaltyUnits=sum('royalty'),patronUnits=sum('patron');
             const interest=hasUpgrade(upgrades,'interest')?Math.floor(market.credits/10):0;
+            const bonus=bonusCredits(sentences,upgrades,round);
             const carryIn=market.incomeRemainder||0;
             const units=carryIn+baseUnits+royaltyUnits+patronUnits;
-            const earned=Math.floor(units/INCOME_UNITS)+interest;
+            const earned=Math.floor(units/INCOME_UNITS)+interest+bonus.total;
             return {earned,incomeRemainder:units%INCOME_UNITS,
                 totalWords:(market.totalWords||0)+words,lastWords:words,
-                lastBaseIncome:baseUnits/INCOME_UNITS,lastBonusIncome:(royaltyUnits+patronUnits)/INCOME_UNITS+interest,
-                lastIncome:{words,base:baseUnits/INCOME_UNITS,royalty:royaltyUnits/INCOME_UNITS,patron:patronUnits/INCOME_UNITS,interest,carryIn:carryIn/INCOME_UNITS,carryOut:(units%INCOME_UNITS)/INCOME_UNITS,excerpts:parts.map(p=>p.credits)},
+                lastBaseIncome:baseUnits/INCOME_UNITS,lastBonusIncome:(royaltyUnits+patronUnits)/INCOME_UNITS+interest+bonus.total,
+                lastIncome:{words,base:baseUnits/INCOME_UNITS,royalty:royaltyUnits/INCOME_UNITS,patron:patronUnits/INCOME_UNITS,interest,tips:bonus.tips,bounty:bonus.bounty,longForm:bonus.longForm,frugal:bonus.frugal,carryIn:carryIn/INCOME_UNITS,carryOut:(units%INCOME_UNITS)/INCOME_UNITS,excerpts:parts.map(p=>p.credits)},
                 totalEarned:(market.totalEarned||0)+earned};
         }
         const drawConsumables=(random=Math.random)=>{const pool=[...CONSUMABLES];return Array.from({length:2},()=>pool.splice(Math.min(pool.length-1,Math.floor(random()*pool.length)),1)[0].id);};
@@ -3440,10 +3545,13 @@
             const price=consumable?item.price:shopPrice(item);
             const bag=normalizeBag(market.bag),slot=bag.indexOf(null);
             if(market.credits<price||(!consumable&&(owned.some(u=>u.id===item.id)||market.purchased.includes(item.id)))||(consumable&&(slot<0||!market.stock.includes(item.id))))return null;
+            if(!consumable&&!item.booster&&slottedBuffs(owned).length>=BUFF_SLOTS)return null;
             if(consumable)bag[slot]=item.id;
             return {...market,credits:market.credits-price,bag,stock:consumable?market.stock.filter(id=>id!==item.id):market.stock,purchased:consumable?market.purchased:[...market.purchased,item.id]};
         }
         const hasUpgrade=(upgrades,id)=>upgrades.some(u=>u.id===id);
+        // Buffs that take one of the BUFF_SLOTS: permanent cards, not letter levels or this-round effects.
+        const slottedBuffs=upgrades=>upgrades.filter(u=>!u.temporary&&!u.booster);
         function articleTraits(meta={}) {
             const categories=(meta.categories||[]).join(' ').toLowerCase();
             return {nature:/biology|botany|zoology|species|plants|animals|flora|fauna/.test(categories),history:/history|historical|centur(?:y|ies)|ancient|medieval|archaeolog/.test(categories)};
@@ -3913,6 +4021,9 @@
                 era = years[Math.floor(years.length / 2)];
             }
 
+            // The lede: sentences of the first body paragraph.
+            const lede = blocks.find(b => b.type === 'PARAGRAPH' && b.sentences?.length);
+            if (lede) lede.sentences.forEach(x => { x.lede = true; });
             return { blocks, meta: { leadImageUrl, allImages, era } };
         }
 
@@ -4115,7 +4226,7 @@
             });
             return out;
         }
-        const RenderedText = React.memo(({ chars, matchState, onNavigate, typedLength, sid }) => {
+        const RenderedText = React.memo(({ chars, matchState, onNavigate, typedLength, sid, mark }) => {
             // Group consecutive chars sharing the same format (and, when hoverable, the same word) into spans
             const spans = useMemo(() => {
             const spans = [];
@@ -4156,7 +4267,7 @@
                 matchState === 'YELLOW'   ? 'state-yellow'   : '';
 
             return (
-                <span className={`excerpt-text relative ${containerClass}`} data-sid={sid}>
+                <span className={`excerpt-text relative ${containerClass}${mark ? ' is-loupe' : ''}`} data-sid={sid}>
                     {(() => {
                         let charOffset = 0;
                         return spans.map((span, idx) => {
@@ -4217,7 +4328,7 @@
            (infoboxes, tables, captions, headings, hatnotes) and portals
            a typeable RenderedText into each [data-frag-id] node.
            ================================================================ */
-        const HtmlBlockWithFragments = ({ block, lockedSentences, usedSentenceIds, matchStates, typedLength, onNavigate }) => {
+        const HtmlBlockWithFragments = ({ block, lockedSentences, usedSentenceIds, matchStates, typedLength, onNavigate, loupeIds }) => {
             const containerRef = React.useRef(null);
             const [portalTargets, setPortalTargets] = useState([]);
 
@@ -4265,7 +4376,7 @@
                         else if (matchStates[fragId] === 'COMPLETE')        state = 'COMPLETE';
                         else if (matchStates[fragId] === 'YELLOW')          state = 'YELLOW';
                         return ReactDOM.createPortal(
-                            <RenderedText chars={sentence.chars} sid={fragId} matchState={state} typedLength={state === 'YELLOW' ? typedLength : null} onNavigate={onNavigate} />,
+                            <RenderedText chars={sentence.chars} sid={fragId} mark={state === 'NONE' && !!loupeIds?.has(fragId)} matchState={state} typedLength={state === 'YELLOW' ? typedLength : null} onNavigate={onNavigate} />,
                             el,
                             fragId
                         );
@@ -4298,6 +4409,7 @@
         const wordOutline = chars => ({ text: chars.map(c => c.c).join(''), len: chars.length, fmt: { b: chars.some(c => c.b), i: chars.some(c => c.i), l: chars.some(c => c.l), bul: chars.some(c => c.bul) } });
         const sentenceScoreCache = new WeakMap();
         function scoreSentence(s, upgrades, rules = DEFAULT_SCORING) {
+            upgrades = expandUnderstudy(upgrades);
             let byUpgrades = sentenceScoreCache.get(s);
             if (!byUpgrades) { byUpgrades = new WeakMap(); sentenceScoreCache.set(s, byUpgrades); }
             let byRules = byUpgrades.get(upgrades);
@@ -4362,7 +4474,7 @@
                 const wordEffects = [];
 
                 wordUpgrades.forEach(u => {
-                    const effect = u.action({ len, isFirst, isLast, index: idx, count: words.length, charDetails, text, prev: outline[idx - 1] || null, words: outline });
+                    const effect = u.action({ len, isFirst, isLast, index: idx, count: words.length, charDetails, text, prev: outline[idx - 1] || null, words: outline, title: s.articleTitle || '' });
                     if (effect) {
                         if (effect.baseAdd) upgradeBase += effect.baseAdd * rules.wordBonus;
                         if (effect.multAdd) upgradeMult += effect.multAdd * rules.wordBonus;
@@ -4401,7 +4513,7 @@
             if (citationBlocks > 0) appliedSentenceUpgrades.push(`${citationBlocks} Citation(s)`);
 
             upgrades.filter(u => u.type === 'SENTENCE').forEach(u => {
-                const effect = u.action({ words: wordScores, citationBlocks, citationTexts });
+                const effect = u.action({ words: wordScores, citationBlocks, citationTexts, sentence: s });
                 if (effect) {
                     if (effect.baseAdd) sBase += effect.baseAdd * rules.sentenceBonus;
                     if (effect.multAdd) sMult += effect.multAdd * rules.sentenceBonus;
@@ -4579,7 +4691,7 @@
             };
             const runNames=result.appliedRunUpgrades.join(', ');
             return <dialog ref={dialogRef} className="tally-dialog is-simple" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()}>
-                <header className="tally-head"><div><span className="print-label">Round {ante} of 7</span><h1 id="tally-title">Tally</h1></div>{step<6 && <button onClick={()=>setStep(6)}>Skip</button>}</header>
+                <header className="tally-head"><div><span className="print-label">Round {ante} of {MAX_ANTE}</span><h1 id="tally-title">Tally</h1></div>{step<6 && <button onClick={()=>setStep(6)}>Skip</button>}</header>
                 <section className="tally-ledger" aria-label="Excerpt scores" onMouseOver={hover.onMouseOver} onMouseLeave={hover.onMouseLeave}>
                     <p className="tally-hint">Hover a word for its base, multiplier and score.</p>
                     {details.map((d,i)=>{const note=modifiers(d);return <article key={d.id} className="tally-row">
@@ -4592,7 +4704,7 @@
                     <div className="tally-result"><div><span className="print-label">{step<5?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span>
                         <p className="tally-equation">{step>=4?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}{step>=4&&result.multiplier!==1&&<> × <b title={runNames}>{fmtMult(result.multiplier)}</b> <span className="tally-run-names">{runNames}</span></>}</p></div>
                         <strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
-                    {!practice&&step>=5&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market);return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
+                    {!practice&&step>=5&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market,{runScore:result.runTotal,target:targetScore});return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
                     <div className="tally-next">{!practice&&step>=5&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={step<6} onClick={()=>onComplete(result.runTotal,success)}>{practice?'Finish practice':success?(ante>=MAX_ANTE?'Complete the run':'Visit the shop'):'See results'}</button></div>
                 </footer>
                 {hover.node}
@@ -4696,7 +4808,7 @@
             patron:'+25% word income on future clears. Partial credits carry over.'
         };
         const shopBlurb = (u, rules) => SHOP_BLURBS[u.id] || upgradeDescription(u, rules).replace(/^Multiply the round score by (\S+) when/, '×$1 round score when').replace(/ \([^)]*\)\.$/, '.');
-        const ITEM_BLURBS = { hourglass:'+20 seconds on the clock.', carbon:'Doubles one round’s score.', ink:'+8 base per word for one round.' };
+        const ITEM_BLURBS = { hourglass:'+20 seconds on the clock.', carbon:'Doubles one round’s score.', ink:'+8 base per word for one round.', loupe:'Outlines the three best unused excerpts on this article.', highlighter:'×2 word multiplier on formatted words for one round.' };
         const listNames = names => names.length <= 3 ? names.join(', ').replace(/, ([^,]*)$/, ' & $1') : `${names.slice(0, 3).join(', ')} & ${names.length - 3} more`;
 
         const PackDialog = ({ pack, sentences, owned, rules, onChoose, onSkip }) => {
@@ -4769,19 +4881,39 @@
             })}</div>
         </div>;
 
-        // Owned buffs, always in view. Cards the current excerpt triggers light up; run cards already ruled out dim.
-        const BuildRail = ({ upgrades, rules, fired = [], lost = [], label = 'Your buffs' }) => {
+        // Owned buffs, always in view: the slotted cards, this round's item effects, and letter levels in one line.
+        // In the shop each card can be sold and, for Understudy, moved. Cards the current excerpt triggers light up;
+        // run cards already ruled out dim.
+        const sellValue = (u, owned) => hasUpgrade(owned, 'scrapper') && u.id !== 'scrapper' ? shopPrice(u) : Math.floor(shopPrice(u) / 2);
+        const BuildList = ({ upgrades, rules, fired = [], lost = [], onSell, onMove }) => {
+            const showEmpty = !!onSell;
             const on = new Set(fired), off = new Set(lost);
-            return <aside className="build-rail" aria-label={label}>
-                <div className="rail-head"><span>{label}</span><b>{upgrades.length}</b></div>
-                {upgrades.length ? <ul>{upgrades.map(u => <li key={u.id} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}`} title={plainText(upgradeDescription(u, rules))}>
-                    <b><RichText text={u.richName || u.name}/>{u.temporary && <em>this round</em>}</b>
-                    <span><RichText text={shopBlurb(u, rules)}/></span>
-                </li>)}</ul> : <p className="rail-empty">None yet. The shop sells them between rounds.</p>}
-            </aside>;
+            const [armed, setArmed] = useState(null);
+            useEffect(() => { if (!armed) return; const t = setTimeout(() => setArmed(null), 3000); return () => clearTimeout(t); }, [armed]);
+            const slotted = slottedBuffs(upgrades), effects = upgrades.filter(u => u.temporary), letters = upgrades.filter(u => u.booster);
+            const reorder = onMove && slotted.some(u => u.id === 'understudy');
+            return <>
+                <ul>{slotted.map((u, i) => <li key={u.id} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}`} title={plainText(upgradeDescription(u, rules))}>
+                        <b><RichText text={u.richName || u.name}/></b>
+                        <span><RichText text={u.id === 'understudy' ? (i && ['WORD','SENTENCE','RUN'].includes(slotted[i - 1].type) && slotted[i - 1].id !== 'safety-net' ? `Copying ${slotted[i - 1].name}.` : 'Copies nothing: put a scoring buff directly above it.') : shopBlurb(u, rules)}/></span>
+                        {(onSell || reorder) && <div className="rail-actions">
+                            {reorder && <><button type="button" aria-label={`Move ${u.name} up`} disabled={!i} onClick={() => onMove(u.id, -1)}>↑</button><button type="button" aria-label={`Move ${u.name} down`} disabled={i === slotted.length - 1} onClick={() => onMove(u.id, 1)}>↓</button></>}
+                            {onSell && <button type="button" className={`rail-sell${armed === u.id ? ' is-armed' : ''}`} onClick={() => { if (armed === u.id) { setArmed(null); onSell(u.id); } else setArmed(u.id); }}>{armed === u.id ? `Confirm +${sellValue(u, upgrades)}¢` : `Sell ${sellValue(u, upgrades)}¢`}</button>}
+                        </div>}
+                    </li>)}
+                    {showEmpty && Array.from({ length: Math.max(0, BUFF_SLOTS - slotted.length) }, (_, i) => <li key={`empty-${i}`} className="rail-slot">Empty slot</li>)}
+                    {effects.map(u => <li key={u.id} className={`rail-item rail-effect${on.has(u.name) ? ' is-live' : ''}`} title={plainText(upgradeDescription(u, rules))}><b>{u.name}<em>this round</em></b></li>)}
+                </ul>
+                {!showEmpty && !slotted.length && !effects.length && <p className="rail-empty">None yet. The shop sells them between rounds.</p>}
+                {letters.length > 0 && <p className="rail-letters" title={letters.map(u => u.name).join(', ')}><span>Letters</span>{letters.map(u => <i key={u.id} lang="und">{u.glyph}<sup>{u.level}</sup></i>)}</p>}
+            </>;
         };
+        const BuildRail = ({ label = 'Your buffs', ...props }) => <aside className="build-rail" aria-label={label}>
+            <div className="rail-head"><span>{label}</span><b>{slottedBuffs(props.upgrades).length}/{BUFF_SLOTS}</b></div>
+            <BuildList {...props}/>
+        </aside>;
 
-        const BuildDrawer = ({ upgrades, rules }) => {
+        const BuildDrawer = (props) => {
             const ref = useRef(null);
             useEffect(() => {
                 const close = e => { if (ref.current?.open && !ref.current.contains(e.target)) ref.current.open = false; };
@@ -4790,10 +4922,8 @@
             }, []);
             const onKeyDown = e => { if (e.key === 'Escape' && ref.current.open) { e.stopPropagation(); ref.current.open = false; ref.current.querySelector('summary').focus(); } };
             return <details ref={ref} className="shop-build" onKeyDown={onKeyDown}>
-                <summary>Build <b>{upgrades.length}</b></summary>
-                <div className="shop-build-panel">{upgrades.length
-                    ? upgrades.map(u => <article key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span><h3><RichText text={u.richName||u.name}/></h3><p><RichText text={upgradeDescription(u, rules)}/></p></article>)
-                    : <p className="shop-build-empty">No upgrades yet.</p>}</div>
+                <summary>Buffs <b>{slottedBuffs(props.upgrades).length}/{BUFF_SLOTS}</b></summary>
+                <div className="shop-build-panel build-rail-list"><BuildList {...props}/></div>
             </details>;
         };
 
@@ -4801,13 +4931,13 @@
             <header className="rule-head"><div><h2>Rules</h2></div><button autoFocus onClick={onClose} aria-label="Close rules">Close</button></header>
             <div className="rule-body">
                 <p className="rules-edition">{rules === DEFAULT_SCORING ? 'Standard scoring' : 'Custom dev scoring'} · values below match the active rules.</p>
-                <details open><summary>01 / The run</summary><p>Lock three different excerpts before the clock runs out. Their scores multiply together. Reach the round’s target to advance, then visit the shop to buy permanent upgrades and consumables. Clear all seven rounds to win. Banked score is the sum of cleared rounds; it does not pay the next target.</p><p>Sentences, headings and captions can be excerpts; captions and infobox cells show a faint dotted underline. Start at the beginning of one and type its complete text, including spaces, punctuation and citations, matching the formatting of every character. Press Enter or Lock to bank it. Used excerpts are greyed out for the rest of that article visit, and the third lock starts the tally.</p>
+                <details open><summary>01 / The run</summary><p>Lock three different excerpts before the clock runs out. Their scores multiply together. Reach the round’s target to advance, then visit the shop to buy permanent upgrades and consumables. Clear all eight rounds to win. Banked score is the sum of cleared rounds; it does not pay the next target.</p><p>Sentences, headings and captions can be excerpts; captions and infobox cells show a faint dotted underline. Start at the beginning of one and type its complete text, including spaces, punctuation and citations, matching the formatting of every character. Press Enter or Lock to bank it. Used excerpts are greyed out for the rest of that article visit, and the third lock starts the tally.</p>
                     <p>The top bar reads left to right. <b>Target</b> is the round goal. <b>This sentence</b> appears once your typing matches exactly one excerpt and shows its full score, with the credits its words will pay. <b>Aim per sentence</b> (<b>Still needed</b> on the last one) is the equal score each open slot needs to clear the round, counting only guaranteed multipliers; hover it for the version where every run bonus still in reach also lands. It is a guide: a strong excerpt can carry a weak one. <b>Credits</b> is what you hold. On the last excerpt, <b>Round if locked</b> gives the finished forecast.</p>
                     <p>The pace gauge on the left fills toward <b>Goal</b> as you bank excerpts. The notch marks exactly-on-pace; fill above it means you are ahead. The striped segment previews the excerpt you are typing, and <b>This one</b> compares it to what the slot needs.</p><table><thead><tr><th>Round</th><th>Target</th><th>Clock</th></tr></thead><tbody>{ROUND_SECONDS.map((seconds,i) => <tr key={i}><td>{i+1}</td><td>{formatScore(getRoundTarget(i+1))}</td><td>{seconds}s</td></tr>)}</tbody></table></details>
                 <details><summary>02 / Typing & formatting</summary><p>Click the typing field to focus it. Formatting buttons are toggles, not keys you hold down. Turn each required format on before typing that part, then off when it ends. Multiple formats can be on at once. The toggles stay on until you change them, including between excerpts. After three seconds without typing in an unfinished excerpt, a hint appears above the input when the next character is unambiguous. It shows the character and any formatting toggles that need changing. If only the last character is wrong, it shows how to replace it. Typing or changing a format dismisses the hint. The format-button values show the standard word multiplier for bold/italic, link points per word, and citation multiplier per citation block; bullet formatting itself adds no points.</p><table><thead><tr><th>Action</th><th>Shortcut</th></tr></thead><tbody>{[['Bold','B'],['Italic','I'],['Link','L'],['Citation',';'],['Bullet','O'],['Compose','M']].map(([label,key]) => <tr key={key}><td>{label}</td><td>Ctrl / ⌘ + {key}</td></tr>)}<tr><td>Special characters</td><td>Hold Ctrl, then Ctrl + shown key</td></tr><tr><td>Use item in bag slot 1–3</td><td>Ctrl + 1–3</td></tr></tbody></table><p>Enter locks only a complete match. Backspace removes the last character. Ctrl, ⌘ or Alt + Backspace clears the input. Clear or Escape clears the unfinished sentence and resets formatting; locked sentences stay. Escape first closes Compose or the special-character panel when either is open. An unmatched character or format turns the input red; edit it to restore a match. Straight quotes also match curly quotes; a hyphen matches an en dash or em dash. Spaces still require the correct formatting.</p><p>Citation mode applies to references and annotations such as [which?] and [citation needed], including brackets. These use small baseline brackets with a dotted underline, without internal link or italic toggles. Math superscripts and area exponents are ordinary text, never citations. Each format combination has its own ink color and an underline showing its component colors. Hover a word or check the active-format preview to see the combination; bullet-only text and bullet markers stay green. Bullet mode matches the text of a list item; do not type its decorative bullet. Special characters typed from the Ctrl panel use your active formats.</p><p>Practice has three excerpts, no clock and no target. Complete the plain, bold and italic excerpts to finish; it does not replace your saved run.</p></details>
                 <details><summary>03 / Navigation, clock & saving</summary><p>The clock starts with your first typed character, inserted special character or article link, except for an unused Scout’s Honor free click. Following a link clears unfinished input after the new article loads; locked excerpts and upgrades remain. Back returns to a previously visited article.</p><p>The clock pauses while the game menu is open, during article loading, Rules, dev mode and scoring. Practice is untimed. Switching browser tabs alone does not pause a running clock. Save & leave stores the run in this browser; Continue resumes with the clock paused until typing or navigation begins. The run also autosaves while playing. Restart starts at round one with a new article and resets upgrades and credits; Keep playing cancels it. The clock pauses while choosing. New run replaces the saved run.</p></details>
                 <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers. Cards marked × multiply the word multiplier instead, after every addition, so they grow with the rest of your build. Hover any word, in the article or the tally, to see its base, its multiplier (length × format) and its score.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
-                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
+                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. Tip Jar pays per excerpt typed without a mistake, Long Form per excerpt of 25+ words, Bounty per doubling of the target, and Frugal per empty buff slot. All money buffs apply on future clears. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>You hold up to four buffs. Letter levels and this-round item effects don’t take a slot. When all four are full, sell one from your buffs list in the shop: it pays back half its price (Scrapper pays full price). Order matters only for Understudy, which copies the scoring buff directly above it; move buffs up and down in the shop.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Highlighter costs 5: ×2 word multiplier, after every addition, on bold, italic and linked words this round. Loupe costs 4: outlines the three highest-scoring excerpts you have not used on the current article, until you leave it. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
                 <details><summary>06 / Special characters</summary><p>Hold Ctrl for a moment to open the character panel: every special character on the current page, each with a key. While still holding Ctrl, press that key to type the character with your active formatting; release Ctrl to close the panel. Keys are fixed for the whole article, with the most frequent characters on single keys. Pages with more characters than keys use two-key labels (for example Ctrl+0 then Ctrl+S). Experienced players can press Ctrl+key without waiting for the panel. The Ω button pins the panel open for mouse and touch; click a character to type it. Hint keys never reuse the format toggles (B I L ; O M) or the item slots (1–3). Characters that match plain keys are left out: straight quotes match curly quotes, a hyphen matches en and em dashes, and superscript digits accept ordinary digits (² → 2); exponents do not require Citation mode. Combining marks are shown on a dotted circle for legibility; only the mark is inserted.</p><p>Compose also works for common Latin accents and typography: toggle Compose, then type a two-character combination. A supported pair inserts one character with the active formatting and exits Compose. An unsupported pair inserts both characters literally. Escape or Enter cancels composition without clearing the existing input.</p><table><thead><tr><th>Pair</th><th>Character</th></tr></thead><tbody>{Object.entries(COMPOSE_SYMBOLS).map(([pair,char]) => <tr key={pair}><td><code>{pair}</code></td><td>{char}</td></tr>)}</tbody></table><p>Combine a letter with an accent marker in either order: apostrophe for acute, backtick for grave, double quote for diaeresis, ^ for circumflex, ~ for tilde, comma for cedilla, / for stroke, or o for ring. An accented character is inserted when the combination forms a single character; otherwise the pair is inserted literally. Example: apostrophe + e gives é.</p></details>
                 <details><summary>07 / Dev mode & sandbox</summary><p>Dev mode pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
             </div>
@@ -4911,7 +5041,7 @@
                             <p className="text-xs mt-2">Round: floor({run.finalSentenceTotals.map(n => n.toLocaleString()).join(' × ')} × {Number(run.multiplier.toFixed(3))})</p>
                         </details>
                         <details className="bg-white border border-zinc-300 rounded p-3 mt-3">
-                            <summary className="font-bold text-sm cursor-pointer">Difficulty across seven rounds</summary>
+                            <summary className="font-bold text-sm cursor-pointer">Difficulty across {MAX_ANTE} rounds</summary>
                             <p className="text-xs text-zinc-500 my-3">Fixed build, same three excerpts</p>
                             <table className="w-full text-xs text-left"><thead><tr><th>Round</th><th>Time budget</th><th>Goal</th><th>Trial</th></tr></thead><tbody>{Array.from({length: MAX_ANTE}, (_,i) => i+1).map(n => {const estimate=estimateTrialTime(trial,selectedUpgrades,n,wpm,article,categories);return <tr key={n} className="border-t border-zinc-100"><td className="py-2">{n}</td><td>{estimate.budget}s</td><td>{formatScore(getRoundTarget(n))}</td><td className={trialReady && run.runTotal >= getRoundTarget(n) && estimate.fits ? 'text-blue-700' : 'text-zinc-500'}>{!trialReady ? '—' : !estimate.fits ? 'Over time' : run.runTotal >= getRoundTarget(n) ? `${(run.runTotal / getRoundTarget(n)).toFixed(1)}× goal` : 'Below goal'}</td></tr>;})}</tbody></table>
                         </details>
@@ -5296,7 +5426,15 @@
 
             const uniqueExcerpt = matchStates._activeCount === 1
                 ? flatSentences.find(s=>matchStates[s.id]==='YELLOW'||matchStates[s.id]==='COMPLETE') : null;
-            const liveExcerpt = useMemo(() => uniqueExcerpt ? {...uniqueExcerpt,articleTitle:uniqueExcerpt.articleTitle || article} : null, [uniqueExcerpt,article]);
+            // How the current draft is being typed: mistakes (each slip into red), when it started, and which
+            // articles this round has visited. Locked excerpts keep a copy for Clean Copy, Tempo, Tip Jar and Rabbit Hole.
+            const draftRef=useRef({start:null,mistakes:0,red:false});
+            const [loupeIds,setLoupeIds]=useState(()=>new Set());
+            useEffect(()=>{setLoupeIds(new Set());},[article]);
+            const roundVisitsRef=useRef(new Set());
+            const draftTyping=chars=>{const d=draftRef.current,secs=d.start===null?0:(performance.now()-d.start)/1000;
+                return {mistakes:d.mistakes,wpm:secs>1?Math.min(250,Math.round(chars/5/(secs/60))):0,visited:Math.max(1,roundVisitsRef.current.size)};};
+            const liveExcerpt = useMemo(() => uniqueExcerpt ? {...uniqueExcerpt,articleTitle:uniqueExcerpt.articleTitle || article,typing:draftTyping(buffer.length)} : null, [uniqueExcerpt,article,buffer.length]); // eslint-disable-line
             const liveDetail = useMemo(() => liveExcerpt ? scoreSentence(liveExcerpt,activeUpgrades,rules) : null,[liveExcerpt,activeUpgrades,rules]);
             const liveScore=liveDetail?.sentenceTotal??null;
             const thirdRequirement = useMemo(() => thirdExcerptRequirement(lockedSentences,liveExcerpt,activeUpgrades,rules,targetScore),[lockedSentences,liveExcerpt,activeUpgrades,rules,targetScore]);
@@ -5318,6 +5456,9 @@
             const paceRatio=pace?.ratio??null;
             const pacePercent=paceRatio===null?null:Math.floor(paceRatio*100);
             const isRed = buffer.length > 0 && matchStates._activeCount === 0;
+            if(!buffer.length&&draftRef.current.start!==null)draftRef.current={start:null,mistakes:0,red:false};
+            if(buffer.length){const d=draftRef.current;if(d.start===null)d.start=performance.now();if(isRed&&!d.red)d.mistakes++;d.red=isRed;}
+            useEffect(()=>{if(article&&gameState==='PLAYING')roundVisitsRef.current.add(article);},[article,gameState]);
 
             useEffect(()=>{if(gameState==='LOST'){AudioEngine.stopAmbient();AudioEngine.playLoss();}if(gameState==='VICTORY')AudioEngine.stopAmbient();},[gameState]);
 
@@ -5386,7 +5527,7 @@
                                 if(!isPractice && lockedSentences.length<2 && hasUpgrade(activeUpgrades,'breathing')){setTimeLeft(t=>t+8);setUtilityNotice('Second Wind +8s');}
                                 setUsedSentenceIds(prev => { const n = new Set(prev); n.add(sentence.id); return n; });
                                 setLockedSentences(prev => {
-                                    const next = [...prev, { ...sentence, articleTitle: article, articleCategories: articleMeta.categories || [] }];
+                                    const next = [...prev, { ...sentence, articleTitle: article, articleCategories: articleMeta.categories || [], typing: draftTyping(sentence.chars.length) }];
                                     if (next.length === REQUIRED_SENTENCES) setGameState('SCORING');
                                     return next;
                                 });
@@ -5569,6 +5710,7 @@
                Round / run lifecycle
                ---------------------------------------------------------- */
             const startRound = async (keepArticle = false, roundAnte = ante, roundUpgrades = activeUpgrades) => {
+                roundVisitsRef.current=new Set();
                 setBuffer([]);
                 setLockedSentences([]);
                 const reward=keepArticle?articleTimeReward(articleMeta,roundUpgrades):{seconds:0,awards:[]};
@@ -5652,8 +5794,9 @@
                 }
 
                 setTotalScore(prev => prev + runScore);
-                setActiveUpgrades(prev=>prev.filter(u=>!u.temporary));
-                const payout=shopIncome(lockedSentences,activeUpgrades,marketRef.current);
+                // Temporary effects end; Snowball grows a level.
+                setActiveUpgrades(prev=>prev.filter(u=>!u.temporary).map(u=>u.template==='snowball'?buffVariant('snowball',Number(u.params[0])+1)||u:u));
+                const payout=shopIncome(lockedSentences,activeUpgrades,marketRef.current,{runScore,target:getRoundTarget(ante)});
                 updateMarket({...marketRef.current,...payout,credits:marketRef.current.credits+payout.earned,lastScore:runScore,stock:drawConsumables(),rerolls:0,freeUsed:false,purchased:[],packsBought:[],pack:null});
 
                 if (ante >= MAX_ANTE) {
@@ -5672,6 +5815,19 @@
                 const next=buyShopItem(marketRef.current,activeUpgrades,upgrade);
                 if(!next)return;
                 updateMarket(next);setActiveUpgrades(prev=>[...prev,upgrade]);AudioEngine.playLock();
+            };
+            // Buff slots: sell for half price (Scrapper: full), reorder for Understudy.
+            const sellBuff = id => {
+                if(gameState!=='UPGRADE_SELECT')return;
+                const u=activeUpgrades.find(x=>x.id===id);if(!u||u.temporary||u.booster)return;
+                const value=sellValue(u,activeUpgrades);
+                setActiveUpgrades(prev=>prev.filter(x=>x.id!==id));
+                updateMarket({...marketRef.current,credits:marketRef.current.credits+value,purchased:(marketRef.current.purchased||[]).filter(x=>x!==id)});AudioEngine.playTick?.();
+            };
+            const moveBuff = (id, dir) => {
+                if(gameState!=='UPGRADE_SELECT')return;
+                setActiveUpgrades(prev=>{const slots=prev.filter(u=>!u.temporary&&!u.booster),i=slots.findIndex(u=>u.id===id),j=i+dir;
+                    if(i<0||j<0||j>=slots.length)return prev;[slots[i],slots[j]]=[slots[j],slots[i]];let k=0;return prev.map(u=>u.temporary||u.booster?u:slots[k++]);});
             };
             const buyConsumable = item => {
                 if(gameState!=='UPGRADE_SELECT')return;
@@ -5715,10 +5871,16 @@
                 if(gameState!=='PLAYING'||isNavigating||timeLeft<=0)return refuse('Items can only be used mid-round');
                 if(!item)return refuse(bagCount(bag)?`Bag slot ${index+1} is empty`:'Your bag is empty — buy items in the shop');
                 if(item.effect&&hasUpgrade(activeUpgrades,item.effect))return refuse(`${item.name} is already active this round`);
+                if(item.id==='loupe'){
+                    const locked=new Set(lockedSentences.map(x=>x.id));
+                    const ranked=flatSentences.filter(x=>!usedSentenceIds.has(x.id)&&!locked.has(x.id)).map(x=>({id:x.id,score:scoreSentence({...x,articleTitle:article},activeUpgrades,rules).sentenceTotal})).sort((a,b)=>b.score-a.score).slice(0,3);
+                    if(!ranked.length)return refuse('No unused excerpts left on this article');
+                    setLoupeIds(new Set(ranked.map(r=>r.id)));
+                }
                 bag[index]=null;updateMarket({...current,bag});
                 if(item.seconds){setTimeLeft(t=>t+item.seconds);setRoundClock(t=>Math.max(t,timeLeft+item.seconds));}
                 if(item.effect)setActiveUpgrades(prev=>[...prev,ROUND_EFFECTS.find(u=>u.id===item.effect)]);
-                setUtilityNotice(item.seconds?`${item.name} +${item.seconds}s`:`${item.name} active this round`);AudioEngine.playLock();
+                setUtilityNotice(item.seconds?`${item.name} +${item.seconds}s`:item.id==='loupe'?'Loupe: the three best excerpts are outlined':`${item.name} active this round`);AudioEngine.playLock();
             };
             const useItemByKey = slot => useConsumable(slot,true);
             itemHotkeyRef.current=useItemByKey;
@@ -5826,11 +5988,11 @@
                     <div className="home-inner">
                         <p className="home-kicker">A typing roguelike on Wikipedia</p>
                         <h1 className="home-wordmark">Ency<span>clo</span></h1>
-                        <p className="home-lede">Land on a random article. Type three of its sentences, formatting and all. Their scores multiply. Clear seven rounds.</p>
+                        <p className="home-lede">Land on a random article. Type three of its sentences, formatting and all. Their scores multiply. Clear eight rounds.</p>
                         <nav className="home-menu" aria-label="Game menu">
                             {completedPractice && <p className="home-note">Practice complete. You’re ready for a real run.</p>}
-                            {savedRun && <button className="home-primary" onClick={resumeRun}>Continue<span>Round {savedRun.ante} of 7</span></button>}
-                            <button className={savedRun ? 'home-option' : 'home-primary'} onClick={handleStartNewGame}>{savedRun ? 'New run' : 'Play'}<span>{savedRun ? 'Replaces your save' : 'Seven rounds'}</span></button>
+                            {savedRun && <button className="home-primary" onClick={resumeRun}>Continue<span>Round {savedRun.ante} of {MAX_ANTE}</span></button>}
+                            <button className={savedRun ? 'home-option' : 'home-primary'} onClick={handleStartNewGame}>{savedRun ? 'New run' : 'Play'}<span>{savedRun ? 'Replaces your save' : 'Eight rounds'}</span></button>
                             <button className="home-option" onClick={startPractice}>Practice<span>No clock</span></button>
                             <button className="home-option" onClick={() => setShowCommandsModal(true)}>Rules<span>How scoring works</span></button>
                         </nav>
@@ -5887,6 +6049,10 @@
                             <span>{income.words} words ÷ 6 = {formatCredits(income.base)}</span>
                             {income.royalty>0&&<span>Royalties +{formatCredits(income.royalty)}</span>}
                             {income.patron>0&&<span>Patron +{formatCredits(income.patron)}</span>}
+                            {income.tips>0&&<span>Tip Jar +{income.tips}¢</span>}
+                            {income.bounty>0&&<span>Bounty +{income.bounty}¢</span>}
+                            {income.longForm>0&&<span>Long Form +{income.longForm}¢</span>}
+                            {income.frugal>0&&<span>Frugal +{income.frugal}¢</span>}
                             {income.interest>0&&<span>Interest +{income.interest}¢</span>}
                             {income.carryIn>0&&<span>Carried in +{formatCredits(income.carryIn)}</span>}
                             <span>Next round carries {formatCredits(income.carryOut)}</span>
@@ -5894,25 +6060,25 @@
                         </section>}
                         <main className="shop-floor">
                             <section className="shop-shelf shop-upgrades" aria-labelledby="shop-upgrades">
-                                <div className="shop-label"><h2 id="shop-upgrades">Upgrades</h2><span>Permanent</span></div>
+                                <div className="shop-label"><h2 id="shop-upgrades">Upgrades</h2><span>{slottedBuffs(owned).length} of {BUFF_SLOTS} slots used</span></div>
                                 <div className={`shop-cards cols-${Math.max(4,upgradeOptions.length)}`} style={{'--cols':Math.max(4,upgradeOptions.length)}}>
                                     {upgradeOptions.map(opt => {
                                         const sold=activeUpgrades.some(u=>u.id===opt.id);
-                                        const price=shopPrice(opt), afford=market.credits>=price;
+                                        const price=shopPrice(opt), afford=market.credits>=price, slotsFull=!sold&&slottedBuffs(owned).length>=BUFF_SLOTS;
                                         const withUpgrade=sold?activeUpgrades:[...activeUpgrades,opt];
                                         const replay=(opt.type!=='UTILITY'||['chain','chain-forged'].includes(opt.id))&&lastRoundScore!==null?scoreRun(lockedSentences,withUpgrade,rules).runTotal:null;
                                         const clock=nextClock(withUpgrade);
                                         const preview=sold?null:replay!==null?{label:'Last round',from:formatScore(lastRoundScore),to:replay===lastRoundScore?null:formatScore(replay)}:clock!==clockNow?{label:'Clock',from:`${clockNow}s`,to:`${clock}s`}:null;
                                         const blurb=shopBlurb(opt,rules), full=upgradeDescription(opt,rules);
                                         return (
-                                            <button key={opt.id} className={`shop-card type-${opt.type.toLowerCase()}${sold?' is-owned':''}`} onClick={() => handleSelectUpgrade(opt)} disabled={sold||!afford} title={blurb!==full?plainText(full):undefined}>
+                                            <button key={opt.id} className={`shop-card type-${opt.type.toLowerCase()}${sold?' is-owned':''}`} onClick={() => handleSelectUpgrade(opt)} disabled={sold||!afford||slotsFull} title={slotsFull?'All four buff slots are full. Sell one first.':blurb!==full?plainText(full):undefined}>
                                                 <span className="shop-card-body">
                                                     <span className="shop-card-meta"><span className="shop-type">{opt.type}</span><span className={`rarity-badge rarity-${opt.rarity}`}>{RARITIES[opt.rarity].label}</span></span>
                                                     <h3><RichText text={opt.richName||opt.name}/></h3>
                                                     <p><RichText text={blurb}/></p>
                                                     {preview&&<span className="shop-preview"><small>{preview.label}</small>{preview.to?<span>{preview.from}<i aria-hidden="true">→</i><b>{preview.to}</b></span>:<span>No change</span>}</span>}
                                                 </span>
-                                                <span className="shop-buy"><b>{price}¢</b><span>{sold?'Owned':afford?'Buy':shortBy(price)}</span></span>
+                                                <span className="shop-buy"><b>{price}¢</b><span>{sold?'Owned':slotsFull?'Slots full':afford?'Buy':shortBy(price)}</span></span>
                                                 {sold&&<span className="shop-stamp" aria-hidden="true">Sold</span>}
                                             </button>
                                         );
@@ -5955,7 +6121,7 @@
                             </section>
                         </main>
 
-                        <BuildRail upgrades={owned} rules={rules} label="Your buffs"/>
+                        <BuildRail upgrades={owned} rules={rules} onSell={sellBuff} onMove={moveBuff}/>
                         <footer className="shop-foot">
                             <div className="shop-kit">
                                 <div className="shop-bag" role="group" aria-label={`Bag, ${bagCount(market.bag)} of 3. Use items mid-round with ${ITEM_KEY_HINT}.`}>
@@ -5967,7 +6133,7 @@
                                             : <span key={i} className="shop-slot is-empty" title={`Slot ${i+1} is empty (${itemKeyLabel(i)})`}><kbd>{i+1}</kbd></span>;
                                     })}
                                 </div>
-                                <BuildDrawer upgrades={owned} rules={rules}/>
+                                <BuildDrawer upgrades={owned} rules={rules} onSell={sellBuff} onMove={moveBuff}/>
                             </div>
                             <div className="shop-exit">
                                 <button className="shop-link" onClick={() => setShowCommandsModal(true)}>Rules</button>
@@ -6020,7 +6186,7 @@
                         <div className="play-toolbar flex justify-between items-center gap-2">
                             {/* Left: ante + title */}
                             <div className="flex items-center gap-3 min-w-0 flex-1"><span className="hud-brand" aria-hidden="true">Ency<span>clo</span></span>
-                                <span className="round-pill">Round {ante}<small>/7</small></span>
+                                <span className="round-pill">Round {ante}<small>/{MAX_ANTE}</small></span>
                                 <h2 className="text-lg md:text-xl font-serif font-bold text-zinc-900 truncate min-w-0">
                                     {article}
                                 </h2>
@@ -6136,6 +6302,7 @@
                                                 matchStates={matchStates}
                                                 typedLength={buffer.length}
                                                 onNavigate={handleNavigation}
+                                                loupeIds={loupeIds}
                                             />
                                         );
                                     }
@@ -6151,7 +6318,7 @@
 
                                     return (
                                         <React.Fragment key={s.id}>
-                                            <RenderedText chars={s.chars} sid={s.id} matchState={state} typedLength={state === 'YELLOW' ? buffer.length : null} onNavigate={handleNavigation} />
+                                            <RenderedText chars={s.chars} sid={s.id} mark={state === 'NONE' && loupeIds.has(s.id)} matchState={state} typedLength={state === 'YELLOW' ? buffer.length : null} onNavigate={handleNavigation} />
                                             {' '}
                                         </React.Fragment>
                                     );
@@ -6237,10 +6404,10 @@
                     {(gameState === 'LOST' || gameState === 'VICTORY') && (
                         <div className="result-screen">
                             <section className={`result-card ${gameState === 'VICTORY' ? 'won' : 'lost'}`} aria-labelledby="result-title">
-                                <p className="result-kicker">{gameState === 'VICTORY' ? 'All seven rounds cleared' : timeLeft <= 0 ? 'Out of time' : 'Below the target'}</p>
+                                <p className="result-kicker">{gameState === 'VICTORY' ? 'All eight rounds cleared' : timeLeft <= 0 ? 'Out of time' : 'Below the target'}</p>
                                 <h1 id="result-title">{gameState === 'VICTORY' ? 'You broke the scale.' : 'Run over.'}</h1>
                                 <dl className="result-stats">
-                                    <div><dt>Round reached</dt><dd>{ante} of 7</dd></div>
+                                    <div><dt>Round reached</dt><dd>{ante} of {MAX_ANTE}</dd></div>
                                     <div><dt>Banked score</dt><dd>{formatScore(totalScore)}</dd></div>
                                     <div><dt>Credits earned</dt><dd>{market.totalEarned || 0}¢</dd></div>
                                 </dl>
