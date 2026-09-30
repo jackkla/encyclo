@@ -2238,6 +2238,31 @@
         .shop.has-wall :is(.shop-cards,.shop-row) { margin-top:0; }
         .shop.has-wall .shop-foot { padding:10px 12px 10px 18px!important; border:2px solid var(--c-ink)!important; background:var(--c-card); }
         .shop.has-wall .shop-slot.is-empty { background:var(--c-bg)!important; }
+
+        /* Buff panel, sleeker: bigger borderless tiles on paper, a type bar, ink ring when contributing. */
+        #root .game-shell .build-rail,#root .shop .build-rail { padding:10px 10px 12px!important; }
+        #root .game-shell .build-rail { padding-bottom:26px!important; }
+        .build-rail .rail-head { margin:0 0 8px!important; }
+        .build-rail .rail-head b { font:600 11.5px/1 'Inter',sans-serif; letter-spacing:.02em; color:var(--c-faint); }
+        .rail-tiles { gap:8px; }
+        #root .game-shell .rail-tiles { gap:24px; }
+        #root .rail-tile { width:60px; height:60px; border:2px solid transparent!important; background:var(--c-bg)!important; transition:background .12s,border-color .12s,opacity .15s; }
+        #root .rail-tile::after { height:5px; }
+        #root .rail-tile.is-double { height:128px; }
+        #root .rail-tile > .rt-glyph { margin:-5px 0 0; font:900 22px/1 'Inter',sans-serif; letter-spacing:-.04em; }
+        #root .rail-tile > .rt-glyph.is-long { font-size:15px; letter-spacing:-.03em; }
+        #root .rail-tile.is-live { background:var(--c-card)!important; border-color:var(--c-ink)!important; }
+        #root .rail-tile.is-effect { border:2px dashed #15171c55!important; background:transparent!important; }
+        .rt-times { bottom:8px!important; right:6px!important; font-size:11px!important; }
+        .rt-gain { top:calc(100% + 6px)!important; font:800 11px/1 'Inter',sans-serif!important; letter-spacing:-.01em; }
+        #root .build-rail .rail-slot { width:60px!important; height:60px!important; }
+        .build-rail .rail-empty,.build-rail .rail-letters { width:60px!important; }
+        .rt-card { width:270px!important; right:calc(100% + 14px)!important; padding:12px 14px!important; }
+        .rt-card::after { right:-16px!important; width:16px!important; height:60px!important; }
+        .rt-card > b { font-size:14.5px!important; }
+        .rt-card > span { font-size:12.5px!important; line-height:1.5!important; }
+        @media (min-width:900px) { .game-shell:has(.build-rail) > .flex-1.overflow-y-auto { padding-right:110px!important; } }
+        @media (min-width:1200px) { .shop:has(.build-rail) { padding-right:calc(82px + 18px + clamp(16px,2.4vw,36px))!important; } }
 </style>
 </head>
 <body>
@@ -5244,10 +5269,16 @@
                 document.addEventListener('pointerdown', away, true); document.addEventListener('keydown', key, true);
                 return () => { document.removeEventListener('pointerdown', away, true); document.removeEventListener('keydown', key, true); };
             }, [mode]);
-            // Links keep navigating on click; the card never opens for them in click mode.
-            const onClick = e => { if (e.target.closest?.('a')) return; showFor(e, true); };
+            // Links keep navigating on click, so in click mode their card opens on hover instead.
+            const onClick = e => { if (e.target.closest?.('a')) return; hoverOpen.current = false; showFor(e, true); };
+            const hoverOpen = useRef(false);
+            const onLinkOver = e => {
+                if (e.target.closest?.('a') && e.target.closest('[data-w]')) { hoverOpen.current = true; showFor(e, false); }
+                else if (hoverOpen.current) { hoverOpen.current = false; clear(); }
+            };
+            const onLinkLeave = () => { if (hoverOpen.current) { hoverOpen.current = false; clear(); } };
             return mode === 'click'
-                ? { onClick, clear, node: <Host/> }
+                ? { onClick, onMouseOver: onLinkOver, onMouseLeave: onLinkLeave, clear, node: <Host/> }
                 : { onMouseOver: e => showFor(e, false), onMouseLeave: clear, clear, node: <Host/> };
         }
 
@@ -5559,9 +5590,9 @@
             return { main, mark };
         };
         const BuffTile = ({ u, rules, gain, live, off, effect, children }) => {
-            const { main, mark } = buffIcon(u);
+            const { main } = buffIcon(u);
             return <li data-name={u.name} tabIndex={0} aria-label={u.name} className={`rail-item rail-tile type-${(u.type || 'UTILITY').toLowerCase()}${live ? ' is-live' : ''}${off ? ' is-off' : ''}${effect ? ' is-effect' : ''}${u.slots > 1 ? ' is-double' : ''}`}>
-                <span className={`rt-glyph${[].concat(main).map(x => typeof x === 'string' ? x : 'x').join('').length > 3 ? ' is-long' : ''}`} lang="und">{main}</span>{mark && <sup className="rt-mark">{mark}</sup>}{u.times && <sub className="rt-times">×</sub>}{gain && <small className="rt-gain">{gain.split('·')[0].replace(/\s+each$/, '').trim()}</small>}
+                <span className={`rt-glyph${[].concat(main).map(x => typeof x === 'string' ? x : 'x').join('').length > 3 ? ' is-long' : ''}`} lang="und">{main}</span>{u.times && <sub className="rt-times">×</sub>}{gain && <small className="rt-gain">{gain.split('·')[0].trim().replace(/\s+each$/, '')}</small>}
                 <div className="rt-card" role="tooltip">
                     <b><RichText text={u.richName || u.name}/>{effect && <em>this round</em>}{u.slots > 1 && <em>2 slots</em>}</b>
                     {gain && <em className="rail-gain">{gain}</em>}
@@ -5920,7 +5951,6 @@
             useEffect(() => {
                 setHalftoneBg(null);
                 const sources = (articleMeta.allImages || []).slice(0, 6);
-                if (sources.length === 0) return;
 
                 const imgs = sources.map(src => {
                     const im = new Image();
@@ -5937,14 +5967,25 @@
                     if (cancelled) return;
                     const SIZE = 800;
                     const valid = imgs.filter(im => im.naturalWidth);
-                    if (valid.length === 0) return;
 
                     const stack = document.createElement('canvas');
                     stack.width = SIZE;
-                    stack.height = SIZE * valid.length;
+                    stack.height = SIZE * Math.max(1, valid.length);
                     const stx = stack.getContext('2d');
                     stx.fillStyle = '#ffffff';
                     stx.fillRect(0, 0, stack.width, stack.height);
+                    // No usable image: paint soft blobs in the four inks, seeded by the title, so every article still gets its own halftone.
+                    if (!valid.length) {
+                        let seed = [...(articleMeta.title || 'Encyclo')].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0;
+                        const rnd = () => { seed = Math.imul(seed ^ seed >>> 15, 2246822507) >>> 0; seed = Math.imul(seed ^ seed >>> 13, 3266489909) >>> 0; return ((seed ^= seed >>> 16) >>> 0) / 4294967296; };
+                        const hues = ['33,70,224', '226,61,40', '230,168,0', '15,138,90'], main = Math.floor(rnd() * 4);
+                        for (let k = 0; k < 9; k++) {
+                            const x = rnd() * SIZE, y = rnd() * SIZE, r = SIZE * (.18 + rnd() * .38), hue = hues[k < 5 ? main : Math.floor(rnd() * 4)];
+                            const g = stx.createRadialGradient(x, y, 0, x, y, r);
+                            g.addColorStop(0, `rgba(${hue},${.55 + rnd() * .4})`); g.addColorStop(1, `rgba(${hue},0)`);
+                            stx.fillStyle = g; stx.fillRect(0, 0, SIZE, SIZE);
+                        }
+                    }
 
                     valid.forEach((im, i) => {
                         const sw = im.naturalWidth, sh = im.naturalHeight;
@@ -6009,7 +6050,7 @@
                     imgs.forEach(im=>{im.onload=null;im.onerror=null;});
                     if(objectUrl)URL.revokeObjectURL(objectUrl);
                 };
-            }, [articleMeta.allImages]);
+            }, [articleMeta.allImages, articleMeta.title]);
 
             // Tell the audio engine about the era so typewriter clicks adjust
             // (older = duller/lower freq, modern = crisper).
