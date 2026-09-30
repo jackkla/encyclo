@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENCYCLO — Augmented Edition</title>
+    <title>Encyclo</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -1425,6 +1425,323 @@
         .rolled.is-glyph { font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.05em; padding:0 .28em; margin:0 .06em;
             background:#d9f7ec; box-shadow:inset 0 0 0 1px #8fdcc2; border-radius:4px; }
         .shop-card:disabled .rolled:not(.is-glyph), .shop-card.is-owned .rolled:not(.is-glyph) { background:linear-gradient(transparent 58%, #d6ece4 58%, #d6ece4 92%, transparent 92%); }
+        /* ============================================================
+           CALM — one quiet system for every screen. Slate ink, one blue,
+           hairline rules, soft radii. No offset shadows, dots or tilt.
+           ============================================================ */
+        :root { --c-ink:#1e2735; --c-ink2:#3d4a5c; --c-muted:#687588; --c-faint:#9aa5b4; --c-line:#e3e7ee; --c-line2:#d3dae4;
+            --c-bg:#f3f5f8; --c-card:#fff; --c-accent:#155bd1; --c-accent-ink:#0f47a8; --c-soft:#eef3fc; --c-ok:#17804a; --c-warn:#c2531a;
+            --c-shadow:0 1px 2px #1a2a4410,0 8px 28px -12px #1a2a4430; --c-lift:0 2px 4px #1a2a4412,0 16px 36px -14px #1a2a4445; }
+        body { background:var(--c-bg); background-image:none; color:var(--c-ink); }
+        .print-stage { background:var(--c-bg); background-image:none; }
+        .print-stage::before,.shop::before,.halftone-orbit { display:none!important; }
+        .print-label,.rules-edition { font:500 12px/1.4 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        ::selection { background:#155bd126; }
+
+        /* ---- Home, loading, error ---- */
+        .home { min-height:100vh; min-height:100dvh; display:grid; place-items:center; padding:48px 20px; background:var(--c-bg); }
+        .home-inner { width:min(420px,100%); }
+        .home-kicker { margin:0 0 14px; font:500 13px/1.3 'Inter',sans-serif; color:var(--c-muted); }
+        .home-wordmark { margin:0; font:800 clamp(52px,12vw,76px)/.9 'Inter',sans-serif; letter-spacing:-.06em; color:var(--c-ink); }
+        .home-wordmark span { color:var(--c-accent); }
+        .home-title { margin:0; font:700 30px/1.15 'Inter',sans-serif; letter-spacing:-.03em; color:var(--c-ink); }
+        .home-lede { margin:20px 0 34px; font:400 16px/1.6 'PT Serif',Georgia,serif; color:var(--c-ink2); max-width:36ch; }
+        .home-menu { display:flex; flex-direction:column; }
+        .home-menu button { display:flex; align-items:baseline; justify-content:space-between; gap:16px; width:100%; text-align:left; font:600 15px/1 'Inter',sans-serif; letter-spacing:-.01em; transition:background .15s,color .15s,border-color .15s; }
+        .home-menu button span { font:400 13px/1 'Inter',sans-serif; letter-spacing:0; }
+        .home-primary { padding:17px 18px; margin-bottom:10px; border-radius:10px; background:var(--c-accent); color:#fff; box-shadow:0 1px 2px #155bd133,0 8px 20px -10px #155bd1aa; }
+        .home-primary span { color:#ffffffb8; }
+        .home-primary:hover { background:var(--c-accent-ink); }
+        .home-option { padding:15px 4px; border-bottom:1px solid var(--c-line2); color:var(--c-ink); }
+        .home-primary + .home-option { border-top:1px solid var(--c-line2); }
+        .home-option span { color:var(--c-muted); }
+        .home-option:hover { color:var(--c-accent); }
+        .home-menu button:focus-visible { outline:2px solid var(--c-accent); outline-offset:3px; }
+        .home-note { margin:0 0 12px; padding:10px 12px; border-radius:8px; background:#e8f4ec; font:500 13px/1.45 'Inter',sans-serif; color:var(--c-ok); }
+        .home-loading { gap:16px; align-content:center; }
+        .home-loading p { margin:0; font:500 14px 'Inter',sans-serif; color:var(--c-muted); }
+        .home-spinner { width:22px; height:22px; border-radius:50%; border:2px solid var(--c-line2); border-top-color:var(--c-accent); animation:calm-spin .8s linear infinite; }
+        @keyframes calm-spin { to { transform:rotate(360deg); } }
+
+        /* ---- Result ---- */
+        .result-screen { min-height:100vh; min-height:100dvh; display:grid; place-items:center; padding:24px 16px; background:var(--c-bg); }
+        .result-screen > .result-card { width:min(440px,100%); max-width:none; padding:36px 32px 28px; border:1px solid var(--c-line); border-radius:16px!important; background:var(--c-card); box-shadow:var(--c-shadow); }
+        .result-kicker { margin:0 0 8px; font:500 13px 'Inter',sans-serif; color:var(--c-muted); }
+        .result-card.won .result-kicker { color:var(--c-ok); }
+        .result-screen .result-card h1 { margin:0; font:750 34px/1.1 'Inter',sans-serif!important; letter-spacing:-.035em; color:var(--c-ink); }
+        .result-stats { margin:28px 0; border-top:1px solid var(--c-line); }
+        .result-stats > div { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid var(--c-line); }
+        .result-stats dt { font:400 14px 'Inter',sans-serif; color:var(--c-muted); }
+        .result-stats dd { margin:0; font:650 16px 'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--c-ink); }
+        .result-screen .result-primary { width:100%; padding:15px; border-radius:10px!important; background:var(--c-accent); color:#fff; font:600 15px 'Inter',sans-serif; }
+        .result-screen .result-primary:hover { background:var(--c-accent-ink); }
+        .result-screen .result-link { display:block; margin:14px auto 0; font:500 13px 'Inter',sans-serif; color:var(--c-muted); }
+        .result-screen .result-link:hover { color:var(--c-ink); }
+
+        /* ---- Dialog chrome shared by rules, tally, pack, sandbox ---- */
+        dialog.manual-dialog,dialog.tally-dialog,dialog.pack-dialog,dialog.sandbox { border:1px solid var(--c-line); border-radius:16px!important; background:var(--c-card); color:var(--c-ink); box-shadow:0 30px 80px -20px #0f1c3360,0 2px 6px #0f1c3314; }
+        .manual-dialog::backdrop,.sandbox::backdrop,.tally-dialog::backdrop,.pack-dialog::backdrop { background:#1a263a4d; backdrop-filter:blur(4px); }
+
+        /* Rules */
+        .rule-head { padding:22px 28px 18px; background:var(--c-card); background-image:none!important; border-bottom:1px solid var(--c-line); }
+        .rule-head h2 { margin:0; font:750 24px/1 'Inter',sans-serif; letter-spacing:-.03em; }
+        .rule-head button,.pack-dialog-head button,.tally-head button { padding:8px 13px; border:1px solid var(--c-line2); border-radius:8px; background:var(--c-card); color:var(--c-ink2); font:600 13px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; }
+        .rule-head button:hover,.pack-dialog-head button:hover,.tally-head button:hover { background:var(--c-bg); color:var(--c-ink); }
+        .rule-body { padding:0 28px 28px; }
+        .rules-edition { padding:14px 0 12px; }
+        .rule-body details { border-top:1px solid var(--c-line); }
+        .rule-body summary { padding:15px 0; font:600 15px 'Inter',sans-serif; color:var(--c-ink); }
+        .rule-body summary::marker { color:var(--c-faint); }
+        .rule-body p { font:400 14.5px/1.7 'Inter',sans-serif; color:var(--c-ink2); }
+        .rule-body table { font:400 13px/1.5 'Inter',sans-serif; }
+        .rule-body th { background:var(--c-bg); font-weight:600; }
+        .rule-body th,.rule-body td { border-bottom:1px solid var(--c-line); }
+        .rule-body .rule-equation { background:var(--c-soft); color:var(--c-accent-ink); border-radius:8px; font:500 13px/1.6 'JetBrains Mono',monospace; }
+        .rules-catalogue section { border:1px solid var(--c-line); border-radius:10px; }
+        .rules-catalogue h3 { font:700 17px 'Inter',sans-serif; letter-spacing:-.02em; }
+
+        /* Rarity: quiet tinted text, no boxes shouting */
+        .rarity-badge { padding:3px 7px; border:0; border-radius:5px; box-shadow:none!important; font:600 10.5px/1.2 'Inter',sans-serif; letter-spacing:.01em; text-transform:none; }
+        .rarity-common { color:#5d6878; background:#eef1f5; }
+        .rarity-uncommon { color:#127047; background:#e5f4ec; }
+        .rarity-rare { color:#1b4fc4; background:#e8effd; }
+        .rarity-epic { color:#7a35b8; background:#f3eafc; }
+        .rarity-legendary { color:#8a5600; background:#fdf0cf; }
+
+        /* ---- Tally ---- */
+        dialog.tally-dialog { background:var(--c-card); overflow:hidden; }
+        .tally-head { padding:18px 26px; background:var(--c-card); border-bottom:1px solid var(--c-line); }
+        .tally-head h1 { margin:2px 0 0; font:750 24px/1.1 'Inter',sans-serif; letter-spacing:-.03em; }
+        .tally-ledger { background:var(--c-card); padding:22px 26px; }
+        .tally-ledger article+article { border-top:1px solid var(--c-line); }
+        .tally-excerpt-head { align-items:baseline; }
+        .tally-excerpt-head strong { font:700 24px 'Inter',sans-serif; letter-spacing:-.03em; color:var(--c-accent); font-variant-numeric:tabular-nums; }
+        .tally-quote { font:400 16px/1.65 'PT Serif',serif; color:var(--c-ink); }
+        .tally-words { gap:6px; }
+        .tally-words button { border:1px solid var(--c-line); border-radius:7px; background:var(--c-card); padding:5px 8px; font:400 15px 'PT Serif',serif; color:var(--c-ink); transition:border-color .12s,background .12s; }
+        .tally-words button:hover { border-color:var(--c-line2); background:var(--c-bg); }
+        .tally-words button b { font:600 11px 'Inter',sans-serif; color:var(--c-muted); font-variant-numeric:tabular-nums; }
+        .tally-words button.selected { border-color:#9db7e6; background:var(--c-soft); }
+        .tally-words button.selected b { color:var(--c-accent); }
+        .score-effects { font:500 11px 'Inter',sans-serif; gap:5px; }
+        .score-effects>span { border:0; border-radius:6px; background:var(--c-bg); color:var(--c-ink2); padding:4px 8px; }
+        .score-effects small { font-size:10px; opacity:.7; }
+        .score-effects .effect-bold { color:#a8431a; background:#fdf0e7; }
+        .score-effects .effect-italic { color:#7437a8; background:#f5eefc; }
+        .score-effects .effect-link { color:#15704a; background:#e9f6ef; }
+        .score-effects .effect-citation { color:#a3306a; background:#fcedf4; }
+        .score-effects .effect-chain { color:var(--c-accent); background:var(--c-soft); }
+        .excerpt-calculation { font:400 12.5px/1.6 'Inter',sans-serif; color:var(--c-ink2); }
+        .excerpt-calculation b { font-weight:600; font-variant-numeric:tabular-nums; }
+        .excerpt-calculation p { font-size:12px; color:var(--c-muted); }
+        .calculation-total { border-top:1px solid var(--c-line); color:var(--c-accent); font-family:'JetBrains Mono',monospace; font-size:11.5px; }
+        .word-inspector,.tally-dialog .word-inspector { background:var(--c-bg); border-left:1px solid var(--c-line); padding:22px 20px; }
+        .word-inspector h2 { font:700 22px/1.2 'PT Serif',serif; letter-spacing:0; }
+        .word-inspector dl>div { border-bottom:1px solid var(--c-line); font:400 13px 'Inter',sans-serif; color:var(--c-ink2); }
+        .word-inspector dd { font:600 13px 'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--c-ink); }
+        .character-score-sum { color:var(--c-muted)!important; }
+        .word-formula { color:var(--c-muted); }
+        .word-total { font:650 15px 'Inter',sans-serif; }
+        .word-total strong { color:var(--c-accent); }
+        .tally-footer,.tally-dialog .tally-footer { background:var(--c-card); border-top:1px solid var(--c-line); padding:18px 26px 20px; }
+        .tally-result strong { font:750 clamp(30px,4vw,40px)/1 'Inter',sans-serif; letter-spacing:-.04em; color:var(--c-accent); font-variant-numeric:tabular-nums; }
+        .tally-result .print-label { font-size:14px; font-weight:600; color:var(--c-ink); }
+        .tally-equation,.tally-run-effects { font:400 12.5px/1.55 'Inter',sans-serif; color:var(--c-ink2); }
+        .tally-equation b { font-weight:500; color:var(--c-muted); }
+        .tally-run-effects { color:var(--c-accent); font-weight:500; }
+        .tally-pay { font:500 12.5px/1.5 'Inter',sans-serif; color:var(--c-ok); }
+        .tally-pay.is-lost { color:var(--c-faint); }
+        .tally-next p { font:400 13px 'Inter',sans-serif; color:var(--c-muted); }
+        .tally-next p b { color:var(--c-ink); font-weight:600; }
+        .tally-next button { padding:12px 20px; border-radius:9px; background:var(--c-accent); font:600 14px 'Inter',sans-serif; letter-spacing:0; }
+        .tally-next button:hover:enabled { background:var(--c-accent-ink); }
+        .word-inspector-toggle { font:500 12px 'Inter',sans-serif; }
+
+        /* ---- Pack dialog ---- */
+        dialog.pack-dialog { background:var(--c-bg); }
+        .pack-dialog-head { padding:20px 24px; background:var(--c-card); border-bottom:1px solid var(--c-line); }
+        .pack-dialog-head h2 { margin:3px 0 0; font:750 24px/1.1 'Inter',sans-serif; letter-spacing:-.03em; text-transform:none; }
+        .pack-dialog-cards { gap:14px; padding:22px 24px 14px; }
+        .pack-dialog-cards button,.pack-dialog-cards button:not(.rarity-common-card) { padding:18px; border:1px solid var(--c-line); border-radius:14px; background:var(--c-card); box-shadow:var(--c-shadow); transition:transform .15s,box-shadow .15s,border-color .15s; }
+        .pack-dialog-cards button:not(.rarity-common-card) { border-color:color-mix(in srgb,var(--aura) 35%,white); box-shadow:var(--c-shadow),0 10px var(--glow) -6px color-mix(in srgb,var(--aura) 30%,transparent); }
+        .pack-dialog-cards button:hover { transform:translateY(-3px); box-shadow:var(--c-lift); border-color:var(--c-line2); }
+        .pack-dialog-cards button:not(.rarity-common-card):hover { border-color:color-mix(in srgb,var(--aura) 60%,white); }
+        .pack-dialog-cards .rarity-legendary-card { background:var(--c-card); }
+        .pack-dialog-plate { height:104px; margin:-18px -18px 14px; border-bottom:1px solid color-mix(in srgb,var(--aura) 20%,white); border-radius:13px 13px 0 0; }
+        .rarity-common-card .pack-dialog-plate { border-bottom-color:var(--c-line); background:var(--c-bg); }
+        .pack-dialog-cards button.rarity-common-card .pack-dialog-plate .pack-dialog-glyph { color:var(--c-ink); }
+        .pack-dialog-cards strong { margin-top:10px; font:650 17px/1.2 'Inter',sans-serif; letter-spacing:-.02em; color:var(--c-ink); }
+        .pack-dialog-boost { font:750 24px/1 'Inter',sans-serif; color:var(--c-ok); }
+        .pack-dialog-boost span { font:400 12px 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .pack-dialog-cards small { font:400 13px/1.5 'Inter',sans-serif; color:var(--c-muted); }
+        .pack-dialog-proof { border-top:1px solid var(--c-line); font:500 12px/1.3 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .pack-dialog-proof em { color:var(--c-ok); font-weight:600; }
+        .pack-dialog-cards q { font-size:13px; color:var(--c-ink2); }
+        .pack-dialog-note { padding:2px 24px 20px; font:400 12.5px/1.4 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+
+        /* ---- Shop ---- */
+        .shop { --ink:var(--c-ink); --paper:var(--c-bg); --card:var(--c-card); --muted:var(--c-muted); --blue:var(--c-accent); --orange:var(--c-warn); background:var(--c-bg); }
+        .shop :focus-visible { outline:2px solid var(--c-accent); outline-offset:3px; }
+        .shop-head { border-bottom:0; padding-bottom:0; }
+        .shop-kicker { margin-bottom:6px; font:500 13px/1.2 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-ok); }
+        .shop-title { font:750 clamp(26px,4vh,34px)/1 'Inter',sans-serif; letter-spacing:-.035em; text-transform:none; }
+        .shop-ledger { border:1px solid var(--c-line); border-radius:12px; background:var(--c-card); box-shadow:none; overflow:hidden; }
+        .shop-ledger > div + div { border-left:1px solid var(--c-line); }
+        .shop-ledger dt { font:500 11.5px/1.3 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .shop-ledger dd { font:700 clamp(20px,3vh,26px)/1 'Inter',sans-serif; letter-spacing:-.035em; color:var(--c-ink); }
+        .shop-ledger .is-credits { background:var(--c-soft); color:var(--c-accent); }
+        .shop-ledger .is-credits dd { color:var(--c-accent); }
+        .shop-ledger .is-credits dt { color:var(--c-accent); }
+        .shop-ledger .is-credits dt span { padding:1px 5px; border-radius:4px; background:#e2f3e9; color:var(--c-ok); font-weight:600; }
+        .shop-time button { border:1px solid var(--c-line2); border-radius:6px; background:var(--c-card); box-shadow:none; font:650 11.5px/1.1 'Inter',sans-serif; }
+        .shop-time button span { font:400 10px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; }
+        .shop-time button b { font:600 11px/1 'Inter',sans-serif; color:var(--c-accent); }
+        .shop-time button:hover:enabled { transform:none; box-shadow:none; background:var(--c-soft); border-color:#b9cbef; }
+        .shop-time button:active:enabled { transform:none; }
+        .shop-receipt { border:0; border-radius:10px; background:var(--c-card); padding:8px 14px; font:400 12.5px/1.4 'Inter',sans-serif; color:var(--c-muted); box-shadow:inset 0 0 0 1px var(--c-line); }
+        .shop-receipt-title { font:600 13px/1 'Inter',sans-serif; text-transform:none; letter-spacing:0; color:var(--c-ink); }
+        .shop-receipt-title b { color:var(--c-ok); }
+        .shop-label { font:400 12px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-faint); }
+        .shop-label h2 { font:600 14px/1 'Inter',sans-serif; color:var(--c-ink); }
+        .shop-label h2::after { border-top:1px solid var(--c-line); }
+        .shop-card,.shop-pack,.shop-item { border:1px solid var(--c-line); border-radius:14px; box-shadow:var(--c-shadow); overflow:hidden; background:var(--c-card); }
+        .shop-card::before { height:3px; border-bottom:0; }
+        .shop-card-meta { gap:8px; }
+        .shop-type { font:600 11px/1 'Inter',sans-serif; letter-spacing:.02em; text-transform:capitalize; }
+        .shop-card h3 { font:700 clamp(17px,min(3vh,9cqi),24px)/1.15 'Inter',sans-serif; letter-spacing:-.03em; color:var(--c-ink); }
+        .shop-card p,.shop-pack p,.shop-item p { font:400 clamp(12.5px,min(1.8vh,5.2cqi),14.5px)/1.5 'Inter',sans-serif; color:var(--c-ink2); }
+        .shop-preview { border-top:1px solid var(--c-line); }
+        .shop-preview small { font:500 11px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-faint); }
+        .shop-preview > span { font:500 12px/1 'Inter',sans-serif; color:var(--c-muted); }
+        .shop-preview b { font:700 clamp(14px,min(2.2vh,6.4cqi),18px)/1 'Inter',sans-serif; letter-spacing:-.02em; color:var(--c-accent); }
+        .shop-buy { border-top:1px solid var(--c-line); background:transparent; font:500 13px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .shop-buy b { font:700 17px/1 'Inter',sans-serif; letter-spacing:-.02em; color:var(--c-ink); }
+        .shop :enabled > .shop-buy > span { color:var(--c-accent); font-weight:600; }
+        :is(.shop-card,.shop-pack,.shop-item):enabled:hover { transform:translateY(-3px); box-shadow:var(--c-lift); border-color:var(--c-line2); }
+        :is(.shop-card,.shop-pack,.shop-item):enabled:hover .shop-buy { background:var(--c-soft); color:var(--c-accent); }
+        :is(.shop-card,.shop-pack,.shop-item):enabled:active { transform:translateY(-1px); box-shadow:var(--c-shadow); }
+        :is(.shop-card,.shop-pack,.shop-item):disabled { box-shadow:none; background:#fbfcfd; }
+        .shop-stamp { border:0; border-radius:8px; background:var(--c-ink); color:#fff; transform:translate(-50%,-50%); padding:7px 14px; font:600 13px/1 'Inter',sans-serif; letter-spacing:.02em; text-transform:none; }
+        .shop-pack,.shop-pack.pack-large { color:var(--c-ink); background:var(--c-card); }
+        .shop-pack::after { display:none; }
+        .shop-pack-art { gap:.3em; font:400 clamp(26px,min(5vh,14cqi),44px)/1 'PT Serif',Georgia,serif; color:var(--c-accent); text-shadow:none; }
+        .shop-pack.pack-large .shop-pack-art { color:#7a35b8; }
+        .shop-pack-art span:nth-child(2n) { opacity:.55; }
+        .shop-pack p { color:var(--c-ink2); }
+        .shop-pack h3,.shop-item h3 { font:700 clamp(16px,min(2.5vh,7.6cqi),21px)/1.15 'Inter',sans-serif; letter-spacing:-.025em; color:var(--c-ink); }
+        .shop-item.is-empty { border:1px dashed var(--c-line2); background:transparent; box-shadow:none; font:500 13px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-faint); }
+        .shop-foot { border-top:1px solid var(--c-line); }
+        .shop-foot-label { font:500 12px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .shop-slot,.shop-build summary { border:1px solid var(--c-line2); border-radius:8px; background:var(--c-card); font:500 12.5px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; }
+        .shop-slot kbd { border-radius:4px; background:var(--c-bg); color:var(--c-muted); font:600 10px/1 'Inter',sans-serif; }
+        .shop-slot.is-empty { border:1px dashed var(--c-line2); }
+        .shop-slot.is-empty kbd { background:transparent; color:var(--c-faint); }
+        .shop-build summary b { border-radius:4px; background:var(--c-bg); color:var(--c-ink); font:600 11px/1 'Inter',sans-serif; }
+        .shop-build summary:hover { background:var(--c-bg); }
+        .shop-build-panel { border:1px solid var(--c-line); border-radius:12px; box-shadow:var(--c-lift); }
+        .shop-build-panel h3 { font:650 15px/1.25 'Inter',sans-serif; letter-spacing:-.02em; }
+        .shop-build-panel p { font:400 13px/1.5 'Inter',sans-serif; color:var(--c-ink2); }
+        .shop-build-panel article + article { border-top:1px solid var(--c-line); }
+        .shop-link { border-bottom:0; font:500 13px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .shop-link:hover { color:var(--c-ink); }
+        .shop-restock { height:42px; border:1px solid var(--c-line2); border-radius:9px; background:var(--c-card); box-shadow:none; font:500 13px/1 'Inter',sans-serif; letter-spacing:0; text-transform:none; }
+        .shop-restock b { font:650 13px/1 'Inter',sans-serif; color:var(--c-muted); }
+        .shop-restock:enabled:hover { transform:none; box-shadow:none; background:var(--c-bg); }
+        .shop-go { height:46px; padding:0 22px; gap:14px; border:0; border-radius:10px; background:var(--c-accent); color:#fff; box-shadow:0 1px 2px #155bd133,0 8px 20px -10px #155bd1aa; font:600 15px/1 'Inter',sans-serif; letter-spacing:-.01em; text-transform:none; }
+        .shop-go span { font:500 16px/1 'Inter',sans-serif; }
+        .shop-go:enabled:hover { background:var(--c-accent-ink); transform:none; }
+        @media (max-height:700px) and (min-width:761px) { .shop-go { height:40px; font-size:14px; box-shadow:none; } .shop-restock { height:36px; } }
+        @media (max-width:760px) { .shop-go { height:44px; font-size:14px; } .pack-dialog-plate { margin:0; border:0; border-radius:10px; } }
+
+        /* ---- Play: menu, round pill, pace meter ---- */
+        .round-pill { display:inline-flex; align-items:baseline; gap:1px; font:500 13px/1 'Inter',sans-serif; color:var(--c-muted); white-space:nowrap; }
+        .round-pill small { font-size:11px; color:var(--c-faint); }
+        .play-menu-panel { padding:6px; border:1px solid var(--c-line); border-radius:12px; box-shadow:var(--c-lift); }
+        .play-menu-panel > button,.bag-menu button { display:flex; align-items:baseline; justify-content:space-between; gap:10px; width:100%; padding:9px 10px!important; border-radius:7px!important; text-align:left; font:500 13px/1.3 'Inter',sans-serif!important; letter-spacing:0!important; text-transform:none!important; color:var(--c-ink); background:transparent; }
+        .play-menu-panel > button small { font:400 11px 'Inter',sans-serif; color:var(--c-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .play-menu-panel > button:hover,.bag-menu button:hover { background:var(--c-bg)!important; }
+        .play-menu-panel > button.is-on { color:var(--c-warn); }
+        .play-menu-panel > button[aria-pressed=true] { box-shadow:none!important; }
+        .menu-heading { padding:8px 10px; border-bottom:1px solid var(--c-line); font:500 12px 'Inter',sans-serif; letter-spacing:0; color:var(--c-muted); }
+        .bag-menu,.build-menu { border-top:1px solid var(--c-line); }
+        .bag-menu b { font-weight:500; }
+        .bag-menu p,.build-menu p,.menu-article-type { font:400 12px/1.5 'Inter',sans-serif; color:var(--c-muted); padding:6px 10px; }
+        .build-menu summary { font:500 13px 'Inter',sans-serif; }
+        .build-menu h3 { font:650 14px 'Inter',sans-serif; letter-spacing:-.01em; }
+        .menu-kbd { border-radius:4px; background:var(--c-bg); color:var(--c-muted); font:600 10px 'Inter',sans-serif; }
+        .pace-meter { font-family:'Inter',sans-serif; border-color:var(--c-line); box-shadow:var(--c-shadow); }
+        .pm-label,.pm-cap { font:500 10px/1 'Inter',sans-serif; letter-spacing:0; color:var(--c-muted); }
+        .pm-sub,.pm-next { font:500 9.5px/1 'Inter',sans-serif; letter-spacing:0; }
+        .pm-sub { margin-top:5px; }
+        .pm-goal em { font:600 8.5px/1 'Inter',sans-serif; letter-spacing:.01em; }
+        .pm-score small { font:500 10px/1 'Inter',sans-serif; }
+        .pm-live { border-top-color:var(--c-line); }
+        .utility-status { font:500 12px/1.6 'Inter',sans-serif; }
+
+        /* ---- Article furniture: quiet, Wikipedia-like, never rotated ---- */
+        .wiki-content h1,.wiki-content h2,.wiki-content h4,.wiki-content .mw-heading { border-bottom:1px solid var(--c-line); }
+        .wiki-content h2,.wiki-content h3 { font-weight:700; letter-spacing:-.02em; color:var(--c-ink); }
+        .wiki-content .mw-heading h2 { font-weight:700; }
+        .wiki-content .hatnote,.wiki-content .dablink { margin:0 0 .5em; padding:0 0 0 1.4em; border:0; border-radius:0; background:none; font-size:.86em; line-height:1.6; color:var(--c-muted); }
+        .wiki-content .hatnote::before,.wiki-content .dablink::before { content:none; }
+        .wiki-content .hatnote a,.wiki-content .dablink a { color:var(--c-ink2); text-decoration:none; }
+        .wiki-content .ambox,.wiki-content .messagebox,.wiki-content table.metadata { background:var(--c-bg); border:0!important; border-left:3px solid var(--c-line2)!important; border-radius:0 6px 6px 0; color:var(--c-muted); }
+        .wiki-content .ambox::before,.wiki-content .messagebox::before { content:none; }
+        .wiki-content .toc { background:var(--c-bg); border:0; border-radius:8px; color:var(--c-ink2); }
+        .wiki-content .toctitle h2 { letter-spacing:0; text-transform:none; color:var(--c-muted); }
+        .wiki-content blockquote { border-left:3px solid var(--c-line2); background:none; border-radius:0; color:var(--c-ink2); }
+        .wiki-content .infobox { transform:none; border:1px solid var(--c-line); border-radius:10px; box-shadow:none; background:#fafbfc; padding:.9em .8em .7em; }
+        .wiki-content .infobox-title,.wiki-content .infobox caption,.wiki-content .infobox > tbody > tr:first-child th { font-size:1.35em; font-weight:700; letter-spacing:-.02em; color:var(--c-ink); }
+        .wiki-content .infobox .infobox-header { background:#eef1f5; color:var(--c-ink2); border:0; border-radius:5px; letter-spacing:0; font-size:.92em; }
+        .wiki-content .infobox .infobox-image img,.wiki-content figure img,.wiki-content .thumbimage,.wiki-content .gallerybox img { border:0; border-radius:4px; box-shadow:none; }
+        .wiki-content .infobox th { color:var(--c-muted); }
+        .wiki-content .infobox td,.wiki-content .infobox th { border:0; }
+        .wiki-content .infobox > tbody > tr { border:0; }
+        .wiki-content .thumb,.wiki-content figure[typeof~="mw:File/Thumb"],.wiki-content figure[typeof~="mw:File/Frame"],.wiki-content figure.mw-default-size,
+        .wiki-content .thumb:nth-of-type(even),.wiki-content figure:nth-of-type(even),.wiki-content .thumb:hover,.wiki-content figure:hover { transform:none; border:0; border-radius:0; box-shadow:none; background:none; padding:0; }
+        .wiki-content .thumbcaption,.wiki-content figcaption { border-top:0; font-style:normal; font-weight:400; color:var(--c-muted); padding:6px 0 0; }
+        .wiki-content table.wikitable { border:1px solid var(--c-line); border-radius:8px; box-shadow:none; background:var(--c-card); }
+        .wiki-content table.wikitable th,.wiki-content table.wikitable td { border-color:var(--c-line); }
+        .wiki-content table.wikitable th { background:var(--c-bg); color:var(--c-ink); font-weight:600; }
+        .wiki-content .gallerybox,.wiki-content .gallerybox:nth-child(n),.wiki-content .gallerybox:hover { transform:none; border:0; box-shadow:none; background:none; padding:0; border-radius:0; }
+        .wiki-content .gallerytext { border-top:0; font-family:'PT Serif',serif; font-size:.9em; color:var(--c-muted); }
+        .frag-host::after { background-image:none; background:#94a0b0; height:1px; opacity:.25; }
+        .wiki-content .infobox :is(th,td,caption,div)[style*="background"] { background:#eef1f5!important; color:inherit!important; }
+        .wiki-content .infobox-above,.wiki-content .infobox > tbody > tr:first-child th { border-radius:6px; }
+        .frag-host::after { content:none; }
+        .frag-host .excerpt-text:not(.state-locked):not(.state-yellow):not(.state-used) { text-decoration:underline dotted #b3bcc9; text-decoration-thickness:1px; text-underline-offset:5px; }
+        .pack-dialog-head .print-label { text-transform:none; color:var(--c-muted); }
+        .shop-type { display:inline-block; text-transform:lowercase; }
+        .shop-type::first-letter { text-transform:uppercase; }
+        .shop-card::before { display:none; }
+        .hud-locks>span { font:600 13px/1 'Inter',sans-serif; padding:4px 8px!important; gap:6px; font-variant-numeric:tabular-nums; }
+        .hud-locks>span b { font:500 11px/1 'Inter',sans-serif; color:var(--c-faint); }
+        .hud-locks>span.active b,.hud-locks>span.locked b { color:inherit; opacity:.7; }
+        .excerpt-counter { font-weight:500!important; color:var(--c-muted)!important; }
+        .result-screen { position:fixed; inset:0; z-index:80; overflow:auto; min-height:0; background:#eef1f5e8; backdrop-filter:blur(6px); animation:calm-fade .35s ease-out both; }
+        @keyframes calm-fade { from { opacity:0; } }
+        .hud-brand { font:750 15px/1 'Inter',sans-serif!important; letter-spacing:-.035em!important; text-transform:none; }
+        @media (min-width:761px) { .shop-head { align-items:flex-end; } }
+        @media (max-width:760px) {
+            .shop-head { align-items:stretch; }
+            .shop-ledger > div { padding:8px 10px; }
+            .shop-ledger .is-clock { column-gap:6px; }
+            .shop-time button span { display:none; }
+            .shop-kicker { margin-bottom:4px; }
+        }
+        @media (max-width:700px) {
+            .wiki-content .infobox { float:none; width:auto!important; max-width:none; margin:0 0 1.4em; }
+            .pm-sub,.pm-next { font-size:8px; white-space:normal; text-align:center; line-height:1.15; }
+            .pm-cap { font-size:9px; text-align:center; }
+        }
+        dialog.sandbox { background:var(--c-card); }
+        .sandbox header { background:var(--c-card)!important; background-image:none!important; }
+        .sandbox .sandbox-title,.sandbox h2 { margin-top:2px; font:750 24px/1.1 'Inter',sans-serif; letter-spacing:-.03em; text-transform:none; }
+        .sandbox .rounded,.sandbox input,.sandbox select,.sandbox textarea { border-radius:6px!important; }
+        .sandbox button { border-radius:7px!important; }
+        .rules-link { font:500 13px 'Inter',sans-serif; letter-spacing:0; border:0; color:var(--c-muted); }
+        .tally-dialog .word-inspector { align-self:stretch; max-height:none; }
+        @media(max-width:650px){ .tally-dialog .word-inspector { border-left:0; border-top:1px solid var(--c-line); max-height:210px; } }
 </style>
 </head>
 <body>
@@ -1620,496 +1937,410 @@
         }
 
         /* ================================================================
-           AUDIO ENGINE — typewriter SFX + ambient pipeline
+           AUDIO ENGINE — typewriter effects and a small generative composer.
+           Every article gets its own seeded song: a style chosen from its
+           subject (chamber, waltz, jazz, ambient, dusk, pulse, folk, march),
+           then a key, mode, tempo, chord progression and melodic motif from
+           its title. A look-ahead scheduler places every note on the audio
+           clock, chords are voice-led, and layers build as the round clock
+           runs down. Game sounds are drawn from the current chord, so they
+           always sit in key.
            ================================================================ */
         const AudioEngine = (() => {
-            let ctx = null;
-            let masterGain = null;
-            let noiseBuffer = null;
-            let impulseBuffer = null;
-            let muted = false;
-            let ambientNodes = null;  // { source, gain } when ambient is playing
-            let ambientVersion = 0, mediaRequest = null;
-            let era = null;           // median article year, shapes click timbre
+            let ctx = null, masterGain = null, sfxBus = null, noiseBuffer = null;
+            let muted = false, era = null, song = null;
 
+            const MASTER = .6;
             function init() {
                 if (ctx) return ctx;
                 const AC = window.AudioContext || window.webkitAudioContext;
                 if (!AC) return null;
                 ctx = new AC();
                 masterGain = ctx.createGain();
-                masterGain.gain.value = muted ? 0 : 0.55;
-                masterGain.connect(ctx.destination);
-
-                // Pre-bake a noise buffer (1s of white noise)
+                masterGain.gain.value = muted ? 0 : MASTER;
+                const limiter = ctx.createDynamicsCompressor();
+                limiter.threshold.value = -10; limiter.knee.value = 6; limiter.ratio.value = 4; limiter.attack.value = .004; limiter.release.value = .2;
+                masterGain.connect(limiter).connect(ctx.destination);
+                sfxBus = ctx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(masterGain);
                 const sr = ctx.sampleRate;
                 noiseBuffer = ctx.createBuffer(1, sr, sr);
                 const nd = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < sr; i++) nd[i] = (Math.random() * 2 - 1);
-
-                // Synthesize a short reverb impulse (~1.6s exponential decay)
-                const irLen = Math.floor(sr * 1.6);
-                impulseBuffer = ctx.createBuffer(2, irLen, sr);
-                for (let ch = 0; ch < 2; ch++) {
-                    const d = impulseBuffer.getChannelData(ch);
-                    for (let i = 0; i < irLen; i++) {
-                        const decay = Math.pow(1 - i / irLen, 3);
-                        d[i] = (Math.random() * 2 - 1) * decay;
-                    }
-                }
+                for (let i = 0; i < sr; i++) nd[i] = Math.random() * 2 - 1;
                 return ctx;
             }
-
             function ensureRunning() {
                 init();
                 if (ctx && ctx.state === 'suspended') ctx.resume();
                 return ctx;
             }
+            // Stereo hall: decorrelated, exponentially decaying noise with a soft low-pass tilt.
+            function makeImpulse(seconds, decay) {
+                const sr = ctx.sampleRate, len = Math.floor(sr * seconds), ir = ctx.createBuffer(2, len, sr);
+                for (let ch = 0; ch < 2; ch++) {
+                    const d = ir.getChannelData(ch); let lp = 0;
+                    for (let i = 0; i < len; i++) { lp += ((Math.random() * 2 - 1) - lp) * (.35 - .25 * i / len); d[i] = lp * Math.pow(1 - i / len, decay); }
+                }
+                return ir;
+            }
+            const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+            const voiceEnd = (nodes, t) => { const [first] = nodes; if (first) first.onended = () => nodes.forEach(n => { try { n.disconnect(); } catch {} }); };
 
-            // Single typewriter click — filtered noise burst with quick envelope.
-            let lastKeyGain = null;  // tracks active key/space gain so a new keystroke chokes it
-
+            /* ---------- typewriter effects ---------- */
+            let lastKeyGain = null;
             function chokeKey() {
                 if (!lastKeyGain || !ctx) return;
-                try {
-                    lastKeyGain.gain.cancelScheduledValues(ctx.currentTime);
-                    lastKeyGain.gain.setValueAtTime(lastKeyGain.gain.value, ctx.currentTime);
-                    lastKeyGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.008);
-                } catch (e) {}
+                try { lastKeyGain.gain.cancelScheduledValues(ctx.currentTime); lastKeyGain.gain.setValueAtTime(lastKeyGain.gain.value, ctx.currentTime); lastKeyGain.gain.linearRampToValueAtTime(0, ctx.currentTime + .008); } catch {}
                 lastKeyGain = null;
             }
-
-            // Era shapes the timbre: pre-1950 → duller/lower (mechanical typewriter),
-            // post-2000 → crisper/higher (modern keyboard), in-between → neutral.
+            // Era shapes the click: pre-1950 duller and woodier, post-1990 crisper.
             function playKey() {
                 if (!ensureRunning() || muted) return;
                 chokeKey();
-                const t = ctx.currentTime;
-                const src = ctx.createBufferSource();
-                src.buffer = noiseBuffer;
-                src.loop = true;
-
-                // Era-modulated bandpass center frequency
-                let centerFreq = 2000;
-                let q = 6;
-                if (era !== null) {
-                    if (era < 1950)      { centerFreq = 1100; q = 4; }     // dull, woody
-                    else if (era < 1990) { centerFreq = 1700; q = 5; }     // mid-century
-                    else                 { centerFreq = 2600; q = 7; }     // modern click
-                }
-                const bp = ctx.createBiquadFilter();
-                bp.type = 'bandpass';
-                bp.frequency.value = centerFreq + Math.random() * 800;
-                bp.Q.value = q;
-
+                const t = ctx.currentTime, src = ctx.createBufferSource();
+                src.buffer = noiseBuffer; src.loop = true;
+                const centre = era === null ? 2200 : era < 1950 ? 1300 : era < 1990 ? 1800 : 2700;
+                const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = centre + Math.random() * 600; bp.Q.value = 5;
                 const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.18 + Math.random() * 0.06, t + 0.002);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-
-                src.connect(bp).connect(gain).connect(masterGain);
-                src.start(t);
-                src.stop(t + 0.06);
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.09 + Math.random() * .03, t + .002); gain.gain.exponentialRampToValueAtTime(.001, t + .045);
+                src.connect(bp).connect(gain).connect(sfxBus);
+                src.start(t, Math.random() * .8); src.stop(t + .05); voiceEnd([src, bp, gain]);
                 lastKeyGain = gain;
             }
-
-            // Subtle space-bar thunk — lower frequency
             function playSpace() {
                 if (!ensureRunning() || muted) return;
                 chokeKey();
-                const t = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(180, t);
-                osc.frequency.exponentialRampToValueAtTime(70, t + 0.08);
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.22, t + 0.005);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-                osc.connect(gain).connect(masterGain);
-                osc.start(t);
-                osc.stop(t + 0.12);
+                const t = ctx.currentTime, osc = ctx.createOscillator(), gain = ctx.createGain();
+                osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(70, t + .07);
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.12, t + .004); gain.gain.exponentialRampToValueAtTime(.001, t + .09);
+                osc.connect(gain).connect(sfxBus); osc.start(t); osc.stop(t + .1); voiceEnd([osc, gain]);
                 lastKeyGain = gain;
             }
-
-            // Carriage return — descending blip + click
-            function playEnter() {
-                if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(880, t);
-                osc.frequency.exponentialRampToValueAtTime(440, t + 0.15);
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.2, t + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-                osc.connect(gain).connect(masterGain);
-                osc.start(t);
-                osc.stop(t + 0.22);
-                setTimeout(playKey, 50);
-            }
-
-            // Lock chime — two-note ascending arpeggio
-            function playLock() {
-                if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                [523.25, 783.99].forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    const gain = ctx.createGain();
-                    const start = t + i * 0.06;
-                    gain.gain.setValueAtTime(0, start);
-                    gain.gain.linearRampToValueAtTime(0.18, start + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
-                    osc.connect(gain).connect(masterGain);
-                    osc.start(start);
-                    osc.stop(start + 0.42);
-                });
-            }
-
-            // Error thump
+            function playEnter() { playKey(); }
             function playError() {
                 if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(160, t);
-                osc.frequency.exponentialRampToValueAtTime(60, t + 0.2);
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.18, t + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-                const lp = ctx.createBiquadFilter();
-                lp.type = 'lowpass';
-                lp.frequency.value = 800;
-                osc.connect(lp).connect(gain).connect(masterGain);
-                osc.start(t);
-                osc.stop(t + 0.27);
+                const t = ctx.currentTime, osc = ctx.createOscillator(), lp = ctx.createBiquadFilter(), gain = ctx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(110, t); osc.frequency.exponentialRampToValueAtTime(70, t + .12);
+                lp.type = 'lowpass'; lp.frequency.value = 500;
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(.16, t + .006); gain.gain.exponentialRampToValueAtTime(.001, t + .16);
+                osc.connect(lp).connect(gain).connect(sfxBus); osc.start(t); osc.stop(t + .18); voiceEnd([osc, lp, gain]);
             }
 
-            // Round start: typewriter bell ding
+            /* ---------- instruments (all return nothing; they schedule at time t) ---------- */
+            // Electric piano: two-operator FM with a decaying index, plus a quiet tine partial.
+            function epiano(out, m, t, dur, vel = .5) {
+                const f = midiHz(m), car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), amp = ctx.createGain();
+                const tine = ctx.createOscillator(), tg = ctx.createGain();
+                car.frequency.value = f; mod.frequency.value = f; tine.frequency.value = f * 4;
+                mg.gain.setValueAtTime(f * (1.4 + vel), t); mg.gain.exponentialRampToValueAtTime(f * .25, t + .7);
+                tg.gain.setValueAtTime(.12 * vel, t); tg.gain.exponentialRampToValueAtTime(.0005, t + .25);
+                const peak = .16 * vel, end = t + Math.max(.2, dur);
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .006); amp.gain.exponentialRampToValueAtTime(peak * .35, t + 1.2);
+                amp.gain.setValueAtTime(peak * .35, end); amp.gain.exponentialRampToValueAtTime(.0005, end + .35);
+                mod.connect(mg).connect(car.frequency); car.connect(amp); tine.connect(tg).connect(amp); amp.connect(out);
+                [car, mod, tine].forEach(o => { o.start(t); o.stop(end + .4); }); voiceEnd([car, mod, tine, mg, tg, amp]);
+            }
+            // Mallet (marimba/kalimba): fundamental plus a fast-fading fourth-harmonic strike.
+            function mallet(out, m, t, vel = .5, ring = .9) {
+                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), ga = ctx.createGain(), gb = ctx.createGain();
+                a.frequency.value = f; b.frequency.value = f * 4;
+                ga.gain.setValueAtTime(0, t); ga.gain.linearRampToValueAtTime(.14 * vel, t + .004); ga.gain.exponentialRampToValueAtTime(.0005, t + ring);
+                gb.gain.setValueAtTime(.05 * vel, t); gb.gain.exponentialRampToValueAtTime(.0005, t + .09);
+                a.connect(ga).connect(out); b.connect(gb).connect(out);
+                a.start(t); b.start(t); a.stop(t + ring + .05); b.stop(t + .12); voiceEnd([a, ga]); voiceEnd([b, gb]);
+            }
+            // Bell: inharmonic FM (ratio 3.5) with a long tail.
+            function bell(out, m, t, vel = .5, ring = 2.4) {
+                const f = midiHz(m), car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), amp = ctx.createGain();
+                car.frequency.value = f; mod.frequency.value = f * 3.5;
+                mg.gain.setValueAtTime(f * 1.6, t); mg.gain.exponentialRampToValueAtTime(f * .1, t + ring * .6);
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(.1 * vel, t + .003); amp.gain.exponentialRampToValueAtTime(.0005, t + ring);
+                mod.connect(mg).connect(car.frequency); car.connect(amp).connect(out);
+                car.start(t); mod.start(t); car.stop(t + ring + .05); mod.stop(t + ring + .05); voiceEnd([car, mod, mg, amp]);
+            }
+            // Soft lead: sine and quiet triangle with delayed vibrato, like a breathy flute.
+            function flute(out, m, t, dur, vel = .5) {
+                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), vib = ctx.createOscillator(), vg = ctx.createGain(), gb = ctx.createGain(), amp = ctx.createGain();
+                a.frequency.value = f; b.type = 'triangle'; b.frequency.value = f; gb.gain.value = .25;
+                vib.frequency.value = 5; vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(f * .006, t + Math.min(.5, dur));
+                vib.connect(vg); vg.connect(a.frequency); vg.connect(b.frequency);
+                const peak = .085 * vel, end = t + dur;
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .05); amp.gain.setValueAtTime(peak, Math.max(t + .05, end - .06)); amp.gain.linearRampToValueAtTime(0, end + .12);
+                a.connect(amp); b.connect(gb).connect(amp); amp.connect(out);
+                [a, b, vib].forEach(o => { o.start(t); o.stop(end + .15); }); voiceEnd([a, b, vib, vg, gb, amp]);
+            }
+            // Pluck lead for pulse styles: filtered saw with a quick filter decay.
+            function pluck(out, m, t, vel = .5) {
+                const f = midiHz(m), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
+                o.type = 'sawtooth'; o.frequency.value = f; lp.type = 'lowpass'; lp.Q.value = 2;
+                lp.frequency.setValueAtTime(Math.min(8000, f * 8), t); lp.frequency.exponentialRampToValueAtTime(f * 1.5, t + .25);
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(.2 * vel, t + .003); amp.gain.exponentialRampToValueAtTime(.0005, t + .45);
+                o.connect(lp).connect(amp).connect(out); o.start(t); o.stop(t + .5); voiceEnd([o, lp, amp]);
+            }
+            // Pad: two detuned saws spread left and right through a gentle low-pass, slow swell and release.
+            function pad(out, m, t, dur, level, cutoff) {
+                const f = midiHz(m), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
+                const oscs = [-8, 8].map(c => { const o = ctx.createOscillator(), p = ctx.createStereoPanner(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = c; p.pan.value = c / 12; o.connect(p).connect(lp); return [o, p]; });
+                lp.type = 'lowpass'; lp.frequency.value = cutoff; lp.Q.value = .4;
+                const att = Math.min(1.6, dur * .4), end = t + dur;
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(level, t + att); amp.gain.setValueAtTime(level, end); amp.gain.linearRampToValueAtTime(0, end + 1.4);
+                lp.connect(amp).connect(out);
+                oscs.forEach(([o]) => { o.start(t); o.stop(end + 1.5); }); voiceEnd([...oscs.flat(), lp, amp]);
+            }
+            // Round bass: sine with an octave triangle, low-passed.
+            function bass(out, m, t, dur, vel = .6) {
+                const f = midiHz(m), a = ctx.createOscillator(), b = ctx.createOscillator(), gb = ctx.createGain(), lp = ctx.createBiquadFilter(), amp = ctx.createGain();
+                a.frequency.value = f; b.type = 'triangle'; b.frequency.value = f * 2; gb.gain.value = .22; lp.type = 'lowpass'; lp.frequency.value = 340;
+                const peak = .15 * vel, end = t + Math.max(.12, dur);
+                amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(peak, t + .008); amp.gain.exponentialRampToValueAtTime(peak * .6, t + .3);
+                amp.gain.setValueAtTime(peak * .6, end - .03); amp.gain.linearRampToValueAtTime(0, end + .06);
+                a.connect(lp); b.connect(gb).connect(lp); lp.connect(amp).connect(out);
+                a.start(t); b.start(t); a.stop(end + .1); b.stop(end + .1); voiceEnd([a, b, gb, lp, amp]);
+            }
+            // Drums: soft kick, rim, closed hat, brush.
+            function noiseHit(out, t, type, freq, q, len, level) {
+                const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+                src.buffer = noiseBuffer; f.type = type; f.frequency.value = freq; f.Q.value = q;
+                g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + .002); g.gain.exponentialRampToValueAtTime(.0005, t + len);
+                src.connect(f).connect(g).connect(out); src.start(t, Math.random() * .8); src.stop(t + len + .02); voiceEnd([src, f, g]);
+            }
+            function kick(out, t, vel = .7) {
+                const o = ctx.createOscillator(), g = ctx.createGain();
+                o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
+                g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.2 * vel, t + .004); g.gain.exponentialRampToValueAtTime(.0005, t + .26);
+                o.connect(g).connect(out); o.start(t); o.stop(t + .34); voiceEnd([o, g]);
+            }
+            // Unpitched, so it never clashes with the key.
+            const rim = (out, t, vel = .6) => { noiseHit(out, t, 'bandpass', 1900, 3, .06, .14 * vel); noiseHit(out, t, 'highpass', 5000, .7, .02, .06 * vel); };
+            const hat = (out, t, vel = .5) => noiseHit(out, t, 'highpass', 7500, .7, .035, .05 * vel);
+            const brush = (out, t, vel = .5) => noiseHit(out, t, 'bandpass', 3200, .8, .16, .045 * vel);
+
+            /* ---------- harmony ---------- */
+            const MODES = { major: [0, 2, 4, 5, 7, 9, 11], lydian: [0, 2, 4, 6, 7, 9, 11], mixolydian: [0, 2, 4, 5, 7, 9, 10], dorian: [0, 2, 3, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10], phrygian: [0, 1, 3, 5, 7, 8, 10] };
+            // Progressions as scale degrees (0 = tonic), one chord per bar.
+            const PROGRESSIONS = {
+                major: [[0, 4, 5, 3], [0, 5, 3, 4], [0, 3, 0, 4], [5, 3, 0, 4], [0, 2, 3, 4], [1, 4, 0, 0], [0, 3, 5, 4], [3, 4, 2, 5]],
+                lydian: [[0, 1, 0, 1], [0, 1, 4, 0], [0, 1, 5, 4]],
+                mixolydian: [[0, 6, 3, 0], [0, 3, 6, 3], [0, 6, 4, 3]],
+                dorian: [[0, 3, 0, 3], [0, 6, 3, 0], [0, 3, 6, 2], [0, 2, 3, 6]],
+                aeolian: [[0, 5, 2, 6], [0, 3, 5, 4], [0, 6, 5, 6], [0, 5, 3, 4], [0, 2, 5, 6]],
+                phrygian: [[0, 1, 0, 6], [0, 1, 6, 0], [0, 5, 1, 0]],
+                jazz: [[1, 4, 0, 0], [1, 4, 0, 5], [0, 5, 1, 4], [2, 5, 1, 4]]
+            };
+            // Styles: tempo range, meter, modes, harmony colour, and which parts play how.
+            const STYLES = {
+                chamber: { tempo: [72, 88], meter: 4, modes: ['major', 'lydian', 'mixolydian'], sevenths: true, keys: 'sustain', bass: 'round', arp: 'broken', lead: 'flute', drums: null, pad: .018, cutoff: 1500, reverb: .32 },
+                waltz: { tempo: [84, 104], meter: 3, modes: ['major', 'lydian'], sevenths: false, keys: 'waltz', bass: 'waltz', arp: 'broken', lead: 'flute', drums: null, pad: .012, cutoff: 1600, reverb: .3 },
+                jazz: { tempo: [92, 118], meter: 4, modes: ['jazz'], sevenths: true, ninths: true, keys: 'comp', bass: 'walking', arp: null, lead: 'vibes', drums: 'brush', swing: .55, pad: 0, cutoff: 1800, reverb: .22 },
+                ambient: { tempo: [62, 72], meter: 4, modes: ['lydian', 'dorian', 'aeolian', 'major'], sevenths: true, ninths: true, keys: null, bass: 'drone', arp: 'sparse', lead: 'bell', drums: null, pad: .045, cutoff: 1500, reverb: .5, chordBars: 2, gain: 1.3 },
+                dusk: { tempo: [60, 68], meter: 4, modes: ['aeolian', 'phrygian', 'dorian'], sevenths: true, keys: null, bass: 'drone', arp: 'sparse', lead: 'bell', drums: null, pad: .045, cutoff: 1100, reverb: .5, chordBars: 2, gain: 1.3 },
+                pulse: { tempo: [104, 120], meter: 4, modes: ['dorian', 'mixolydian', 'major', 'aeolian'], sevenths: false, ninths: true, keys: null, bass: 'eighths', arp: 'sixteenths', lead: 'pluck', drums: 'soft', pad: .014, cutoff: 1700, reverb: .22, gain: 2 },
+                folk: { tempo: [78, 94], meter: 4, modes: ['major', 'mixolydian', 'dorian'], sevenths: false, ninths: true, keys: 'lofi', bass: 'round', arp: 'broken', lead: 'flute', drums: 'lofi', swing: .25, pad: .012, cutoff: 1400, reverb: .26 },
+                march: { tempo: [84, 96], meter: 4, modes: ['aeolian', 'dorian'], sevenths: false, keys: 'sustain', bass: 'halves', arp: null, lead: 'flute', drums: 'march', pad: .02, cutoff: 1100, reverb: .34 }
+            };
+            const MOOD_STYLE = { cosmic: 'ambient', aquatic: 'ambient', austere: 'ambient', sacred: 'ambient', mythic: 'ambient', antique: 'ambient', shadow: 'dusk', martial: 'march',
+                salon: 'waltz', jazz: 'jazz', reel: 'jazz', amped: 'pulse', circuit: 'pulse', kinetic: 'pulse', transit: 'pulse', ledger: 'pulse', civic: 'pulse', verdant: 'folk', hearth: 'folk' };
+            const NOTE_NAMES = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+
+            // Everything about a song follows from its seed, so an article always plays the same tune.
+            function compose(seed, moodLabel) {
+                let s = (seed | 0) || 7;
+                const rand = () => { s = (s * 1103515245 + 12345) | 0; return ((s >>> 16) & 0x7fff) / 0x7fff; };
+                const pick = list => list[Math.floor(rand() * list.length)];
+                const styleName = MOOD_STYLE[moodLabel] || 'chamber', style = STYLES[styleName];
+                const modeKey = pick(style.modes), mode = MODES[modeKey === 'jazz' ? 'major' : modeKey];
+                const tonic = Math.floor(rand() * 12), bpm = Math.round(style.tempo[0] + rand() * (style.tempo[1] - style.tempo[0]));
+                const progression = pick(PROGRESSIONS[modeKey]);
+                // Melody: a two-bar motif of rhythm cells and scale steps, reused as A A' B A over eight bars.
+                const CELLS = style.meter === 3 ? [[4, 4, 4], [8, 4], [6, 2, 4], [4, 8]] : [[4, 4, 8], [2, 2, 4, 8], [6, 2, 8], [8, 8], [4, 4, 4, 4], [8, 4, 4]];
+                const motif = [];
+                for (let bar = 0; bar < 2; bar++) { let pos = bar * style.meter * 4; for (const len of pick(CELLS)) { motif.push({ pos, len, step: 0 }); pos += len; } }
+                let degree = pick([0, 2, 4]);
+                motif.forEach((n, i) => { if (i) degree += rand() < .7 ? pick([-1, 1]) : pick([-3, -2, 2, 3]); degree = Math.max(-2, Math.min(9, degree)); n.step = degree; n.rest = i > 0 && rand() < .12; });
+                return { styleName, style, modeKey, mode, tonic, bpm, progression, motif, rand, label: `${NOTE_NAMES[tonic]} ${modeKey === 'jazz' ? 'major' : modeKey} · ${bpm} bpm` };
+            }
+            // Chord for a scale degree as MIDI pitch classes above the tonic.
+            function chordTones(song, degree, withSeventh) {
+                const n = [0, 2, 4].concat(withSeventh ? [6] : []), m = song.mode;
+                return n.map(k => { const d = degree + k; return m[d % 7] + 12 * Math.floor(d / 7); });
+            }
+            // Voice-lead: place the chord's pitch classes in 52–74, closest to the previous voicing.
+            function voiceLead(prev, tones, tonic) {
+                const pcs = tones.map(t => (t + tonic) % 12), options = [];
+                for (let base = 50; base <= 62; base++) {
+                    const v = pcs.map(pc => { let m = base + ((pc - base) % 12 + 12) % 12; return m; }).sort((a, b) => a - b);
+                    if (v[v.length - 1] <= 76) options.push(v);
+                }
+                if (!prev) return options[Math.floor(options.length / 2)];
+                const cost = v => v.reduce((sum, m, i) => sum + Math.abs(m - (prev[i] ?? prev[prev.length - 1])), 0);
+                return options.reduce((best, v) => cost(v) < cost(best) ? v : best);
+            }
+
+            /* ---------- player ---------- */
+            function playSong(seed, moodLabel) {
+                if (!ensureRunning()) return null;
+                stopAmbient();
+                const c = compose(seed, moodLabel), st = c.style;
+                const bus = ctx.createGain(); bus.gain.value = 0;
+                const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = st.cutoff * 4.5; tone.Q.value = .3;
+                const hall = ctx.createConvolver(); hall.buffer = makeImpulse(st.reverb > .4 ? 3.2 : 2.2, 3);
+                const wet = ctx.createGain(); wet.gain.value = st.reverb;
+                const echo = ctx.createDelay(1.5), fb = ctx.createGain(), echoOut = ctx.createGain(), echoLp = ctx.createBiquadFilter();
+                const beat = 60 / c.bpm; echo.delayTime.value = beat * .75; fb.gain.value = .28; echoOut.gain.value = .22; echoLp.type = 'lowpass'; echoLp.frequency.value = 2500;
+                echo.connect(echoLp).connect(fb).connect(echo); echoLp.connect(echoOut);
+                const dry = ctx.createGain(), send = ctx.createGain(), echoSend = ctx.createGain();
+                dry.connect(tone); send.connect(hall).connect(wet).connect(tone); echoSend.connect(echo); echoOut.connect(tone); echoOut.connect(send);
+                tone.connect(bus).connect(masterGain);
+                // Parts: each has its own level and reverb/echo sends.
+                const part = (level, rev, ech = 0, pan = 0) => { const g = ctx.createGain(), p = ctx.createStereoPanner(); g.gain.value = level; p.pan.value = pan; g.connect(p); p.connect(dry); const r = ctx.createGain(); r.gain.value = rev; p.connect(r).connect(send); if (ech) { const e = ctx.createGain(); e.gain.value = ech; p.connect(e).connect(echoSend); } return g; };
+                const parts = { pad: part(.8, .9), keys: part(1.5, .45, 0, -.3), bass: part(.9, .06), arp: part(1.4, .55, .6, .35), lead: part(1.5, .55, .45, .12), drums: part(1.1, .15) };
+                const level = st.gain || 1;
+                bus.gain.linearRampToValueAtTime(level, ctx.currentTime + 3);
+
+                const sixteenth = beat / 4, barSteps = st.meter * 4, chordBars = st.chordBars || 1;
+                let step = 0, nextTime = ctx.currentTime + .15, voicing = null, chord = null, intensity = 0, stopped = false;
+                const state = { c, intensity: () => intensity, chord: () => chord, voicing: () => voicing };
+                const swingOffset = pos => (st.swing && pos % 4 === 2) ? st.swing * sixteenth * .66 : 0;
+                const humanise = () => (c.rand() - .5) * .012;
+                const vel = base => base * (.85 + c.rand() * .3);
+
+                function schedule(stepIndex, t) {
+                    const bar = Math.floor(stepIndex / barSteps), pos = stepIndex % barSteps, section = Math.floor(bar / 8), sectionBar = bar % 8;
+                    const layer = [2, 4, 3, 4][section % 4]; // 2: bed + arp, 3: bed + lead, 4: everything
+                    const arpOn = st.arp && (layer === 2 || layer === 4 || intensity >= 1), leadOn = st.lead && (layer >= 3 || intensity >= 2), drumsOn = st.drums && (bar >= 2 && (layer !== 1 || intensity >= 2));
+                    const degree = c.progression[Math.floor(bar / chordBars) % c.progression.length];
+                    if (pos === 0 && bar % chordBars === 0) {
+                        chord = chordTones(c, degree, st.sevenths || st.modes[0] === 'jazz');
+                        if (st.ninths && c.rand() < .5) { const d = degree + 8; chord = chord.slice(0, 3).concat([c.mode[d % 7] + 12 * Math.floor(d / 7)]); }
+                        voicing = voiceLead(voicing, chord, c.tonic);
+                        const len = barSteps * chordBars * sixteenth;
+                        if (st.pad) voicing.forEach(m => pad(parts.pad, m, t, len - .1, st.pad * (1 + intensity * .15), st.cutoff * (1 + intensity * .2)));
+                    }
+                    const root = 36 + ((c.tonic + c.mode[degree % 7]) % 12), fifth = root + 7;
+                    const at = t + swingOffset(pos) + humanise();
+                    // Bass
+                    if (st.bass === 'drone' && pos === 0 && bar % chordBars === 0) bass(parts.bass, root, t, barSteps * chordBars * sixteenth * .95, .45);
+                    if (st.bass === 'round' && pos === 0) bass(parts.bass, root, at, sixteenth * 10, vel(.6));
+                    if (st.bass === 'round' && pos === 10 && c.rand() < .6) bass(parts.bass, c.rand() < .5 ? fifth : root + 12, at, sixteenth * 5, vel(.4));
+                    if (st.bass === 'halves' && pos % 8 === 0) bass(parts.bass, pos ? fifth : root, at, sixteenth * 7, vel(.55));
+                    if (st.bass === 'waltz' && pos === 0) bass(parts.bass, root, at, sixteenth * 3.5, vel(.6));
+                    if (st.bass === 'eighths' && pos % 2 === 0) bass(parts.bass, pos % 8 === 6 ? root + 12 : root, at, sixteenth * 1.6, vel(pos % 4 ? .2 : .3));
+                    if (st.bass === 'walking' && pos % 4 === 0) {
+                        const nextDegree = c.progression[(bar + 1) % c.progression.length], nextRoot = 36 + ((c.tonic + c.mode[nextDegree % 7]) % 12);
+                        const third = root + (chord ? (chord[1] - chord[0] + 12) % 12 : 4);
+                        const walk = [root, third, fifth, nextRoot + (c.rand() < .5 ? -1 : 1)];
+                        bass(parts.bass, walk[pos / 4], at, sixteenth * 3.6, vel(.5));
+                    }
+                    // Keys
+                    if (voicing) {
+                        const hit = (len, v) => voicing.forEach((m, i) => epiano(parts.keys, m, at + i * .012, sixteenth * len, vel(v)));
+                        if (st.keys === 'sustain' && (pos === 0 || (pos === barSteps / 2 && c.rand() < .5))) hit(pos ? 6 : 12, pos ? .32 : .42);
+                        if (st.keys === 'waltz' && (pos === 4 || pos === 8)) hit(3, .3);
+                        if (st.keys === 'comp' && (pos === 0 || pos === 6 || (pos === 12 && c.rand() < .4))) hit(pos ? 2 : 3, .36);
+                        if (st.keys === 'lofi' && (pos === 0 || pos === 6 || pos === 12)) hit(pos === 0 ? 5 : 3, pos ? .28 : .38);
+                    }
+                    // Arpeggio
+                    if (arpOn && voicing) {
+                        const tones = voicing.concat(voicing.map(m => m + 12));
+                        if (st.arp === 'broken' && pos % 2 === 0) mallet(parts.arp, tones[[0, 2, 1, 3, 2, 4, 3, 5, 4, 2, 3, 1][(pos / 2) % 12] % tones.length] + 12, at, vel(.45));
+                        if (st.arp === 'sixteenths') { const i = [0, 1, 2, 3, 4, 3, 2, 1][pos % 8]; if (c.rand() < .92) pluck(parts.arp, tones[i % tones.length] + 12, at, vel(pos % 4 ? .35 : .5)); }
+                        if (st.arp === 'sparse' && pos % 2 === 0 && c.rand() < (pos % 4 ? .3 : .75)) mallet(parts.arp, tones[Math.floor(c.rand() * tones.length)] + 12, at, vel(.5), 2.4);
+                    }
+                    // Lead melody: motif A (bars 1–2), A' (3–4), B up a third (5–6), A resolving to the tonic (7–8).
+                    if (leadOn) {
+                        const half = Math.floor(sectionBar / 2), local = (sectionBar % 2) * barSteps + pos;
+                        c.motif.forEach((n, i) => {
+                            if (n.pos !== local || n.rest) return;
+                            let stepDeg = n.step + (half === 2 ? 2 : 0);
+                            if (half === 1 && i === c.motif.length - 1) stepDeg = 4;
+                            if (half === 3 && i === c.motif.length - 1) stepDeg = 0;
+                            const oct = Math.floor(stepDeg / 7), m = 72 + c.tonic % 12 - (c.tonic > 6 ? 12 : 0) + c.mode[((stepDeg % 7) + 7) % 7] + 12 * oct;
+                            const dur = n.len * sixteenth * .92;
+                            if (st.lead === 'flute') flute(parts.lead, m, at, dur, vel(.6));
+                            else if (st.lead === 'bell') bell(parts.lead, m, at, vel(.75));
+                            else if (st.lead === 'vibes') mallet(parts.lead, m, at, vel(.6), 1.4);
+                            else pluck(parts.lead, m, at, vel(.6));
+                        });
+                    }
+                    // Drums
+                    if (drumsOn) {
+                        const d = st.drums;
+                        if (d === 'soft') { if (pos % 8 === 0) kick(parts.drums, t, vel(.4)); if (pos % 2 === 0) hat(parts.drums, at, vel(pos % 4 ? .5 : .3)); if (pos === 12 && intensity >= 2) rim(parts.drums, at, .5); }
+                        if (d === 'lofi') { if (pos === 0 || pos === 10) kick(parts.drums, t, vel(.55)); if (pos === 4 || pos === 12) rim(parts.drums, at, vel(.5)); if (pos % 2 === 0) hat(parts.drums, at, vel(.3)); }
+                        if (d === 'brush') { if (pos % 4 === 0) brush(parts.drums, at, vel(pos % 8 ? .7 : .45)); if (pos % 4 === 2) hat(parts.drums, at, vel(.25)); }
+                        if (d === 'march') { if (pos % 8 === 0) kick(parts.drums, t, vel(.5)); if (pos === 12 || (pos === 14 && c.rand() < .5)) rim(parts.drums, at, vel(.45)); if (intensity >= 1 && pos % 2 === 1 && c.rand() < .3) hat(parts.drums, at, .2); }
+                    }
+                    // Final seconds: a quiet pulse on every beat keeps time for the player.
+                    if (intensity >= 3 && pos % 4 === 0 && !st.drums) hat(parts.drums, at, .35);
+                }
+                const timer = setInterval(() => {
+                    if (stopped || !ctx) return;
+                    // Fell behind (background tab): skip ahead rather than bunching notes.
+                    if (nextTime < ctx.currentTime - .2) nextTime = ctx.currentTime + .05;
+                    while (nextTime < ctx.currentTime + .18) { if (!muted) schedule(step, nextTime); nextTime += sixteenth; step++; }
+                }, 25);
+                song = {
+                    ...state,
+                    label: c.label,
+                    setIntensity(level) { intensity = level; tone.frequency.linearRampToValueAtTime(st.cutoff * (4.5 + level * .8), ctx.currentTime + 1.5); bus.gain.linearRampToValueAtTime((st.gain || 1) * (1 + level * .06), ctx.currentTime + 1.5); },
+                    stop() {
+                        stopped = true; clearInterval(timer);
+                        const now = ctx.currentTime;
+                        bus.gain.cancelScheduledValues(now); bus.gain.setValueAtTime(bus.gain.value, now); bus.gain.linearRampToValueAtTime(0, now + .8);
+                        setTimeout(() => { try { [bus, tone, hall, wet, echo, fb, echoOut, echoLp, dry, send, echoSend].forEach(n => n.disconnect()); } catch {} }, 4000);
+                    }
+                };
+                return c.label;
+            }
+            function stopAmbient() { if (song) { song.stop(); song = null; } }
+            function intensify(level) { song?.setIntensity(level); }
+
+            /* ---------- in-key game sounds ---------- */
+            // Current harmony, or a C major fallback before any song starts.
+            const harmony = () => song ? { tonic: song.c.tonic, mode: song.c.mode, chord: song.chord() || [0, 4, 7] } : { tonic: 0, mode: MODES.major, chord: [0, 4, 7] };
+            const upper = (h, i) => 72 + ((h.chord[i % h.chord.length] + h.tonic) % 12) + 12 * Math.floor(i / h.chord.length);
+            function playLock() {
+                if (!ensureRunning() || muted) return;
+                const h = harmony(), t = ctx.currentTime;
+                [0, 1, 2].forEach(i => bell(sfxBus, upper(h, i + 1), t + i * .07, .7, 1.6));
+            }
             function playBell() {
                 if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                [1760, 2349].forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    const gain = ctx.createGain();
-                    gain.gain.setValueAtTime(0, t);
-                    gain.gain.linearRampToValueAtTime(i === 0 ? 0.16 : 0.08, t + 0.005);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
-                    osc.connect(gain).connect(masterGain);
-                    osc.start(t);
-                    osc.stop(t + 1.5);
-                });
+                const h = harmony(), t = ctx.currentTime;
+                bell(sfxBus, 72 + h.tonic % 12, t, .8, 2.6); bell(sfxBus, 79 + h.tonic % 12, t + .09, .5, 2.4);
             }
-
-            // Scoring tick — for the per-word ledger reveal
+            // Scoring ledger: a pentatonic climb in the song's key.
+            let tickStep = 0;
             function playTick() {
                 if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                const osc = ctx.createOscillator();
-                osc.type = 'square';
-                osc.frequency.value = 1200 + Math.random() * 400;
-                const gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.06, t + 0.003);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-                osc.connect(gain).connect(masterGain);
-                osc.start(t);
-                osc.stop(t + 0.06);
+                const h = harmony(), penta = [0, 2, 4, 7, 9], i = tickStep++ % 10;
+                mallet(sfxBus, 72 + h.tonic % 12 + penta[i % 5] + 12 * Math.floor(i / 5), ctx.currentTime, .35, .35);
             }
-
-            // Ambient: take an audio URL, route through lowpass + reverb, loop
-            async function playAmbient(url) {
-                if (!ensureRunning()) return false;
-                stopAmbient();
-                const version=ambientVersion;
-                const controller=new AbortController();mediaRequest=controller;
-                try {
-                    const res = await fetch(url, { mode: 'cors', signal:controller.signal });
-                    if (!res.ok) return false;
-                    const arr = await res.arrayBuffer();
-                    const buf = await ctx.decodeAudioData(arr);
-                    if(version!==ambientVersion)return false;
-
-                    const src = ctx.createBufferSource();
-                    src.buffer = buf;
-                    src.loop = true;
-
-                    const lp = ctx.createBiquadFilter();
-                    lp.type = 'lowpass';
-                    lp.frequency.value = 600;
-                    lp.Q.value = 0.7;
-
-                    const conv = ctx.createConvolver();
-                    conv.buffer = impulseBuffer;
-
-                    const dryGain = ctx.createGain();
-                    dryGain.gain.value = 0.4;
-                    const wetGain = ctx.createGain();
-                    wetGain.gain.value = 0.5;
-
-                    const ambGain = ctx.createGain();
-                    ambGain.gain.value = 0;
-
-                    src.connect(lp);
-                    lp.connect(dryGain).connect(ambGain);
-                    lp.connect(conv).connect(wetGain).connect(ambGain);
-                    ambGain.connect(masterGain);
-                    src.start();
-
-                    // Fade in
-                    ambGain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 2);
-
-                    ambientNodes = { source: src, gain: ambGain, lp: lp, baseLpFreq: 600, baseGain: 0.22, dispose:()=>[src,lp,conv,dryGain,wetGain,ambGain].forEach(n=>n.disconnect()) };
-                    return true;
-                } catch (e) {
-                    return false; // The caller falls back to the article soundscape.
-                }
+            function playMarker(pitch) {
+                if (!ensureRunning() || muted) return;
+                const h = harmony(), t = ctx.currentTime, lift = pitch === 'low' ? 0 : pitch === 'mid' ? 2 : 4;
+                [0, 1].forEach(i => bell(sfxBus, upper(h, lift + i), t + i * .08, .55, 1.8));
             }
-
-            function stopAmbient() {
-                ambientVersion++;
-                mediaRequest?.abort();mediaRequest=null;
-                if (!ambientNodes) return;
-                const { source, gain, dispose } = ambientNodes;
-                try {
-                    gain.gain.cancelScheduledValues(ctx.currentTime);
-                    gain.gain.setValueAtTime(gain.gain.value,ctx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
-                    setTimeout(() => { try { source.stop(); dispose?.(); } catch (e) {} }, 600);
-                } catch (e) {}
-                ambientNodes = null;
+            function playLoss() {
+                if (!ensureRunning() || muted) return;
+                const h = harmony(), t = ctx.currentTime, m = h.mode, base = 60 + h.tonic % 12;
+                [m[4] + 12, m[3] + 12, m[2] + 12, m[0] + 12].forEach((d, i) => flute(sfxBus, base + d - 12, t + i * .32, .5, .55));
+                [0, m[2], m[4]].forEach(d => epiano(sfxBus, 48 + h.tonic % 12 + d, t + 1.28, 2.2, .35));
+            }
+            function playWin() {
+                if (!ensureRunning() || muted) return;
+                const h = harmony(), t = ctx.currentTime, base = 60 + h.tonic % 12;
+                [0, 4, 7, 12, 16].forEach((d, i) => bell(sfxBus, base + d + 12, t + i * .09, .6, 2.4));
             }
 
             function setMuted(m) {
                 muted = m;
-                if (masterGain) masterGain.gain.linearRampToValueAtTime(m ? 0 : 0.55, (ctx?.currentTime || 0) + 0.05);
+                if (masterGain) masterGain.gain.linearRampToValueAtTime(m ? 0 : MASTER, (ctx?.currentTime || 0) + .05);
             }
             function setEra(e) { era = e; }
-
-            // Synthesize an evolving ambient bed in a given root + chord.
-            // Components:
-            //  - drone pad: detuned voices on chord tones
-            //  - noise wash: bandpass noise for air
-            //  - arpeggio: slow plucks drawn from the chord
-            //  - chord progression: gentle voice-leading every ~22s
-            //  - LFO: slow filter breathing
-            // `seed` lets two articles in the same mood sound different.
-            function playDrone(rootHz, intervals, seed, profile = SOUND_PALETTES.neutral) {
-                if (!ensureRunning()) return;
-                stopAmbient();
-
-                // Seeded PRNG for stable per-article variation
-                let s = (seed | 0) || 1;
-                const rand = () => { s = (s * 1103515245 + 12345) | 0; return ((s >>> 16) & 0x7fff) / 0x7fff; };
-
-                // Octave shift (-1, 0, or +1) and inversion add variety
-                const octaveShift = profile.octave || 0;
-                let root = rootHz * Math.pow(2, octaveShift);
-                while (root < 146) root *= 2;   // keep the pad warm, never a sub-bass rumble
-                const inv = Math.floor(rand() * intervals.length);
-                const variant = intervals.slice(inv).concat(intervals.slice(0, inv).map(x => x + 12));
-
-                const t0 = ctx.currentTime;
-                const ambGain = ctx.createGain();
-                ambGain.gain.value = 0;
-
-                const conv = ctx.createConvolver();
-                conv.buffer = impulseBuffer;
-                const dryGain = ctx.createGain();
-                dryGain.gain.value = 1-profile.wet;
-                const wetGain = ctx.createGain();
-                wetGain.gain.value = profile.wet;
-
-                const lp = ctx.createBiquadFilter();
-                lp.type = 'lowpass';
-                lp.frequency.value = profile.cutoff*(.9+rand()*.2);
-                lp.Q.value = 0.5 + rand() * 0.4;
-
-                // Slow LFO breathing on cutoff
-                const lfo = ctx.createOscillator();
-                lfo.frequency.value = profile.breath;
-                const lfoGain = ctx.createGain();
-                lfoGain.gain.value = profile.cutoff*.18;
-                lfo.connect(lfoGain).connect(lp.frequency);
-                lfo.start();
-
-                // Drone voices — store .frequency.value handles so we can move
-                // them slowly for chord progression.
-                const drones = [];
-                const oscTypes = profile.waves;
-                variant.slice(0,profile.voices).forEach((semis, i) => {
-                    const baseFreq = root * Math.pow(2, semis / 12);
-                    [-profile.detune, profile.detune].forEach((detune) => {
-                        const osc = ctx.createOscillator();
-                        osc.type = oscTypes[i % oscTypes.length];
-                        osc.frequency.value = baseFreq;
-                        osc.detune.value = detune;
-                        const g = ctx.createGain();
-                        g.gain.value = profile.pad / (i * 0.6 + 1);
-                        osc.connect(g).connect(lp);
-                        osc.start();
-                        drones.push({ osc, g, semis, level: g.gain.value });
-                    });
-                });
-
-                // Soft noise wash
-                const noise = ctx.createBufferSource();
-                noise.buffer = noiseBuffer;
-                noise.loop = true;
-                const noiseFilter = ctx.createBiquadFilter();
-                noiseFilter.type = 'bandpass';
-                noiseFilter.frequency.value = profile.air;
-                noiseFilter.Q.value = 1 + rand();
-                const noiseGain = ctx.createGain();
-                noiseGain.gain.value = profile.noise;
-                const swell=ctx.createOscillator(),swellGain=ctx.createGain();
-                swell.frequency.value=profile.breath*.7;
-                swellGain.gain.value=profile.noise*.65;
-                swell.connect(swellGain).connect(noiseGain.gain);swell.start();
-                noise.connect(noiseFilter).connect(noiseGain).connect(lp);
-                noise.start();
-
-                lp.connect(dryGain).connect(ambGain);
-                lp.connect(conv).connect(wetGain).connect(ambGain);
-                ambGain.connect(masterGain);
-
-                ambGain.gain.linearRampToValueAtTime(0.16, t0 + 5);
-
-                // Arpeggio: slow plucks drawn from the chord. Different
-                // articles get different patterns and tempos.
-                const arpInterval = profile.gap*(.9+rand()*.2);     // 1.2–3.0s between notes
-                const arpOctaves  = profile.registers;        // pluck registers
-                const arpPattern = [];
-                const arpLen = 6 + Math.floor(rand() * 6);
-                for (let i = 0; i < arpLen; i++) {
-                    arpPattern.push({
-                        semis: variant[Math.floor(rand() * variant.length)],
-                        oct:   arpOctaves[Math.floor(rand() * arpOctaves.length)],
-                        rest:  rand() < profile.rest  // occasional rests
-                    });
-                }
-
-                let arpStep = 0, phrase = 0, chordStep = 0;
-                const activeNotes=new Set();
-                const arpTimer = setInterval(() => {
-                    if (muted) return;
-                    const step = arpPattern[arpStep % arpPattern.length];
-                    arpStep++;
-                    if (step.rest) return;
-                    const freq = root * Math.pow(2, (step.semis + step.oct + profile.progression[chordStep%profile.progression.length]) / 12);
-                    const t = ctx.currentTime;
-                    const o = ctx.createOscillator();
-                    o.type = profile.pluck;
-                    o.frequency.value = freq;
-                    const g = ctx.createGain();
-                    g.gain.setValueAtTime(0, t);
-                    g.gain.linearRampToValueAtTime(profile.note, t + profile.attack);
-                    g.gain.exponentialRampToValueAtTime(0.001, t + profile.decay);
-                    const pluckLp = ctx.createBiquadFilter();
-                    pluckLp.type = 'lowpass';
-                    pluckLp.frequency.value = Math.min(profile.cutoff*2.5,freq*profile.brightness);
-                    const pan=ctx.createStereoPanner();pan.pan.value=(rand()-.5)*profile.width;
-                    o.connect(pluckLp).connect(g).connect(pan);
-                    pan.connect(conv);pan.connect(dryGain);
-                    activeNotes.add(o);
-                    o.onended=()=>{activeNotes.delete(o);[o,pluckLp,g,pan].forEach(n=>n.disconnect());};
-                    o.start(t);o.stop(t + profile.decay + .1);
-                    if(arpStep%arpPattern.length===0){
-                        phrase++;
-                        // Alter one motif note per phrase while staying in the scale.
-                        const index=Math.floor(rand()*arpPattern.length);
-                        arpPattern[index].semis=variant[(index+phrase)%variant.length];
-                    }
-                }, arpInterval * 1000);
-
-                // Move the whole harmony through a defined progression, not random chromatic drift.
-                const progTimer=setInterval(()=>{
-                    if(muted)return;
-                    const shift=profile.progression[++chordStep%profile.progression.length];
-                    const now=ctx.currentTime,fade=Math.min(1.2,profile.glide/3),base=drones.length;
-                    drones.forEach(({osc,g,semis,level})=>{
-                        g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(g.gain.value,now);
-                        g.gain.linearRampToValueAtTime(0,now+fade);               // fade the old chord out
-                        osc.frequency.setValueAtTime(root*Math.pow(2,(semis+shift)/12),now+fade+.02); // retune while silent: no pitch slide
-                        g.gain.linearRampToValueAtTime(level,now+fade*2+.3);       // fade the new chord in
-                    });
-                },profile.phrase*1000);
-
-                ambientNodes = {
-                    source: { stop: () => {
-                        clearInterval(arpTimer);
-                        clearInterval(progTimer);
-                        drones.forEach(({ osc }) => { try { osc.stop(); } catch (e) {} });
-                        try { noise.stop(); } catch (e) {}
-                        try { lfo.stop(); swell.stop(); } catch (e) {}
-                        activeNotes.forEach(o=>{try{o.stop();}catch{}});
-                        drones.forEach(({osc,g})=>{osc.disconnect();g.disconnect();});
-                        [noise,noiseFilter,noiseGain,swell,swellGain,lfo,lfoGain,lp,conv,dryGain,wetGain,ambGain].forEach(n=>n.disconnect());
-                    }},
-                    gain: ambGain,
-                    lp: lp,
-                    baseLpFreq: lp.frequency.value,
-                    baseGain: 0.16
-                };
-            }
-
-            // Intensify the drone for a phase boundary: raise filter cutoff
-            // and bump volume. `level` 0-3 corresponds to start/2/3, 1/3, final.
-            function intensify(level) {
-                if (!ambientNodes || !ctx) return;
-                const t = ctx.currentTime;
-                if (ambientNodes.lp && ambientNodes.baseLpFreq) {
-                    const targetLp = ambientNodes.baseLpFreq * (1 + level * 0.2);
-                    ambientNodes.lp.frequency.linearRampToValueAtTime(targetLp, t + 1.5);
-                }
-                if (ambientNodes.gain && ambientNodes.baseGain != null) {
-                    const targetGain = Math.min(0.22, ambientNodes.baseGain + level * 0.015);
-                    ambientNodes.gain.gain.linearRampToValueAtTime(targetGain, t + 1.5);
-                }
-            }
-
-            // Soft marker chime — used at thirds boundaries
-            function playMarker(pitch) {
-                if (!ensureRunning() || muted) return;
-                const t = ctx.currentTime;
-                const freqs = pitch === 'low' ? [392, 587] : pitch === 'mid' ? [523, 784] : [659, 988];
-                freqs.forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    const g = ctx.createGain();
-                    const start = t + i * 0.05;
-                    g.gain.setValueAtTime(0, start);
-                    g.gain.linearRampToValueAtTime(0.12, start + 0.01);
-                    g.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
-                    osc.connect(g).connect(masterGain);
-                    osc.start(start);
-                    osc.stop(start + 0.62);
-                });
-            }
-
-            function playLoss() {
-                if(!ensureRunning() || muted)return;
-                const now=ctx.currentTime;
-                [220,174.61,130.81].forEach((frequency,i)=>{
-                    const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='triangle';osc.frequency.value=frequency;
-                    const t=now+i*.17;gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(.12,t+.015);gain.gain.exponentialRampToValueAtTime(.001,t+.85);
-                    osc.connect(gain).connect(masterGain);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(t);osc.stop(t+.9);
-                });
-            }
-
-            function isMuted() { return muted; }
-            function hasAmbient() { return !!ambientNodes; }
-
             return {
-                playKey, playSpace, playEnter, playLock, playError, playBell, playTick, playMarker, playLoss,
-                playAmbient, playDrone, intensify, stopAmbient, setMuted, setEra, isMuted, hasAmbient, ensureRunning
+                playKey, playSpace, playEnter, playLock, playError, playBell, playTick, playMarker, playLoss, playWin,
+                playSong, intensify, stopAmbient, setMuted, setEra, isMuted: () => muted, hasAmbient: () => !!song, ensureRunning,
+                nowPlaying: () => song?.label || null
             };
         })();
         const MAX_FETCH_ATTEMPTS = 5;       // give up loading after this many random-article tries
@@ -3515,120 +3746,62 @@
             return { blocks, meta: { leadImageUrl, allImages, era } };
         }
 
-        const SOUND_PALETTES = (() => {
-            const base={waves:['sine','triangle'],voices:3,detune:3,pad:.028,wet:.45,cutoff:1400,breath:.07,air:900,noise:.012,gap:1.8,rest:.25,registers:[0,12],pluck:'sine',note:.09,attack:.02,decay:1.8,brightness:3,width:1,progression:[0,5,0,7],phrase:16,glide:4};
-            const settings={
-                neutral:{},
-                verdant:{voices:2,cutoff:2200,breath:.16,air:2600,noise:.025,gap:1.1,rest:.4,registers:[12,24],attack:.06,decay:.65,wet:.3,progression:[0,7,5,0]},
-                aquatic:{voices:3,cutoff:750,breath:.055,air:500,noise:.07,gap:3.8,rest:.3,registers:[0,12],decay:4.5,wet:.75,phrase:28,glide:9},
-                cosmic:{waves:['sine'],voices:4,detune:6,cutoff:1800,breath:.023,noise:.005,gap:4.4,rest:.45,registers:[12,24],attack:.3,decay:5,wet:.8,width:1.8,phrase:30,glide:12},
-                circuit:{waves:['triangle'],voices:2,pad:.013,detune:0,cutoff:2400,noise:0,gap:.42,rest:.18,registers:[0,12,24],pluck:'square',note:.045,attack:.005,decay:.18,wet:.18,phrase:8,glide:.1},
-                jazz:{voices:2,pad:.012,detune:0,cutoff:1500,noise:.004,gap:.7,rest:.32,registers:[0,12],pluck:'triangle',note:.12,decay:.6,wet:.22,progression:[0,5,2,7],phrase:7,glide:.3},
-                salon:{voices:2,pad:.014,cutoff:2400,noise:0,gap:.85,rest:.12,registers:[0,12,24],note:.1,decay:1.15,wet:.5,progression:[0,5,7,0],phrase:10,glide:.7},
-                lyric:{voices:3,cutoff:1700,gap:1.1,rest:.16,registers:[0,12],decay:1.4,progression:[0,7,5,0],phrase:12},
-                shadow:{waves:['triangle','sawtooth'],voices:2,octave:-1,cutoff:450,detune:11,noise:.04,air:170,gap:4.1,rest:.55,registers:[0,12],attack:.8,decay:4,wet:.7,progression:[0,-4,-2,0],phrase:24,glide:8},
-                martial:{waves:['triangle'],voices:2,octave:-1,cutoff:600,gap:.9,rest:.15,registers:[0,0,12],attack:.006,decay:.25,note:.12,wet:.35,progression:[0,0,5,0],phrase:12},
-                austere:{waves:['sine'],voices:2,octave:-1,cutoff:600,air:1800,noise:.055,gap:5,rest:.6,decay:4,wet:.8,phrase:32,glide:10},
-                sacred:{waves:['sine'],voices:4,detune:1,cutoff:1900,noise:0,gap:3,rest:.4,attack:1.2,decay:5.5,wet:.8,progression:[0,5,0,-5],phrase:24,glide:8},
-                mythic:{cutoff:1200,air:650,gap:2.4,rest:.3,registers:[0,12,24],decay:3.5,wet:.7,progression:[0,2,5,0]},
-                gallery:{voices:2,pad:.018,cutoff:1800,noise:0,gap:2.1,rest:.5,attack:.015,decay:2.5,wet:.6,progression:[0,4,5,0]},
-                logic:{waves:['sine'],voices:2,detune:0,noise:0,gap:1.25,rest:.1,decay:.8,wet:.25,progression:[0,5,10,0],phrase:14},
-                humane:{voices:2,cutoff:1100,noise:.006,gap:2.2,rest:.35,attack:.08,decay:2.2,wet:.4},
-                civic:{waves:['triangle'],voices:2,cutoff:1200,air:350,noise:.02,gap:.8,rest:.3,decay:.55,wet:.25,phrase:10},
-                kinetic:{voices:2,pad:.012,cutoff:1900,noise:.008,gap:.36,rest:.15,decay:.16,note:.06,wet:.15,progression:[0,0,5,7],phrase:6,glide:.15},
-                hearth:{voices:2,cutoff:1000,air:1800,noise:.025,gap:1.6,rest:.3,decay:1.1,wet:.2,progression:[0,5,0,0]},
-                reel:{waves:['triangle','sine'],voices:4,cutoff:1400,detune:5,gap:2.7,attack:.25,decay:3,wet:.6,progression:[0,-2,5,7],phrase:18},
-                forum:{voices:3,cutoff:850,gap:1.8,rest:.2,registers:[0],decay:1,wet:.3,progression:[0,5,0,7]},
-                ledger:{voices:2,detune:0,noise:0,gap:.65,rest:.2,pluck:'triangle',decay:.3,wet:.2,phrase:8},
-                transit:{waves:['triangle'],voices:2,cutoff:1000,air:450,noise:.035,gap:.55,rest:.08,registers:[0,12],decay:.3,wet:.25,progression:[0,0,5,7],phrase:10,glide:1},
-                lexical:{voices:2,noise:0,gap:.95,rest:.3,registers:[0,12,24],decay:.65,wet:.4,phrase:12},
-                clinical:{waves:['sine'],voices:2,detune:0,cutoff:1600,noise:.005,gap:2,rest:.2,decay:1,wet:.3,progression:[0,5,0,2]},
-                couture:{voices:2,cutoff:2300,noise:.005,gap:.75,rest:.25,registers:[12],decay:.4,wet:.3,phrase:8},
-                antique:{waves:['triangle','sine'],voices:2,octave:-1,cutoff:650,air:700,noise:.03,gap:3.2,rest:.4,attack:.15,decay:3.5,wet:.7,progression:[0,5,0,3],phrase:25,glide:8}
-            };
-            // Warm-up pass: every article keeps its own tempo, register, chord family and density,
-            // but timbres are always soft (no saw/square, no sub-bass, no heavy detune or hiss)
-            // and the reverb/rests are capped so nothing sounds hollow or eerie.
-            const soften=p=>({...p,
-                waves:p.waves.map(w=>w==='sawtooth'||w==='square'?'triangle':w),
-                pluck:p.pluck==='square'||p.pluck==='sawtooth'?'triangle':p.pluck,
-                octave:0,
-                detune:Math.min(p.detune,4),
-                noise:Math.min(p.noise,.008),
-                air:Math.max(p.air,700),
-                cutoff:Math.max(1300,Math.min(p.cutoff,2400)),
-                wet:Math.min(p.wet,.5),
-                rest:Math.min(p.rest,.3),
-                gap:Math.min(Math.max(p.gap,.6),2.6),
-                attack:Math.min(Math.max(p.attack,.02),.35),
-                decay:Math.min(p.decay,2.6),
-                width:Math.min(p.width,.8),
-                pad:p.pad*1.15,
-                note:Math.min(p.note,.08),
-                phrase:Math.max(p.phrase,12),
-                glide:Math.max(p.glide,3),
-                progression:p.progression.every(x=>[0,-5,-3,-7,5,7,9,-2,4,2,-4].includes(x))?p.progression:[0,5,7,0]
-            });
-            return Object.freeze(Object.fromEntries(Object.entries(settings).map(([id,p])=>[id,Object.freeze(soften({...base,...p}))])));
-        })();
-
-        // Pick an ambient mood based on article categories. Each mood is a
-        // (rootHz, intervals) pair — intervals is a chord shape in semitones.
-        // Falls back to a neutral suspended drone if nothing matches.
+        // Pick a mood from the article's title, categories and lead; the audio engine turns it into a musical style.
         function classifyMood(categories, title, excerpt = '') {
 
             const moods = [
                 { keys: ['horror', 'death', 'tragedy', 'disaster', 'massacre', 'extinction', 'crime', 'murder', 'serial killer'],
-                  label: 'shadow',    root: 110.00, intervals: [0, 3, 7, 14] },        // half-dim
+                  label: 'shadow' },
                 { keys: ['battle', 'war', 'military', 'conflict', 'siege', 'army', 'navy', 'regiment'],
-                  label: 'martial',   root: 130.81, intervals: [0, 7, 12, 16] },        // C minor7
+                  label: 'martial' },
                 { keys: ['music', 'composer', 'song', 'opera', 'symphony', 'jazz', 'album', 'band', 'singer'],
-                  label: 'lyric',     root: 174.61, intervals: [0, 4, 7, 11, 14] },    // F maj9
+                  label: 'lyric' },
                 { keys: ['classical music', 'baroque', 'romantic music', 'sonata', 'concerto'],
-                  label: 'salon',     root: 196.00, intervals: [0, 4, 7, 9, 14] },     // G6 add9
+                  label: 'salon' },
+                { keys: ['rock music', 'rock band', 'rock', 'punk', 'hip hop', 'funk', 'metal', 'electronic music', 'dance music', 'pop music', 'rapper', 'record label'],
+                  label: 'amped' },
                 { keys: ['physics', 'astronom', 'space', 'galaxy', 'planet', 'cosmolog', 'star', 'nebula'],
-                  label: 'cosmic',    root: 98.00,  intervals: [0, 7, 12, 16] },        // G sus open
-                { keys: ['science', 'chemistry', 'mathematic', 'geometry', 'algebra'], label:'logic',root:164.81,intervals:[0,5,10] },
-                { keys: ['technology', 'computing', 'computer', 'software', 'internet', 'digital', 'algorithm'],
-                  label: 'circuit',   root: 220.00, intervals: [0, 2, 5, 7] },         // A2 add4
+                  label: 'cosmic' },
+                { keys: ['science', 'chemistry', 'mathematic', 'geometry', 'algebra'], label:'logic' },{ keys: ['technology', 'computing', 'computer', 'software', 'internet', 'digital', 'algorithm'],
+                  label: 'circuit' },
                 { keys: ['nature', 'animal', 'plant', 'forest', 'flora', 'fauna', 'bird', 'fish', 'insect', 'mammal', 'reptile', 'botan', 'species', 'octopus', 'fung', 'ecolog', 'zoolog', 'tree'],
-                  label: 'verdant',   root: 146.83, intervals: [0, 4, 7, 9] },         // D6
+                  label: 'verdant' },
                 { keys: ['ocean', 'sea', 'river', 'lake', 'water', 'island', 'coast', 'maritime', 'reef'],
-                  label: 'aquatic',   root: 87.31,  intervals: [0, 7, 9, 14] },        // F sus7
+                  label: 'aquatic' },
                 { keys: ['mountain', 'desert', 'volcano', 'glacier', 'arctic', 'tundra', 'plateau', 'basalt', 'rock', 'geology', 'igneous', 'mineral'],
-                  label: 'austere',   root: 73.42,  intervals: [0, 7, 12, 16] },           // low D5
+                  label: 'austere' },
                 { keys: ['religion', 'theology', 'church', 'monastery', 'saint', 'mystic', 'spiritual', 'cathedral', 'priest'],
-                  label: 'sacred',    root: 130.81, intervals: [0, 7, 12, 19] },       // open fifths
+                  label: 'sacred' },
                 { keys: ['mythology', 'legend', 'folklore', 'mythical', 'deity'],
-                  label: 'mythic',    root: 116.54, intervals: [0, 3, 7, 14] },        // dorian-ish
+                  label: 'mythic' },
                 { keys: ['art', 'painting', 'sculpture', 'literature', 'poem', 'novel', 'museum', 'poet'],
-                  label: 'gallery',   root: 196.00, intervals: [0, 4, 7, 11] },        // G maj7
+                  label: 'gallery' },
                 { keys: ['philosoph', 'ethic', 'epistemolog', 'metaphysic', 'ontolog'],
-                  label: 'logic',     root: 164.81, intervals: [0, 5, 10] },           // E sus quartal
+                  label: 'logic' },
                 { keys: ['biograph', 'people', 'born', 'died', 'living person', 'novelist', 'actor', 'actress'],
-                  label: 'humane',    root: 164.81, intervals: [0, 4, 7, 9] },         // E6
+                  label: 'humane' },
                 { keys: ['city', 'cities', 'town', 'village', 'urban', 'capital', 'metropolitan', 'borough'],
-                  label: 'civic',     root: 110.00, intervals: [0, 4, 7, 11] },        // A maj7
+                  label: 'civic' },
                 { keys: ['sport', 'athlet', 'olympic', 'football', 'basketball', 'soccer', 'baseball', 'tennis'],
-                  label: 'kinetic',   root: 220.00, intervals: [0, 5, 7, 10] },        // A sus7
+                  label: 'kinetic' },
                 { keys: ['food', 'cuisine', 'recipe', 'cooking', 'beverage', 'wine', 'beer'],
-                  label: 'hearth',    root: 174.61, intervals: [0, 4, 7] },            // F major
+                  label: 'hearth' },
                 { keys: ['film', 'cinema', 'movie', 'television', 'tv series', 'director', 'producer'],
-                  label: 'reel',      root: 138.59, intervals: [0, 3, 7, 10] },        // C# m7
+                  label: 'reel' },
                 { keys: ['politic', 'election', 'government', 'parliament', 'senate', 'president'],
-                  label: 'forum',     root: 123.47, intervals: [0, 4, 7, 9] },         // B6
+                  label: 'forum' },
                 { keys: ['economic', 'finance', 'market', 'currency', 'bank', 'stock'],
-                  label: 'ledger',    root: 155.56, intervals: [0, 3, 7, 10] },        // Eb m7
+                  label: 'ledger' },
                 { keys: ['transport', 'aviation', 'aircraft', 'railway', 'ship', 'train', 'automobile', 'printing press', 'bicycle', 'locomotive', 'airport'],
-                  label: 'transit',   root: 103.83, intervals: [0, 5, 7, 9] },         // Ab sus6
+                  label: 'transit' },
                 { keys: ['language', 'linguistic', 'grammar', 'dialect', 'phonolog'],
-                  label: 'lexical',   root: 185.00, intervals: [0, 4, 7, 14] },        // F# maj add9
+                  label: 'lexical' },
                 { keys: ['medicine', 'medical', 'disease', 'pathology', 'anatom', 'biology'],
-                  label: 'clinical',  root: 138.59, intervals: [0, 5, 7] },            // C# sus
+                  label: 'clinical' },
                 { keys: ['fashion', 'design', 'style', 'textile', 'jewelry'],
-                  label: 'couture',   root: 207.65, intervals: [0, 4, 9, 11] },        // G# maj7add6
+                  label: 'couture' },
                 { keys: ['archaeology', 'ancient', 'prehistor', 'fossil', 'ruin', 'antiquit', 'sundial'],
-                  label: 'antique',   root: 92.50,  intervals: [0, 4, 7, 14] },        // F# minor low
+                  label: 'antique' },
             ];
 
             const clean=x=>String(x||'').toLowerCase().replace(/[_–—-]/g,' ');
@@ -3636,11 +3809,11 @@
             const stems=new Set(['mathematic','astronom','cosmolog','philosoph','ethic','epistemolog','metaphysic','ontolog','athlet','politic','economic','phonolog','anatom','prehistor','antiquit','botan','fung','ecolog','zoolog']);
             const hit=(text,key)=>new RegExp('\\b'+(stems.has(key)?key+'[a-z]*':key.endsWith('y')?key.slice(0,-1)+'(?:y|ies)':key+'(?:s|es)?')+'\\b','i').test(text);
             const ranked=moods.map(m=>({...m,score:m.keys.reduce((n,k)=>n+(hit(heading,k)?12:0)+Math.min(3,cats.filter(c=>hit(c,k)).length)*3+(hit(lead,k)?1:0),0)})).sort((a,b)=>b.score-a.score);
-            let selected=ranked[0]?.score>0?ranked[0]:{label:'neutral',root:130.81,intervals:[0,4,7,14]};
+            let selected=ranked[0]?.score>0?ranked[0]:{label:'neutral' };
             // Specific musical traditions take precedence over generic composer/music categories.
-            if(/\b(jazz|bebop|swing)\b/i.test([title,...categories].join(' ')))selected={label:'jazz',root:146.83,intervals:[0,3,7,10,14]};
-            else if(/\b(classical|baroque|sonata|concerto|symphony)\b/i.test([title,...categories].join(' ')))selected={label:'salon',root:196,intervals:[0,4,7,9,14]};
-            return {...selected,profile:SOUND_PALETTES[selected.label]||SOUND_PALETTES.neutral};
+            if(/\b(jazz|bebop|swing)\b/i.test([title,...categories].join(' ')))selected={label:'jazz' };
+            else if(/\b(classical|baroque|sonata|concerto|symphony)\b/i.test([title,...categories].join(' ')))selected={label:'salon' };
+            return selected;
         }
 
         function extractSentencesFromParagraph(pEl, pageId, initialCounter) {
@@ -4055,7 +4228,7 @@
             let next='',nextCls='';
             if(preview&&isLast){
                 const f=scoreRun(preview,upgrades,rules).runTotal/target;
-                next=f>=1?'CLEARS ✓':`${Math.min(99,Math.ceil((1-f)*100))}% SHORT`;nextCls=f>=1?'up':'down';
+                next=f>=1?'clears ✓':`${Math.min(99,Math.ceil((1-f)*100))}% short`;nextCls=f>=1?'up':'down';
             }else if(preview){
                 next=`→ ${fmtLead(rNext)}`;nextCls=rNext>=1?'up':'down';
             }
@@ -4063,9 +4236,9 @@
             const aria=k===0?'No excerpts banked yet':`${k} of 3 excerpts banked, ${pct===null?'':Math.abs(pct)+' percent '+(pct>=0?'above':'below')+' pace'}`;
             return <aside className={`pace-meter ${state}`} aria-label="Round pace"
                 title={'Solid fill: what you have banked. Notch: where exactly-on-pace excerpts would put you — fill above it means you are ahead.\nStriped: the excerpt you are typing, if you lock it now. Reach GOAL to clear the round.\nHeadline: how far your locked excerpts average above or below the pace.'}>
-                <span className="pm-label">PACE</span>
+                <span className="pm-label">Pace</span>
                 {(()=>{const t=k?fmtLead(r):'—';return <strong key={k} className={`pm-head ${k?'pop':''} ${t.length>5?'xlong':t.length>4?'long':''}`}>{t}</strong>;})()}
-                <span className="pm-sub">{state==='ahead'?'AHEAD':state==='behind'?'BEHIND':state==='even'?'ON PACE':'0/3 BANKED'}</span>
+                <span className="pm-sub">{state==='ahead'?'ahead':state==='behind'?'behind':state==='even'?'on pace':'none banked'}</span>
                 <div className="pm-bar" role="progressbar" aria-valuemin={0} aria-valuemax={3} aria-valuenow={Math.round(clamp(banked)*100)/100} aria-valuetext={aria}>
                     <div className="pm-clip">
                         <i className="pm-zone" style={{bottom:`${pos(3)}%`,top:0}}/>
@@ -4077,11 +4250,11 @@
                         {[1,2].map(t=><span key={t} className="pm-tick" style={{bottom:`${pos(t)}%`}}/>)}
                     </div>
                     {[1,2].map(t=><span key={t} className="pm-tickmark" style={{bottom:`${pos(t)}%`}}/>)}
-                    <span className="pm-goal" style={{bottom:`${pos(3)}%`}}><em>GOAL</em></span>
+                    <span className="pm-goal" style={{bottom:`${pos(3)}%`}}><em>Goal</em></span>
                     {k>0&&k<REQUIRED_SENTENCES&&<span className="pm-notch" style={{bottom:`${notch}%`}}/>}
                 </div>
                 <div className={`pm-live ${liveScore===null?'':good?'good':'bad'}`}>
-                    <span className="pm-cap">{isLast?'LAST ONE':k>=REQUIRED_SENTENCES?'DONE':'THIS ONE'}</span>
+                    <span className="pm-cap">{isLast?'Last one':k>=REQUIRED_SENTENCES?'Done':'This one'}</span>
                     <span className="pm-score"><b>{liveScore===null?'—':formatScore(liveScore)}</b><small>/{need===null?'∞':formatScore(need)}</small></span>
                     <span className={`pm-next ${nextCls}`}>{next}</span>
                 </div>
@@ -4100,10 +4273,10 @@
             useEffect(()=>{const dialog=dialogRef.current;dialog.showModal();return ()=>dialog.close();},[]);
             useEffect(()=>{const timer=setInterval(()=>setStep(n=>{if(n>=6){clearInterval(timer);return 6;}return n+1;}),250);return ()=>clearInterval(timer);},[]);
             return <dialog ref={dialogRef} className="tally-dialog" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()}>
-                <header className="tally-head"><div><span className="print-label">ROUND {ante} / 7</span><h1 id="tally-title">THE TALLY.</h1></div>{step<6 && <button onClick={()=>setStep(6)}>SKIP ↗</button>}</header>
+                <header className="tally-head"><div><span className="print-label">Round {ante} of 7</span><h1 id="tally-title">Tally</h1></div>{step<6 && <button onClick={()=>setStep(6)}>Skip</button>}</header>
                 <div className="tally-body">
                     <section className="tally-ledger" aria-label="Excerpt scores">{details.map((d,i)=><article key={d.id}>
-                        <div className="tally-excerpt-head"><span className="print-label">EXCERPT 0{i+1}</span><strong title={result.finalSentenceTotals[i].toLocaleString()}>{step>=3?formatScore(result.finalSentenceTotals[i]):'—'}</strong></div>
+                        <div className="tally-excerpt-head"><span className="print-label">Excerpt {i+1}</span><strong title={result.finalSentenceTotals[i].toLocaleString()}>{step>=3?formatScore(result.finalSentenceTotals[i]):'—'}</strong></div>
                         <p className="tally-quote">{d.text}</p>
                         <div className="tally-words">{d.words.map((w,j)=><button key={j} className={selected?.[0]===i&&selected?.[1]===j?'selected':''} aria-pressed={selected?.[0]===i&&selected?.[1]===j} aria-label={`${w.text}: ${w.total.toLocaleString()} points. Inspect word`} onMouseEnter={()=>setSelected([i,j])} onFocus={()=>setSelected([i,j])} onClick={()=>{setSelected([i,j]);setInspectorOpen(true);}}><span>{w.text}</span><b>{step>=2?formatScore(w.total):'—'}</b></button>)}</div>
                         {step>=3&&<><ScoreEffects detail={d} rules={rules}/><div className="excerpt-calculation">
@@ -4120,7 +4293,7 @@
                         </div></>}
 
                     </article>)}</section>
-                    <aside className={`word-inspector ${inspectorOpen?'inspector-open':''}`} tabIndex={0} aria-label="Word breakdown"><button className="word-inspector-toggle" aria-expanded={inspectorOpen} onClick={()=>setInspectorOpen(x=>!x)}>WORD DETAILS · {word?.text} <span>{inspectorOpen?'HIDE −':'SHOW +'}</span></button><span className="print-label">SELECT A WORD TO INSPECT</span>{word&&<><h2>{word.text}</h2><dl>
+                    <aside className={`word-inspector ${inspectorOpen?'inspector-open':''}`} tabIndex={0} aria-label="Word breakdown"><button className="word-inspector-toggle" aria-expanded={inspectorOpen} onClick={()=>setInspectorOpen(x=>!x)}>Word details · {word?.text} <span>{inspectorOpen?'Hide':'Show'}</span></button><span className="print-label">Select a word to inspect</span>{word&&<><h2>{word.text}</h2><dl>
                         <div><dt>Character points</dt><dd>{word.characterBase}</dd></div><div className="character-score-sum">{word.charDetails.map((c,i)=><span key={i}>{c.c}: {c.score}{i<word.charDetails.length-1?' + ':''}</span>)}</div>
                         {word.formatAdd>0&&<div><dt>Linked word</dt><dd>+{word.formatAdd}</dd></div>}
                         {word.wordEffects.filter(e=>e.base).map(e=><div key={e.name}><dt>{e.name}</dt><dd>+{e.base}</dd></div>)}
@@ -4131,13 +4304,13 @@
                         {word.wordEffects.filter(e=>e.mult).map(e=><div key={e.name}><dt>{e.name} · added to format multiplier</dt><dd>+{e.mult}</dd></div>)}
                         <div><dt>Combined format multiplier</dt><dd>×{Number(word.formatMult.toFixed(3))}</dd></div>
                         
-                    </dl><p className="word-formula">floor({word.base} × {Number(word.lenMult.toFixed(3))} × {Number(word.formatMult.toFixed(3))})</p><div className="word-total"><span>WORD TOTAL</span><strong>{word.total.toLocaleString()}</strong></div></>}</aside>
+                    </dl><p className="word-formula">floor({word.base} × {Number(word.lenMult.toFixed(3))} × {Number(word.formatMult.toFixed(3))})</p><div className="word-total"><span>Word total</span><strong>{word.total.toLocaleString()}</strong></div></>}</aside>
                 </div>
-                <footer className="tally-footer"><div className="tally-result"><span className="print-label">{step<5?'COUNTING':practice?'PRACTICE COMPLETE':success?'TARGET CLEARED':'BELOW TARGET'}</span><strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
+                <footer className="tally-footer"><div className="tally-result"><span className="print-label">{step<5?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span><strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
                     <div className="tally-equation"><b>Multiply the three excerpt totals: </b>{step>=4?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}{step>=4&&result.multiplier!==1&&` × ${Number(result.multiplier.toFixed(3))} (run bonuses)`}</div>
                     {step>=5&&result.appliedRunUpgrades.length>0&&<p className="tally-run-effects">{result.appliedRunUpgrades.map(name=>{const u=upgrades.find(u=>u.name===name);if(u.id==='symmetric')return `Symmetric: +${rules.symmetric} to each excerpt${rules.runTrigger!==1?` · amplifier ×${rules.runTrigger}`:''}`;return `${name}: ×${Number(((1+(u.action(sentences)?.multAdd||0)*rules.runBonus)*rules.runTrigger).toFixed(3))}`;}).join(' · ')}</p>}
                     {!practice&&step>=5&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market);return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
-                    <div className="tally-next">{!practice&&step>=5&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={step<6} onClick={()=>onComplete(result.runTotal,success)}>{practice?'FINISH PRACTICE':success?(ante>=MAX_ANTE?'COMPLETE RUN':'VISIT THE SHOP'):'VIEW RESULTS'} ↗</button></div>
+                    <div className="tally-next">{!practice&&step>=5&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={step<6} onClick={()=>onComplete(result.runTotal,success)}>{practice?'Finish practice':success?(ante>=MAX_ANTE?'Complete the run':'Visit the shop'):'See results'}</button></div>
                 </footer>
             </dialog>;
         };
@@ -4252,8 +4425,8 @@
             }, []);
             return <dialog ref={ref} className="pack-dialog" aria-labelledby="pack-dialog-title" onCancel={e => e.preventDefault()}>
                 <header className="pack-dialog-head">
-                    <div><span className="print-label">{PACKS[pack.kind].name}</span><h2 id="pack-dialog-title">Pick one<span>.</span></h2></div>
-                    <button onClick={onSkip}>Skip · no refund</button>
+                    <div><span className="print-label">{PACKS[pack.kind].name}</span><h2 id="pack-dialog-title">Pick one</h2></div>
+                    <button onClick={onSkip}>Skip</button>
                 </header>
                 <div className="pack-dialog-cards">{pack.choices.map((id, i) => {
                     const u = boosterById(id); if (!u) return null;
@@ -4268,7 +4441,7 @@
                         {proof.best && <q>{proof.best.sample.chars.map(c => c.c).join('')}</q>}
                     </button>;
                 })}</div>
-                <p className="pack-dialog-note">Permanent · levels stack up to 3 · rarer characters pay far more</p>
+                <p className="pack-dialog-note">Permanent. Levels stack up to three. Skipping gives no refund.</p>
             </dialog>;
         };
 
@@ -4329,16 +4502,18 @@
         };
 
         const RulesDialog = ({ onClose, rules = DEFAULT_SCORING }) => <ManualDialog onClose={onClose}>
-            <header className="rule-head"><div><span className="print-label">ENC / REFERENCE</span><h2>THE RULES<span>.</span></h2></div><button autoFocus onClick={onClose} aria-label="Close rules">CLOSE ×</button></header>
+            <header className="rule-head"><div><h2>Rules</h2></div><button autoFocus onClick={onClose} aria-label="Close rules">Close</button></header>
             <div className="rule-body">
-                <p className="rules-edition">{rules === DEFAULT_SCORING ? 'STANDARD SCORING' : 'CUSTOM DEV SCORING'} · Values below match the active rules.</p>
-                <details open><summary>01 / The run</summary><p>Lock three different excerpts before the clock runs out. Their scores multiply together. Reach the round’s target to advance, then visit the shop to buy permanent upgrades and consumables. Clear all seven rounds to win. Banked score is the sum of cleared rounds; it does not pay the next target.</p><p>Sentences, headings and captions can be excerpts. Start at the beginning of a highlighted excerpt and type its complete text, including spaces, punctuation and citations. Match the formatting of each character, then press Enter or select LOCK to lock it. Used excerpts are marked and unavailable on that article visit. The third lock starts scoring automatically. Once your typing matches only one excerpt, EXCERPT shows its full score, including word bonuses, sentence bonuses and chains, before Symmetric and run multipliers. PACE / EXCERPT is the minimum equal score needed from each unfilled slot, after locked scores and Symmetric. It shows two numbers: <b>no bonuses</b> counts only guaranteed multipliers (Symmetric, Carbon Copy); the green <b>all bonuses</b> figure assumes every conditional run upgrade your locked excerpts have not already ruled out also lands (hover it to see which). It is a guide, not a per-excerpt minimum: a stronger excerpt can compensate for a weaker one. On the third excerpt, NEEDED shows the same pair as minimum pre-Symmetric scores to clear the round; the pace meter’s THIS ONE figure uses the uniquely matched excerpt’s actual run conditions, including its article and lock order. EXCERPT also shows the credits that excerpt’s words will pay, and CREDITS shows what you hold plus what your locked excerpts pay if the round clears. Symmetric is included in the requirement calculation, so excerpt and needed scores use the same units. The left gauge shows projected round points divided by the target: 50% fills halfway and 100% reaches the GOAL at the top. Above target, the bar stays full and the percentage keeps increasing. It uses locked excerpts plus the current uniquely matched excerpt. Until all three are known, missing excerpts are estimated at the geometric mean of the known scores, including Symmetric and an active Carbon Copy; conditional run bonuses are excluded. With all three known it uses the exact run scorer. This is a forecast, not banked points or elapsed-time progress. Once the last excerpt is unique, ROUND IF LOCKED shows the complete forecast including run upgrades. Nothing is locked until you press Enter or select LOCK.</p><table><thead><tr><th>Round</th><th>Target</th><th>Clock</th></tr></thead><tbody>{ROUND_SECONDS.map((seconds,i) => <tr key={i}><td>{i+1}</td><td>{formatScore(getRoundTarget(i+1))}</td><td>{seconds}s</td></tr>)}</tbody></table></details>
+                <p className="rules-edition">{rules === DEFAULT_SCORING ? 'Standard scoring' : 'Custom dev scoring'} · values below match the active rules.</p>
+                <details open><summary>01 / The run</summary><p>Lock three different excerpts before the clock runs out. Their scores multiply together. Reach the round’s target to advance, then visit the shop to buy permanent upgrades and consumables. Clear all seven rounds to win. Banked score is the sum of cleared rounds; it does not pay the next target.</p><p>Sentences, headings and captions can be excerpts; captions and infobox cells show a faint dotted underline. Start at the beginning of one and type its complete text, including spaces, punctuation and citations, matching the formatting of every character. Press Enter or Lock to bank it. Used excerpts are greyed out for the rest of that article visit, and the third lock starts the tally.</p>
+                    <p>The top bar reads left to right. <b>Target</b> is the round goal. <b>This sentence</b> appears once your typing matches exactly one excerpt and shows its full score, with the credits its words will pay. <b>Aim per sentence</b> (<b>Still needed</b> on the last one) is the equal score each open slot needs to clear the round, counting only guaranteed multipliers; hover it for the version where every run bonus still in reach also lands. It is a guide: a strong excerpt can carry a weak one. <b>Credits</b> is what you hold. On the last excerpt, <b>Round if locked</b> gives the finished forecast.</p>
+                    <p>The pace gauge on the left fills toward <b>Goal</b> as you bank excerpts. The notch marks exactly-on-pace; fill above it means you are ahead. The striped segment previews the excerpt you are typing, and <b>This one</b> compares it to what the slot needs.</p><table><thead><tr><th>Round</th><th>Target</th><th>Clock</th></tr></thead><tbody>{ROUND_SECONDS.map((seconds,i) => <tr key={i}><td>{i+1}</td><td>{formatScore(getRoundTarget(i+1))}</td><td>{seconds}s</td></tr>)}</tbody></table></details>
                 <details><summary>02 / Typing & formatting</summary><p>Click the typing field to focus it. Formatting buttons are toggles, not keys you hold down. Turn each required format on before typing that part, then off when it ends. Multiple formats can be on at once. The toggles stay on until you change them, including between excerpts. After three seconds without typing in an unfinished excerpt, a hint appears above the input when the next character is unambiguous. It shows the character and any formatting toggles that need changing. If only the last character is wrong, it shows how to replace it. Typing or changing a format dismisses the hint. The format-button values show the standard word multiplier for bold/italic, link points per word, and citation multiplier per citation block; bullet formatting itself adds no points.</p><table><thead><tr><th>Action</th><th>Shortcut</th></tr></thead><tbody>{[['Bold','B'],['Italic','I'],['Link','L'],['Citation',';'],['Bullet','O'],['Compose','M']].map(([label,key]) => <tr key={key}><td>{label}</td><td>Ctrl / ⌘ + {key}</td></tr>)}<tr><td>Special characters</td><td>Hold Ctrl, then Ctrl + shown key</td></tr><tr><td>Use item in bag slot 1–3</td><td>Ctrl + 1–3</td></tr></tbody></table><p>Enter locks only a complete match. Backspace removes the last character. Ctrl, ⌘ or Alt + Backspace clears the input. Clear or Escape clears the unfinished sentence and resets formatting; locked sentences stay. Escape first closes Compose or the special-character panel when either is open. An unmatched character or format turns the input red; edit it to restore a match. Straight quotes also match curly quotes; a hyphen matches an en dash or em dash. Spaces still require the correct formatting.</p><p>Citation mode applies to references and annotations such as [which?] and [citation needed], including brackets. These use small baseline brackets with a dotted underline, without internal link or italic toggles. Math superscripts and area exponents are ordinary text, never citations. Each format combination has its own ink color and an underline showing its component colors. Hover a word or check the active-format preview to see the combination; bullet-only text and bullet markers stay green. Bullet mode matches the text of a list item; do not type its decorative bullet. Special characters typed from the Ctrl panel use your active formats.</p><p>Practice has three excerpts, no clock and no target. Complete the plain, bold and italic excerpts to finish; it does not replace your saved run.</p></details>
                 <details><summary>03 / Navigation, clock & saving</summary><p>The clock starts with your first typed character, inserted special character or article link, except for an unused Scout’s Honor free click. Following a link clears unfinished input after the new article loads; locked excerpts and upgrades remain. Back returns to a previously visited article.</p><p>The clock pauses while the game menu is open, during article loading, Rules, dev mode and scoring. Practice is untimed. Switching browser tabs alone does not pause a running clock. Save & leave stores the run in this browser; Continue resumes with the clock paused until typing or navigation begins. The run also autosaves while playing. Restart starts at round one with a new article and resets upgrades and credits; Keep playing cancels it. The clock pauses while choosing. New run replaces the saved run.</p></details>
                 <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
-                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · THIS ROUND':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
+                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. All money buffs apply on future clears; their bonuses stack and have no caps. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
                 <details><summary>06 / Special characters</summary><p>Hold Ctrl for a moment to open the character panel: every special character on the current page, each with a key. While still holding Ctrl, press that key to type the character with your active formatting; release Ctrl to close the panel. Keys are fixed for the whole article, with the most frequent characters on single keys. Pages with more characters than keys use two-key labels (for example Ctrl+0 then Ctrl+S). Experienced players can press Ctrl+key without waiting for the panel. The Ω button pins the panel open for mouse and touch; click a character to type it. Hint keys never reuse the format toggles (B I L ; O M) or the item slots (1–3). Characters that match plain keys are left out: straight quotes match curly quotes, a hyphen matches en and em dashes, and superscript digits accept ordinary digits (² → 2); exponents do not require Citation mode. Combining marks are shown on a dotted circle for legibility; only the mark is inserted.</p><p>Compose also works for common Latin accents and typography: toggle Compose, then type a two-character combination. A supported pair inserts one character with the active formatting and exits Compose. An unsupported pair inserts both characters literally. Escape or Enter cancels composition without clearing the existing input.</p><table><thead><tr><th>Pair</th><th>Character</th></tr></thead><tbody>{Object.entries(COMPOSE_SYMBOLS).map(([pair,char]) => <tr key={pair}><td><code>{pair}</code></td><td>{char}</td></tr>)}</tbody></table><p>Combine a letter with an accent marker in either order: apostrophe for acute, backtick for grave, double quote for diaeresis, ^ for circumflex, ~ for tilde, comma for cedilla, / for stroke, or o for ring. An accented character is inserted when the combination forms a single character; otherwise the pair is inserted literally. Example: apostrophe + e gives é.</p></details>
-                <details><summary>07 / Dev mode & sandbox</summary><p>DEV pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
+                <details><summary>07 / Dev mode & sandbox</summary><p>Dev mode pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
             </div>
         </ManualDialog>;
 
@@ -4400,11 +4575,11 @@
                 setNotice('Settings exported.');
             };
             return <dialog ref={dialogRef} className="sandbox" aria-labelledby="sandbox-title" onCancel={e => { e.preventDefault(); onClose(); }}>
-                <header className="sticky top-0 z-10 bg-[#faf9f5] border-b-2 border-zinc-900 px-5 py-4 flex items-start justify-between gap-4">
-                    <div><div className="text-[10px] font-bold tracking-widest uppercase text-orange-700">DEV / LAB 007</div>
-                        <h2 id="sandbox-title" className="font-marker text-3xl mt-1">Scoring sandbox</h2>
-                        <p className="text-sm text-zinc-600 mt-1">TIMER PAUSED</p></div>
-                    <div className="flex gap-3"><button onClick={onRules} className="rules-link">RULES</button><button autoFocus onClick={onClose} className="border border-zinc-400 bg-white rounded px-3 py-2 text-sm font-bold">Done</button></div>
+                <header className="sticky top-0 z-10 bg-white border-b border-zinc-200 px-5 py-4 flex items-start justify-between gap-4">
+                    <div><div className="print-label">Dev mode</div>
+                        <h2 id="sandbox-title" className="sandbox-title">Scoring sandbox</h2>
+                        <p className="text-sm text-zinc-600 mt-1">Timer paused</p></div>
+                    <div className="flex gap-3"><button onClick={onRules} className="rules-link">Rules</button><button autoFocus onClick={onClose} className="border border-zinc-400 bg-white rounded px-3 py-2 text-sm font-bold">Done</button></div>
                 </header>
                 <div className="grid lg:grid-cols-2 gap-6 p-5">
                     <section aria-label="Score preview" className="min-w-0">
@@ -4440,7 +4615,7 @@
                         </details>
                         <details className="bg-white border border-zinc-300 rounded p-3 mt-3">
                             <summary className="font-bold text-sm cursor-pointer">Difficulty across seven rounds</summary>
-                            <p className="text-xs text-zinc-500 my-3">FIXED BUILD / SAME THREE EXCERPTS</p>
+                            <p className="text-xs text-zinc-500 my-3">Fixed build, same three excerpts</p>
                             <table className="w-full text-xs text-left"><thead><tr><th>Round</th><th>Time budget</th><th>Goal</th><th>Trial</th></tr></thead><tbody>{Array.from({length: MAX_ANTE}, (_,i) => i+1).map(n => {const estimate=estimateTrialTime(trial,selectedUpgrades,n,wpm,article,categories);return <tr key={n} className="border-t border-zinc-100"><td className="py-2">{n}</td><td>{estimate.budget}s</td><td>{formatScore(getRoundTarget(n))}</td><td className={trialReady && run.runTotal >= getRoundTarget(n) && estimate.fits ? 'text-blue-700' : 'text-zinc-500'}>{!trialReady ? '—' : !estimate.fits ? 'Over time' : run.runTotal >= getRoundTarget(n) ? `${(run.runTotal / getRoundTarget(n)).toFixed(1)}× goal` : 'Below goal'}</td></tr>;})}</tbody></table>
                         </details>
                         <details className="bg-white border border-zinc-300 rounded p-3 mt-3">
@@ -4466,7 +4641,7 @@
                         </div>)}</div>
                         <div className="mt-5 border-t border-zinc-300 pt-4">
                             <label className="flex gap-2 items-start text-sm font-bold"><input className="mt-1" type="checkbox" checked={applied} onChange={e => onApply(e.target.checked)} />Use these rules while playing in dev mode</label>
-                            <p className="text-xs text-zinc-600 mt-2">{applied ? 'CUSTOM SCORING ACTIVE IN DEV' : 'STANDARD SCORING ACTIVE'}</p>
+                            <p className="text-xs text-zinc-600 mt-2">{applied ? 'Custom scoring active in dev mode' : 'Standard scoring active'}</p>
                             <div className="flex flex-wrap gap-3 mt-4"><button onClick={() => { onChange({ ...DEFAULT_SCORING }); setNotice('Default scoring restored.'); }} className="bg-white border border-zinc-400 rounded px-3 py-2 text-sm font-bold">Reset defaults</button><button onClick={exportSettings} className="bg-white border border-zinc-400 rounded px-3 py-2 text-sm font-bold">Export settings</button></div>
                             <p role="status" className="text-xs text-blue-700 mt-2">{notice}</p>
                         </div>
@@ -4655,7 +4830,7 @@
                     stack.width = SIZE;
                     stack.height = SIZE * valid.length;
                     const stx = stack.getContext('2d');
-                    stx.fillStyle = '#f4f6fc';
+                    stx.fillStyle = '#ffffff';
                     stx.fillRect(0, 0, stack.width, stack.height);
 
                     valid.forEach((im, i) => {
@@ -4674,11 +4849,13 @@
                     out.width = stack.width;
                     out.height = stack.height;
                     const octx = out.getContext('2d');
-                    octx.fillStyle = '#f4f6fc';
+                    octx.fillStyle = '#f3f5f8';
                     octx.fillRect(0, 0, out.width, out.height);
+                    // One quiet slate ink: the photo survives only as a tonal texture behind the page.
+                    octx.fillStyle = 'rgba(38,50,68,0.085)';
 
-                    const step = 4;
-                    const maxR = step * 0.7;
+                    const step = 5;
+                    const maxR = step * 0.62;
 
                     let sliceStart = performance.now();
                     for (let y = 0; y < out.height; y += step) {
@@ -4687,21 +4864,16 @@
                             await new Promise(resolve => { wakeFrame=resolve;frameId=requestAnimationFrame(resolve); });
                             wakeFrame=null;if(cancelled)return;sliceStart=performance.now();
                         }
+                        octx.beginPath();
                         for (let x = 0; x < out.width; x += step) {
                             const idx = (y * out.width + x) * 4;
-                            let r = pixels[idx], g = pixels[idx+1], b = pixels[idx+2];
-                            const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
-                            const radius = (1 - lum) * maxR + 0.5;
-                            const avg = (r+g+b)/3;
-                            const boost = 1.4;
-                            r = Math.max(0, Math.min(255, avg + (r-avg)*boost));
-                            g = Math.max(0, Math.min(255, avg + (g-avg)*boost));
-                            b = Math.max(0, Math.min(255, avg + (b-avg)*boost));
-                            octx.fillStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
-                            octx.beginPath();
+                            const lum = (0.299*pixels[idx] + 0.587*pixels[idx+1] + 0.114*pixels[idx+2]) / 255;
+                            const radius = (1 - lum) * maxR;
+                            if (radius < 0.35) continue;
+                            octx.moveTo(x + step/2 + radius, y + step/2);
                             octx.arc(x + step/2, y + step/2, radius, 0, Math.PI * 2);
-                            octx.fill();
                         }
+                        octx.fill();
                     }
                     out.toBlob(blob => {
                         if(cancelled || !blob)return;
@@ -4726,34 +4898,14 @@
             useEffect(() => {
                 if (!contentBlocks.length) return;
                 let disposed=false;
-                const t = setTimeout(async () => {
+                const t = setTimeout(() => {
                     const root = document.querySelector('.wiki-content');
-                    if (!root) return;
-                    const candidates = [];
-                    root.querySelectorAll('audio source, audio').forEach(el => {
-                        const s = el.getAttribute('src');
-                        if (s) candidates.push(s);
-                    });
-                    // Wikipedia audio links: <a href="//upload.../File.ogg"> or .mp3/.wav
-                    root.querySelectorAll('a').forEach(a => {
-                        const href = a.getAttribute('href') || '';
-                        if (/\.(ogg|oga|mp3|wav|flac|m4a)(\?|$)/i.test(href)) candidates.push(href);
-                    });
-
+                    if (!root || disposed) return;
                     const titleStr=articleMeta.title||article||'';
-                    const lead=root.textContent.slice(0,1400);
-                    const m=classifyMood(articleMeta.categories||[],titleStr,lead);
+                    const m=classifyMood(articleMeta.categories||[],titleStr,root.textContent.slice(0,1400));
                     let seed=0;for(let i=0;i<titleStr.length;i++)seed=(seed*31+titleStr.charCodeAt(i))|0;
-                    if(candidates.length){
-                        let url=candidates[0];
-                        if(url.startsWith('//'))url='https:'+url;
-                        else if(url.startsWith('/'))url='https://en.wikipedia.org'+url;
-                        const played=await AudioEngine.playAmbient(url);
-                        if(disposed)return;
-                        if(played){setMood({label:'media'});return;}
-                    }
-                    if(disposed)return;
-                    AudioEngine.playDrone(m.root,m.intervals,seed,m.profile);setMood(m);
+                    const label=AudioEngine.playSong(seed,m.label);
+                    setMood({...m,song:label});
                 }, 400);
                 return () => { disposed=true;clearTimeout(t);AudioEngine.stopAmbient(); };
             }, [contentBlocks, articleMeta.categories, article]);
@@ -4847,7 +4999,7 @@
             const pacePercent=paceRatio===null?null:Math.floor(paceRatio*100);
             const isRed = buffer.length > 0 && matchStates._activeCount === 0;
 
-            useEffect(()=>{if(gameState==='LOST'){AudioEngine.stopAmbient();AudioEngine.playLoss();}},[gameState]);
+            useEffect(()=>{if(gameState==='LOST'){AudioEngine.playLoss();AudioEngine.stopAmbient();}if(gameState==='VICTORY'){AudioEngine.playWin();AudioEngine.stopAmbient();}},[gameState]);
 
             // Sound cue when buffer transitions from "matching" → "no match"
             const wasRedRef = React.useRef(false);
@@ -5350,49 +5502,35 @@
             const rulebook = showCommandsModal && <RulesDialog onClose={() => setShowCommandsModal(false)} rules={rules} />;
             if (gameState === 'START' || gameState === 'PRACTICE_DONE') {
                 const completedPractice = gameState === 'PRACTICE_DONE';
-                return <main className="title-screen">{rulebook}
-                    <div className="halftone-orbit" aria-hidden="true"><span className="orbit-disc"/><span className="orbit-disc orbit-disc-two"/><span className="orbit-rings"/></div>
-                    <div className="title-registration" aria-hidden="true">+<span>ENC / 007</span>+</div>
-                    <div className="title-content">
-                        <div className="title-kicker">TYPE. STACK. BREAK THE SCALE.</div>
-                        <h1 className="game-wordmark">ENCY<span>CLO</span><i aria-hidden="true">↗</i></h1>
-                        <div className="score-stamp" aria-hidden="true">×2<span>×4</span>×8<span>×16</span></div>
-                        <nav className="game-menu" aria-label="Game menu">
-                            {completedPractice && <p className="practice-stamp">TRAINING COMPLETE ✓</p>}
-                            {savedRun && <button className="game-play" onClick={resumeRun}>CONTINUE <span>ROUND {savedRun.ante} ↗</span></button>}
-                            <button className={savedRun ? 'game-option' : 'game-play'} onClick={handleStartNewGame}>{savedRun ? 'NEW RUN' : 'PLAY'}<span>{savedRun ? 'REPLACE SAVE ↗' : '↗'}</span></button>
-                            <button className="game-option" onClick={startPractice}>PRACTICE<span>NO CLOCK</span></button>
-                            <button className="game-option" onClick={() => setShowCommandsModal(true)}>RULES<span>READ / 01–07</span></button>
+                return <main className="home">{rulebook}
+                    <div className="home-inner">
+                        <p className="home-kicker">A typing roguelike on Wikipedia</p>
+                        <h1 className="home-wordmark">Ency<span>clo</span></h1>
+                        <p className="home-lede">Land on a random article. Type three of its sentences, formatting and all. Their scores multiply. Clear seven rounds.</p>
+                        <nav className="home-menu" aria-label="Game menu">
+                            {completedPractice && <p className="home-note">Practice complete. You’re ready for a real run.</p>}
+                            {savedRun && <button className="home-primary" onClick={resumeRun}>Continue<span>Round {savedRun.ante} of 7</span></button>}
+                            <button className={savedRun ? 'home-option' : 'home-primary'} onClick={handleStartNewGame}>{savedRun ? 'New run' : 'Play'}<span>{savedRun ? 'Replaces your save' : 'Seven rounds'}</span></button>
+                            <button className="home-option" onClick={startPractice}>Practice<span>No clock</span></button>
+                            <button className="home-option" onClick={() => setShowCommandsModal(true)}>Rules<span>How scoring works</span></button>
                         </nav>
                     </div>
-                    <footer className="title-footer"><span>3 EXCERPTS / 7 ROUNDS</span><span>EVERY WORD COUNTS.</span></footer>
                 </main>;
             }
 
 
             // LOADING SCREEN
             if (gameState === 'LOADING') {
-                return (
-                    <div className="print-stage min-h-screen flex items-center justify-center flex-col space-y-8 font-sans">
-                        <div className="relative">
-                            <div className="w-14 h-14 border-[3px] border-zinc-300 border-t-blue-600 rounded-full animate-spin"></div>
-                            <div className="absolute inset-2 border-[3px] border-transparent border-t-orange-500 rounded-full animate-spin" style={{animationDuration:'1.4s', animationDirection:'reverse'}}></div>
-                        </div>
-                        <p className="text-zinc-700 font-black text-sm tracking-[0.25em] uppercase font-mono bg-white px-5 py-2.5 marker-box-tight wobble-r">
-                            Finding your next article<span className="ink-bleed inline-block">...</span>
-                        </p>
-                    </div>
-                );
+                return <main className="home home-loading" role="status"><span className="home-spinner" aria-hidden="true"/><p>Finding an article…</p></main>;
             }
 
             // FETCH ERROR SCREEN
             if (gameState === 'FETCH_ERROR') {
-                return <main className="welcome-screen print-stage"><section className="welcome-card max-w-lg w-full">
-                    <div className="eyebrow text-orange-700">A small interruption</div><h1 className="text-3xl font-bold my-3">The article couldn’t load.</h1>
-                    <p className="text-zinc-600 leading-relaxed mb-6">Check your connection and try again. You can also explore the practice round while Wikipedia is unavailable.</p>
-                    <button className="primary-action mb-3" onClick={() => startRound()}>Try again <span>→</span></button><button className="secondary-action" onClick={startPractice}>Try practice</button>
-                    <button className="text-sm text-zinc-500 underline mt-5" onClick={() => setGameState('START')}>Back to home</button>
-                </section></main>;
+                return <main className="home"><div className="home-inner">
+                    <p className="home-kicker">A small interruption</p><h1 className="home-title">The article couldn’t load.</h1>
+                    <p className="home-lede">Check your connection and try again, or play the practice round while Wikipedia is unavailable.</p>
+                    <nav className="home-menu"><button className="home-primary" onClick={() => startRound()}>Try again<span>New article</span></button><button className="home-option" onClick={startPractice}>Practice<span>No clock</span></button><button className="home-option" onClick={() => setGameState('START')}>Home<span>Back to the start</span></button></nav>
+                </div></main>;
             }
 
             // SHOP
@@ -5412,7 +5550,7 @@
                         <header className="shop-head">
                             <div>
                                 <p className="shop-kicker">Round {ante} cleared</p>
-                                <h1 className="shop-title">The Curiosity Shop<span>.</span></h1>
+                                <h1 className="shop-title">Shop</h1>
                             </div>
                             <dl className="shop-ledger">
                                 <div><dt>Round {ante+1} target</dt><dd>{formatScore(getRoundTarget(ante+1))}</dd></div>
@@ -5560,10 +5698,8 @@
 
                         <div className="play-toolbar flex justify-between items-center gap-2">
                             {/* Left: ante + title */}
-                            <div className="flex items-center gap-3 min-w-0 flex-1"><span className="hud-brand" aria-hidden="true">ENCY<span>CLO</span></span>
-                                <span className="text-[10px] font-black text-white bg-orange-600 uppercase tracking-[0.18em] px-2 py-0.5 shrink-0" style={{borderRadius:'3px 7px 3px 6px'}}>
-                                    R{ante} / 7
-                                </span>
+                            <div className="flex items-center gap-3 min-w-0 flex-1"><span className="hud-brand" aria-hidden="true">Ency<span>clo</span></span>
+                                <span className="round-pill">Round {ante}<small>/7</small></span>
                                 <h2 className="text-lg md:text-xl font-serif font-bold text-zinc-900 truncate min-w-0">
                                     {article}
                                 </h2>
@@ -5586,39 +5722,36 @@
                                     {isPractice ? 'Untimed' : `${isDevMode||menuOpen||restartOpen ? 'Ⅱ ' : ''}${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`}
                                 </span>
                                 <button type="button" className="restart-action" title="Restart from round 1" disabled={isNavigating} onClick={()=>setRestartOpen(true)}>↻ <span>Restart</span></button>
-                                <details className="play-menu" onToggle={e=>{if(e.target===e.currentTarget)setMenuOpen(e.currentTarget.open);}}><summary aria-label="Game menu">Menu ≡</summary><div className="play-menu-panel" onClick={e=>{if(e.target.closest('button'))e.currentTarget.parentElement.open=false;}}><div className="menu-heading">{isPractice?'PRACTICE':'CLOCK PAUSED'}</div>                                <button
+                                <details className="play-menu" onToggle={e=>{if(e.target===e.currentTarget)setMenuOpen(e.currentTarget.open);}}><summary aria-label="Game menu">Menu ≡</summary><div className="play-menu-panel" onClick={e=>{if(e.target.closest('button'))e.currentTarget.parentElement.open=false;}}><div className="menu-heading">{isPractice?'Practice':'Clock paused'}</div>                                <button
                                     onClick={() => { setIsDevMode(prev => !prev); setShowSandbox(false); }} aria-pressed={isDevMode}
-                                    className={`text-[10px] font-bold uppercase tracking-[0.15em] px-1.5 py-0.5 transition-all ${isDevMode ? 'bg-orange-600 text-white' : 'text-zinc-400 hover:text-zinc-900'}`}
-                                    style={{borderRadius:'2px 6px 2px 5px'}}
+                                    className={isDevMode ? 'is-on' : ''}
                                     title="Dev mode pauses the timer"
-                                >{isDevMode ? 'DEV · PAUSED' : 'DEV'}</button>
-                                <button className="text-xs font-semibold text-zinc-600 hover:text-zinc-900" onClick={leaveRun} disabled={isNavigating}>{isPractice ? 'Exit practice' : 'Save & leave'}</button>
-                                {isDevMode && <button onClick={() => setShowSandbox(true)} className="text-xs font-bold text-orange-700 underline underline-offset-4">Scoring sandbox</button>}
+                                >{isDevMode ? 'Dev mode · paused' : 'Dev mode'}</button>
+                                <button onClick={leaveRun} disabled={isNavigating}>{isPractice ? 'Exit practice' : 'Save & leave'}</button>
+                                {isDevMode && <button onClick={() => setShowSandbox(true)} className="is-on">Scoring sandbox</button>}
                                 <button
                                     onClick={() => { const next = !muted; setMuted(next); AudioEngine.setMuted(next); }}
-                                    className={`text-[11px] font-bold ${muted ? 'text-zinc-400' : 'text-zinc-700 hover:text-orange-600'}`}
-                                    aria-label={muted ? "Unmute sound" : "Mute sound"} aria-pressed={muted} title={muted ? "Unmute" : (mood ? `Mood: ${mood.label}` : "Mute")}
+                                                                        aria-label={muted ? "Unmute sound" : "Mute sound"} aria-pressed={muted} title={muted ? "Unmute" : (mood?.song ? `Now playing: ${mood.song}` : "Mute")}
                                 >
-                                    {muted ? '♪̸ Sound off' : '♪ Sound on'}
+                                    {muted ? 'Sound off' : 'Sound on'}{mood?.song && !muted && <small>{mood.song}</small>}
                                 </button>
                                 <button
                                     onClick={() => setShowCommandsModal(true)}
-                                    className="text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500 hover:text-zinc-900"
-                                    title="Rules" aria-label="Open rules"
-                                >RULES</button>
-                                {!isPractice&&<div className="bag-menu"><div className="menu-heading">BAG {bagCount(market.bag)}/3 · {market.credits}¢</div>{bagCount(market.bag)?normalizeBag(market.bag).map((id,i)=>{if(!id)return <p key={i} className="bag-empty-slot"><kbd className="menu-kbd">{itemKeyLabel(i)}</kbd>Empty slot</p>;const item=CONSUMABLES.find(c=>c.id===id),active=item.effect&&hasUpgrade(activeUpgrades,item.effect);return <button key={i} onClick={()=>useConsumable(i)} disabled={isNavigating||active}><b><kbd className="menu-kbd">{itemKeyLabel(i)}</kbd>{active?'ACTIVE THIS ROUND':`USE ${item.name.toUpperCase()}`}</b><small>{item.desc}</small></button>}):<p>Buy single-use supplies at the next shop.</p>}</div>}
-                                <details className="build-menu"><summary>YOUR BUILD <b>{activeUpgrades.length}</b></summary><div>{activeUpgrades.length?activeUpgrades.map(u=><article key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span><h3><RichText text={u.richName||u.name}/>{u.temporary?' · THIS ROUND':''}</h3><p><RichText text={upgradeDescription(u,rules)}/></p></article>):<p>No upgrades yet.</p>}</div></details>
-                                {(hasUpgrade(activeUpgrades,'naturalist')||hasUpgrade(activeUpgrades,'historian'))&&<p className="menu-article-type">ARTICLE · {articleTraits(articleMeta).nature?'NATURE ':''}{articleTraits(articleMeta).history?'HISTORY':''}{!articleTraits(articleMeta).nature&&!articleTraits(articleMeta).history?'OTHER':''}</p>}
-                                {!roundStarted&&hasUpgrade(activeUpgrades,'scout')&&!scoutUsed&&<p className="menu-article-type">FREE SCOUTING CLICK READY</p>}
+                                    aria-label="Open rules"
+                                >Rules</button>
+                                {!isPractice&&<div className="bag-menu"><div className="menu-heading">Bag {bagCount(market.bag)}/3 · {market.credits}¢</div>{bagCount(market.bag)?normalizeBag(market.bag).map((id,i)=>{if(!id)return <p key={i} className="bag-empty-slot"><kbd className="menu-kbd">{itemKeyLabel(i)}</kbd>Empty slot</p>;const item=CONSUMABLES.find(c=>c.id===id),active=item.effect&&hasUpgrade(activeUpgrades,item.effect);return <button key={i} onClick={()=>useConsumable(i)} disabled={isNavigating||active}><b><kbd className="menu-kbd">{itemKeyLabel(i)}</kbd>{active?'Active this round':`Use ${item.name}`}</b><small>{item.desc}</small></button>}):<p>Buy single-use supplies at the next shop.</p>}</div>}
+                                <details className="build-menu"><summary>Your build <b>{activeUpgrades.length}</b></summary><div>{activeUpgrades.length?activeUpgrades.map(u=><article key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span><h3><RichText text={u.richName||u.name}/>{u.temporary?' · this round':''}</h3><p><RichText text={upgradeDescription(u,rules)}/></p></article>):<p>No upgrades yet.</p>}</div></details>
+                                {(hasUpgrade(activeUpgrades,'naturalist')||hasUpgrade(activeUpgrades,'historian'))&&<p className="menu-article-type">Article · {articleTraits(articleMeta).nature?'nature ':''}{articleTraits(articleMeta).history?'history':''}{!articleTraits(articleMeta).nature&&!articleTraits(articleMeta).history?'other':''}</p>}
+                                {!roundStarted&&hasUpgrade(activeUpgrades,'scout')&&!scoutUsed&&<p className="menu-article-type">Free scouting click ready</p>}
                                 </div></details>
                             </div>
                         </div>
                         <section className="score-hud" aria-label="Round score dashboard">
                             <div className="score-hud-metrics">
-                                {!isPractice&&<div><span>TARGET</span><strong title={targetScore.toLocaleString()}>{formatScore(targetScore)}</strong></div>}
+                                {!isPractice&&<div><span>Target</span><strong title={targetScore.toLocaleString()}>{formatScore(targetScore)}</strong></div>}
                                 <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><strong title={liveScore!==null?liveScore.toLocaleString():''}>{liveScore!==null?formatScore(liveScore):'—'}</strong>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}</div>
                                 {!isPractice&&(()=>{
-                                    const bonusCount=bonusOutlook.live.length, split=bonusCount>0&&bonusPace!==requiredPace, fmt=n=>Number.isFinite(n)?formatScore(n):'UNREACHABLE';
+                                    const bonusCount=bonusOutlook.live.length, split=bonusCount>0&&bonusPace!==requiredPace, fmt=n=>Number.isFinite(n)?formatScore(n):'unreachable';
                                     const names=bonusOutlook.live.map(u=>u.name).join(', ');
                                     return <div className="hud-pace" title={`Equal score each remaining excerpt needs.\nNo bonuses: only guaranteed multipliers (Symmetric, Carbon Copy).\n${bonusCount?`All bonuses: ${names} also land.`:'No conditional run bonus is still possible.'}${bonusOutlook.lost.length?`\nRuled out: ${bonusOutlook.lost.map(u=>u.name).join(', ')}.`:''}`}>
                                         <span>{lockedSentences.length===2?'Still needed':'Aim per sentence'}</span>
@@ -5626,7 +5759,7 @@
                                         {split&&<strong className="is-bonus" title={Number.isFinite(bonusPace)?bonusPace.toLocaleString():''}>{fmt(bonusPace)}<small>{bonusCount===1?bonusOutlook.live[0].name:`all ${bonusCount} bonuses`}</small></strong>}
                                     </div>;
                                 })()}
-                                {!isPractice&&<div className="hud-credits" title={`${market.credits}¢ in hand. Locked excerpts pay ${formatCredits(pendingCredits)} when the round clears (1¢ per 6 words${hasUpgrade(activeUpgrades,'patron')||hasUpgrade(activeUpgrades,'royalties')?', plus bonuses':''}).`}><span>CREDITS</span><strong>{market.credits}¢</strong><em className="hud-earn">{pendingCredits>0?`+${formatCredits(pendingCredits)} on clear`:''}</em></div>}
+                                {!isPractice&&<div className="hud-credits" title={`${market.credits}¢ in hand. Locked excerpts pay ${formatCredits(pendingCredits)} when the round clears (1¢ per 6 words${hasUpgrade(activeUpgrades,'patron')||hasUpgrade(activeUpgrades,'royalties')?', plus bonuses':''}).`}><span>Credits</span><strong>{market.credits}¢</strong><em className="hud-earn">{pendingCredits>0?`+${formatCredits(pendingCredits)} on clear`:''}</em></div>}
                                 {!isPractice&&bagCount(market.bag)>0&&<div className="quick-bag" role="group" aria-label={`Items — use with ${ITEM_KEY_HINT}`}>
                                     {normalizeBag(market.bag).map((id,k)=>{const item=CONSUMABLES.find(c=>c.id===id);if(!item)return <span key={`empty-${k}`} className="qb-slot is-empty" aria-label={`Slot ${k+1} empty`}><kbd>{itemKeyLabel(k)}</kbd></span>;const active=item.effect&&hasUpgrade(activeUpgrades,item.effect);const nudged=itemNudge?.slot===k;
                                         return <button key={`${k}-${item.id}-${nudged?itemNudge.n:0}`} type="button" data-rarity={item.rarity} className={`qb-slot ${active?'is-active':''} ${nudged?'nudge':''}`}
@@ -5640,7 +5773,7 @@
                             </div>
                             <div className="score-feedback"><span className="excerpt-counter">Sentence {Math.min(3,lockedSentences.length+1)} / 3</span>{liveDetail?<ScoreEffects detail={liveDetail} rules={rules} compact/>:(<div className="hud-locks" aria-label="Locked excerpt scores">{[0,1,2].map(i=>{const locked=lockedSentences[i];return <span key={i} className={locked?'locked':i===lockedSentences.length?'active':''} title={locked?locked.chars.map(c=>c.c).join(''):''}><b>0{i+1}</b>{locked?formatScore(scoreSentence(locked,activeUpgrades,rules).sentenceTotal):'—'}{locked&&!isPractice&&<small className="lock-earn">+{formatCredits(lockedIncome[i].credits)}</small>}{locked&&<i aria-label="Locked">✓</i>}</span>;})}</div>)}</div>
                             
-                            {!isPractice&&lockedSentences.length===2&&<div className={`target-forecast ${roundForecast!==null&&roundForecast>=targetScore?'cleared':''}`}><span>ROUND IF LOCKED <b>{roundForecast===null?'—':formatScore(roundForecast)}</b>{roundForecast!==null&&` · ${roundForecast>=targetScore?'TARGET MET':`${formatScore(targetScore-roundForecast)} SHORT`}`}</span></div>}
+                            {!isPractice&&lockedSentences.length===2&&<div className={`target-forecast ${roundForecast!==null&&roundForecast>=targetScore?'cleared':''}`}><span>Round if locked <b>{roundForecast===null?'—':formatScore(roundForecast)}</b>{roundForecast!==null&&` · ${roundForecast>=targetScore?'target met':`${formatScore(targetScore-roundForecast)} short`}`}</span></div>}
 
                         </section>
                         {/* Subtle bottom hairline */}
@@ -5656,14 +5789,12 @@
                     {!isPractice&&<PaceMeter locked={lockedSentences} live={liveExcerpt} liveScore={liveScore} needed={neededScore} upgrades={activeUpgrades} rules={rules} target={targetScore}/>}
                     {/* Wikipedia article canvas */}
                     <div className="flex-1 overflow-y-auto px-6 pt-3 pb-24 font-article relative" style={{
-                        backgroundImage: halftoneBg
-                            ? `linear-gradient(rgba(245,247,255,0.06), rgba(245,247,255,0.06)), url("${halftoneBg}")`
-                            : 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.06) 1px, transparent 0)',
-                        backgroundRepeat: halftoneBg ? 'repeat-y' : 'repeat',
-                        backgroundSize: halftoneBg ? '100% auto' : '14px 14px',
+                        backgroundImage: halftoneBg ? `url("${halftoneBg}")` : 'none',
+                        backgroundRepeat: 'repeat-y',
+                        backgroundSize: '100% auto',
                         backgroundPosition: halftoneBg ? 'top center' : undefined,
                         backgroundAttachment: halftoneBg ? 'local' : undefined,
-                        backgroundColor: '#f4f6fc',
+                        backgroundColor: '#f3f5f8',
                         transition: 'background-image 0.6s ease'
                     }}>
                         <div className="max-w-4xl mx-auto bg-white border-2 border-zinc-900 p-8 md:p-10 wiki-content relative" onClick={handleWikiClick}
@@ -5713,7 +5844,7 @@
                     {/* Bottom control deck */}
                     <div className="typing-deck shrink-0 z-20 relative" style={{backgroundColor: '#f4f6fc'}}>
                         {(charPanel.open||charPanel.pinned)&&specialChars.length>0&&<CharPanel entries={specialChars} prefix={charPanel.prefix} pinned={charPanel.pinned} onPick={c=>insertSpecialRef.current?.(c)} onClose={()=>setCharPanel({open:false,pinned:false,prefix:''})}/>}
-                        {idleHint&&<div className="idle-hint" role="status"><span className="print-label">{idleHint.correction?'FIX LAST CHARACTER':'NEXT CHARACTER'}</span><kbd>{idleHint.char.c===' '?'SPACE':idleHint.char.c}</kbd><span>{idleHint.correction?'Backspace, then ':''}{hintByChar.get(idleHint.char.c)?`Ctrl+${hintByChar.get(idleHint.char.c).toUpperCase().split('').join(', Ctrl+')}. `:''}{getComposeSequence(idleHint.char.c)?`Compose: ${getComposeSequence(idleHint.char.c)}. `:''}{[['b','Bold'],['i','Italic'],['l','Link'],['cit','Citation'],['bul','Bullet']].filter(([k])=>!!format[k]!==!!idleHint.char[k]).map(([k,label])=>`${label} ${idleHint.char[k]?'on':'off'}`).join(' · ')||([['b','Bold'],['i','Italic'],['l','Link'],['cit','Citation'],['bul','Bullet']].filter(([k])=>idleHint.char[k]).map(([,label])=>label).join(' + ')||'Plain text')}</span></div>}
+                        {idleHint&&<div className="idle-hint" role="status"><span className="print-label">{idleHint.correction?'Fix the last character':'Next character'}</span><kbd>{idleHint.char.c===' '?'SPACE':idleHint.char.c}</kbd><span>{idleHint.correction?'Backspace, then ':''}{hintByChar.get(idleHint.char.c)?`Ctrl+${hintByChar.get(idleHint.char.c).toUpperCase().split('').join(', Ctrl+')}. `:''}{getComposeSequence(idleHint.char.c)?`Compose: ${getComposeSequence(idleHint.char.c)}. `:''}{[['b','Bold'],['i','Italic'],['l','Link'],['cit','Citation'],['bul','Bullet']].filter(([k])=>!!format[k]!==!!idleHint.char[k]).map(([k,label])=>`${label} ${idleHint.char[k]?'on':'off'}`).join(' · ')||([['b','Bold'],['i','Italic'],['l','Link'],['cit','Citation'],['bul','Bullet']].filter(([k])=>idleHint.char[k]).map(([,label])=>label).join(' + ')||'Plain text')}</span></div>}
                         <div className="absolute top-0 left-0 right-0 h-px bg-zinc-900/15"></div>
                         <div className="px-5 py-2 space-y-2">
                             {/* Format toggles + input buffer */}
@@ -5780,79 +5911,19 @@
                         />
                     )}
 
-                    {/* Loss screen */}
-                    {gameState === 'LOST' && (
-                        <div className="result-screen print-stage absolute inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="bg-white marker-box p-10 pt-12 max-w-md w-full text-center relative">
-                                <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 w-14 h-14 bg-white marker-circle flex items-center justify-center text-red-600 font-black text-3xl ink-bleed" style={{borderColor:'#dc2626'}}>✕</div>
-                                <div className="tape absolute -top-3 right-8 w-16 h-6 wobble-r"></div>
-                                <h1 className="text-5xl font-black text-zinc-900 tracking-tight mb-2 font-marker wobble-l-strong">RUN OVER.</h1>
-                                <p className="text-red-600 font-mono font-bold text-[11px] uppercase tracking-[0.25em] mb-7 border-b-2 border-dashed border-red-200 pb-3">
-                                    {timeLeft <= 0 ? 'OUT OF TIME' : 'BELOW TARGET'}
-                                </p>
-
-                                <div className="space-y-3 mb-7 bg-zinc-50 p-5 border-2 border-zinc-900 font-mono text-sm text-left" style={{borderRadius:'4px 12px 4px 10px', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.05)'}}>
-                                    <div className="flex justify-between text-zinc-500 font-bold border-b-2 border-dashed border-zinc-300 pb-2.5">
-                                        <span className="uppercase tracking-[0.15em] text-[11px] pt-1">ROUND</span>
-                                        <span className="text-zinc-900 text-xl">{ante}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-zinc-500 font-bold pt-1">
-                                        <span className="uppercase tracking-[0.15em] text-[11px]">BANKED SCORE</span>
-                                        <span className="text-blue-700 font-black text-xl">{formatScore(totalScore)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-zinc-500 font-bold pt-1">
-                                        <span className="uppercase tracking-[0.15em] text-[11px]">CREDITS EARNED</span>
-                                        <span className="text-zinc-900 font-black text-xl">{market.totalEarned||0}¢</span>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={handleStartNewGame}
-                                    className="w-full py-4 bg-zinc-900 text-white text-base font-black uppercase tracking-[0.2em] marker-box press-marker"
-                                    style={{boxShadow: '6px 6px 0 -1px #ea580c'}}
-                                >
-                                    PLAY AGAIN ↗
-                                </button><button className="rules-link mt-5" onClick={() => setShowCommandsModal(true)}>RULES ↗</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Victory screen */}
-                    {gameState === 'VICTORY' && (
-                        <div className="result-screen print-stage absolute inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="bg-white marker-box-blue p-10 pt-12 max-w-md w-full text-center relative overflow-hidden">
-                                <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500 rounded-full blur-[80px] opacity-25"></div>
-                                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-500 rounded-full blur-[80px] opacity-20"></div>
-                                <div className="tape absolute -top-3 left-8 w-16 h-6 wobble-l"></div>
-
-                                <div className="relative">
-                                    <h1 className="text-6xl font-black text-blue-700 tracking-tight mb-1 font-marker wobble-l-strong inline-block">SCALE BROKEN.</h1>
-                                    <p className="text-zinc-600 font-mono font-bold text-[11px] uppercase tracking-[0.25em] mb-7 border-b-2 border-dashed border-zinc-300 pb-3 mt-2">
-                                        7 / 7 ROUNDS CLEARED
-                                    </p>
-
-                                    <div className="mb-7 bg-blue-50 p-5 border-2 border-blue-300 font-mono text-sm text-left" style={{borderRadius:'4px 12px 4px 10px'}}>
-                                        <div className="flex justify-between items-center text-zinc-600 font-bold">
-                                            <span className="uppercase tracking-[0.15em] text-[11px]">BANKED SCORE</span>
-                                            <span className="text-blue-700 font-black text-2xl marker-box-tight bg-white px-3 py-1 wobble-r" style={{boxShadow:'2px 2px 0 -1px #1d4ed8', borderColor:'#1d4ed8'}}>
-                                                {formatScore(totalScore)}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-zinc-600 font-bold mt-3">
-                                            <span className="uppercase tracking-[0.15em] text-[11px]">CREDITS EARNED</span>
-                                            <span className="text-zinc-900 font-black text-xl">{market.totalEarned||0}¢</span>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={handleStartNewGame}
-                                        className="w-full py-4 bg-blue-600 text-white text-base font-black uppercase tracking-[0.2em] marker-box-blue press-marker"
-                                        style={{boxShadow: '6px 6px 0 -1px #ea580c'}}
-                                    >
-                                        PLAY AGAIN ↗
-                                    </button><button className="rules-link mt-5" onClick={() => setShowCommandsModal(true)}>RULES ↗</button>
-                                </div>
-                            </div>
+                    {(gameState === 'LOST' || gameState === 'VICTORY') && (
+                        <div className="result-screen">
+                            <section className={`result-card ${gameState === 'VICTORY' ? 'won' : 'lost'}`} aria-labelledby="result-title">
+                                <p className="result-kicker">{gameState === 'VICTORY' ? 'All seven rounds cleared' : timeLeft <= 0 ? 'Out of time' : 'Below the target'}</p>
+                                <h1 id="result-title">{gameState === 'VICTORY' ? 'You broke the scale.' : 'Run over.'}</h1>
+                                <dl className="result-stats">
+                                    <div><dt>Round reached</dt><dd>{ante} of 7</dd></div>
+                                    <div><dt>Banked score</dt><dd>{formatScore(totalScore)}</dd></div>
+                                    <div><dt>Credits earned</dt><dd>{market.totalEarned || 0}¢</dd></div>
+                                </dl>
+                                <button className="result-primary" onClick={handleStartNewGame}>Play again</button>
+                                <button className="result-link" onClick={() => setShowCommandsModal(true)}>Rules</button>
+                            </section>
                         </div>
                     )}
                 </div>
