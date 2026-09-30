@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&family=JetBrains+Mono:wght@500;800&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Permanent+Marker&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <style>
         /* ============================================================
            BASE TYPOGRAPHY + PAPER FEEL
@@ -1826,6 +1826,199 @@
         .item-highlighter { --item:#c2531a; }
         .excerpt-text.is-loupe { background:#d6f2e9; border-radius:3px; box-shadow:0 0 0 2px #d6f2e9; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
         @media (max-width:760px) { .shop-build-panel { left:auto; right:0; } }
+        /* ============================================================
+           INK — the print identity back on top of the calm layout: warm paper with grain and
+           halftone, hard corners, ink rules, offset shadows, blue for WORDS and red for MULT.
+           ============================================================ */
+        :root {
+            --c-ink:#15171c; --c-ink2:#33373f; --c-muted:#5f6370; --c-faint:#8f929b; --c-line:#ddd6c6; --c-line2:#c9c1ad;
+            --c-bg:#efe9dc; --c-card:#fffdf6; --c-accent:#2146e0; --c-accent-ink:#1633b8; --c-soft:#e5eaff; --c-ok:#0f8a5a; --c-warn:#e0481f;
+            --c-words:#2146e0; --c-mult:#e23d28; --c-gold:#ffcf3f;
+            --c-shadow:4px 4px 0 var(--c-ink); --c-lift:6px 6px 0 var(--c-ink);
+            --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .05 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            --dots:radial-gradient(#15171c17 .9px, transparent 1.3px) 0 0 / 7px 7px;
+            --paper:var(--grain), var(--dots), var(--c-bg);
+        }
+        body,.home,.result-screen,.shop,.print-stage { background:var(--paper)!important; }
+        .game-shell { background:var(--paper)!important; }
+        .shop { --ink:var(--c-ink); --orange:var(--c-warn); }
+
+        /* Hard corners everywhere; the few round things opt back in below. */
+        :is(.game-shell,.shop,.home,.result-screen,dialog,.word-tip,.pop-layer) :is(button,input,textarea,select,summary,article,section,aside,div,span,li,ul,p,strong,b,em,dl,kbd,a,small),
+        dialog,.word-tip { border-radius:0!important; }
+        .pm-clip { border-radius:10px!important; } .home-spinner { border-radius:50%!important; }
+
+        /* Surfaces: ink frames and offset shadows */
+        .game-shell .hud-header { background:var(--grain),var(--c-card)!important; border-bottom:2px solid var(--c-ink)!important; }
+        .score-hud { border-top-color:#15171c1f!important; }
+        .game-shell .wiki-content { border:2px solid var(--c-ink)!important; box-shadow:7px 7px 0 var(--c-ink)!important; background:var(--c-card)!important; }
+        .typing-deck { background:var(--grain),var(--c-card)!important; border-top:2px solid var(--c-ink)!important; box-shadow:none!important; }
+        .game-shell [data-typing-surface] { border:2px solid var(--c-ink)!important; background:#fff!important; box-shadow:3px 3px 0 #15171c33; }
+        .game-shell [data-typing-surface]:focus { outline:0; box-shadow:3px 3px 0 var(--c-accent); }
+        .game-shell .lock-action { background:var(--c-accent)!important; border:2px solid var(--c-ink)!important; box-shadow:3px 3px 0 var(--c-ink); color:#fff; font-weight:800!important; transition:transform .08s, box-shadow .08s; }
+        .game-shell .lock-action:enabled:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--c-ink); }
+        .game-shell .lock-action:disabled { background:#e9e4d8!important; border-color:#15171c40!important; color:#8f929b; box-shadow:none; }
+        .clear-action { border:2px solid var(--c-ink)!important; background:var(--c-card)!important; }
+        .restart-action { border:2px solid var(--c-ink)!important; background:var(--c-card)!important; box-shadow:2px 2px 0 var(--c-ink); }
+        .pace-meter,.game-shell .build-rail,.play-menu-panel,.idle-hint { border:2px solid var(--c-ink)!important; box-shadow:var(--c-shadow)!important; background:var(--grain),var(--c-card)!important; }
+        .hud-brand { font:900 16px/1 'Inter',sans-serif!important; letter-spacing:-.05em!important; text-transform:uppercase!important; }
+        .hud-brand span { color:var(--c-accent); }
+        .round-pill { font:700 12px 'JetBrains Mono',monospace; letter-spacing:.04em; color:var(--c-ink); padding:3px 6px; border:2px solid var(--c-ink); background:var(--c-gold); }
+        .round-pill small { color:var(--c-ink2); }
+        .score-hud-metrics>div>span,.excerpt-counter,.pm-label,.pm-cap,.rail-head,.menu-heading,.print-label,.shop-label,.shop-ledger dt,.shop-type,.tally-hint,.result-kicker,.home-kicker,.shop-kicker {
+            font-family:'JetBrains Mono',monospace!important; font-weight:700!important; text-transform:uppercase; letter-spacing:.07em!important; font-size:10.5px!important; }
+        .score-hud strong { font-weight:900!important; letter-spacing:-.04em!important; }
+        .hud-locks>span { border:2px solid var(--c-ink)!important; background:var(--c-card)!important; color:var(--c-ink)!important; }
+        .hud-locks>span.active { background:var(--c-gold)!important; }
+        .hud-locks>span.locked { background:var(--c-soft)!important; }
+
+        /* The article wallpaper: the lead photo as blue halftone */
+        .wiki-content .infobox { border:2px solid var(--c-ink); background:#fffdf6; box-shadow:4px 4px 0 #15171c33; }
+        .wiki-content .infobox .infobox-header,.wiki-content .infobox :is(th,td,caption,div)[style*="background"] { background:#eee7d6!important; }
+        .excerpt-text.is-loupe { background:#ffe98a; box-shadow:0 0 0 2px #ffe98a; }
+
+        /* ---- WORDS × MULT = SCORE ---- */
+        .score-bar { position:relative; display:inline-flex; align-items:center; gap:5px; outline:none; }
+        .sb-box { display:inline-flex; flex-direction:column; align-items:center; min-width:52px; padding:3px 7px 2px; border:2px solid var(--c-ink); color:#fff; box-shadow:2px 2px 0 var(--c-ink); line-height:1; }
+        .sb-box b { font:900 16px/1 'Inter',sans-serif; letter-spacing:-.03em; font-variant-numeric:tabular-nums; animation:bump .28s cubic-bezier(.3,1.8,.5,1); }
+        .sb-box small { margin-top:2px; font:700 8px/1 'JetBrains Mono',monospace; letter-spacing:.1em; text-transform:uppercase; opacity:.85; }
+        .sb-words { background:var(--c-words); } .sb-mult { background:var(--c-mult); }
+        .score-bar > i,.tally-math > i { font:900 14px 'Inter',sans-serif; font-style:normal; color:var(--c-ink); }
+        .score-bar > strong { font:900 19px/1 'Inter',sans-serif!important; letter-spacing:-.04em; color:var(--c-ink); animation:bump .3s cubic-bezier(.3,1.8,.5,1); }
+        .score-bar.is-empty .sb-box { background:#e9e4d8; color:var(--c-faint); box-shadow:none; border-color:#15171c40; }
+        .score-bar.is-empty > strong { color:var(--c-faint)!important; }
+        @keyframes bump { 0% { transform:scale(1.35); } 100% { transform:scale(1); } }
+        .sb-pop { display:none; position:absolute; top:calc(100% + 10px); left:0; z-index:60; width:280px; padding:10px 12px; background:var(--c-card); border:2px solid var(--c-ink); box-shadow:var(--c-shadow); }
+        .score-bar:hover .sb-pop,.score-bar:focus .sb-pop { display:block; animation:pop-in .12s ease-out; }
+        .sb-pop p { display:flex; justify-content:space-between; gap:10px; margin:0; padding:4px 0; border-bottom:1px dashed var(--c-line2); font:500 12px 'Inter',sans-serif; color:var(--c-ink2); }
+        .sb-pop p b { font:800 12px 'JetBrains Mono',monospace; color:var(--c-words); }
+        .sb-pop p:is(.is-x,.is-add) b { color:var(--c-mult); }
+        .sb-pop .sb-sum { border-bottom:0; font-weight:700; color:var(--c-ink); } .sb-pop .sb-sum b { color:var(--c-ink); font-size:13px; }
+        .sb-pop small { display:block; margin-top:6px; font:400 11px 'Inter',sans-serif; color:var(--c-muted); }
+        @keyframes pop-in { from { opacity:0; transform:translateY(-4px); } }
+        .current-excerpt-score { display:flex!important; align-items:center!important; gap:8px!important; }
+
+        /* ---- Floating score pops ---- */
+        .pop-layer { position:fixed; inset:0; pointer-events:none; z-index:130; }
+        .score-pop { position:fixed; transform:translate(-50%,-100%); padding:1px 6px; border:2px solid var(--c-ink); background:var(--c-words); color:#fff; font:900 13px/1.3 'Inter',sans-serif; white-space:nowrap; box-shadow:2px 2px 0 var(--c-ink); animation:float-up .9s cubic-bezier(.2,.8,.3,1) forwards; }
+        .score-pop.is-buffed { background:var(--c-gold); color:var(--c-ink); }
+        .score-pop.is-lock { padding:3px 12px; background:var(--c-ink); color:var(--c-gold); font:400 26px/1.1 'Permanent Marker','Inter',sans-serif; box-shadow:4px 4px 0 var(--c-accent); animation:lock-pop 1.4s cubic-bezier(.2,.8,.3,1) forwards; }
+        @keyframes float-up { 0% { opacity:0; transform:translate(-50%,-60%) scale(.6); } 18% { opacity:1; transform:translate(-50%,-120%) scale(1.1); } 100% { opacity:0; transform:translate(-50%,-260%) scale(1); } }
+        @keyframes lock-pop { 0% { opacity:0; transform:translate(-20%,-40%) rotate(-8deg) scale(1.6); } 15% { opacity:1; transform:translate(-20%,-110%) rotate(-5deg) scale(1); } 75% { opacity:1; } 100% { opacity:0; transform:translate(-20%,-170%) rotate(-5deg); } }
+
+        /* ---- Buffs rail: what each buff is adding right now ---- */
+        .rail-gain { display:inline-block; margin-top:4px; padding:1px 5px; border:1.5px solid var(--c-ink); background:var(--c-gold); font:700 10.5px/1.3 'JetBrains Mono',monospace; font-style:normal; color:var(--c-ink); }
+        .rail-item.is-live { background:var(--c-soft)!important; }
+        .rail-item.pulse { animation:rail-pulse .6s ease-out; }
+        @keyframes rail-pulse { 0% { transform:translateX(0); background:var(--c-gold); } 30% { transform:translateX(-5px); } 100% { transform:none; } }
+        .rail-slots { margin-left:6px; padding:0 4px; border:1.5px solid var(--c-ink); font:700 9px/1.4 'JetBrains Mono',monospace; font-style:normal; color:var(--c-ink); }
+        .rail-item.is-double { min-height:92px; background:repeating-linear-gradient(135deg,#15171c08 0 6px,transparent 6px 12px); }
+        .build-rail .rail-item + .rail-item { border-top:1px dashed var(--c-line2); }
+        .rail-slot { border:2px dashed #15171c40!important; }
+
+        /* ---- Word card ---- */
+        .word-tip { flex-direction:column; align-items:stretch; gap:6px; padding:8px 11px 9px; max-width:320px; white-space:normal; background:var(--c-ink); border:2px solid var(--c-ink); box-shadow:4px 4px 0 var(--c-accent); }
+        .wt-eq { display:flex; align-items:center; justify-content:center; gap:8px; }
+        .wt-eq span { display:flex; flex-direction:column; align-items:center; line-height:1; }
+        .wt-eq .wt-base b { color:#8fb0ff; } .wt-eq .wt-mult b { color:#ff8b7a; } .word-tip .is-total b { color:var(--c-gold); }
+        .wt-line { margin:0; font:500 11px/1.45 'JetBrains Mono',monospace; color:#ffffffb8; text-align:left; }
+        .wt-line span { margin-right:5px; } .wt-line .is-buff,.wt-line em.is-buff { color:var(--c-gold); } .wt-line em { font-style:normal; }
+        .wt-base-line { border-top:1px dashed #ffffff33; padding-top:5px; }
+        .word-hover { background:#ffcf3f66!important; box-shadow:0 0 0 2px #ffcf3f66!important; }
+
+        /* ---- Tally ---- */
+        dialog.tally-dialog.is-simple { width:min(860px,calc(100vw - 24px)); border:2px solid var(--c-ink)!important; box-shadow:9px 9px 0 var(--c-accent)!important; background:var(--grain),var(--c-card)!important; }
+        .tally-head { background:var(--c-gold)!important; border-bottom:2px solid var(--c-ink)!important; }
+        .tally-head h1 { font:900 30px/1 'Inter',sans-serif!important; letter-spacing:-.05em!important; text-transform:uppercase; }
+        .tally-row { grid-template-columns:minmax(0,1fr) auto!important; padding:14px 0!important; transition:background .2s; }
+        .tally-row.is-active { background:linear-gradient(90deg,#ffcf3f22,transparent 70%); }
+        .tally-math { display:flex; align-items:center; gap:6px; align-self:center; }
+        .tally-math > strong { min-width:74px; text-align:right; font:900 24px/1 'Inter',sans-serif; letter-spacing:-.04em; color:var(--c-faint); }
+        .tally-math > strong.is-in { color:var(--c-ink); animation:slam .35s cubic-bezier(.3,1.6,.5,1); }
+        @keyframes slam { 0% { transform:scale(1.8); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+        .tally-steps { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; padding:0; list-style:none; }
+        .tally-steps li { padding:2px 7px; border:2px solid var(--c-ink); background:var(--c-card); font:600 11.5px/1.4 'Inter',sans-serif; color:var(--c-ink); box-shadow:2px 2px 0 var(--c-ink); animation:tag-in .3s cubic-bezier(.3,1.7,.5,1); }
+        .tally-steps li b { font:800 11.5px 'JetBrains Mono',monospace; color:var(--c-mult); }
+        .tally-steps li.is-base b { color:var(--c-words); }
+        .tally-steps.is-run li { background:var(--c-gold); } .tally-steps.is-run li b { color:var(--c-ink); }
+        @keyframes tag-in { 0% { transform:translateY(6px) scale(.7); opacity:0; } 100% { transform:none; opacity:1; } }
+        .tally-row [data-w] { transition:background .15s, color .15s; }
+        .tally-row [data-w].is-scored { background:#2146e014; }
+        .tally-dialog .tally-row .tally-quote { font-size:16.5px!important; }
+        .tally-dialog.is-simple .tally-result strong { font:900 clamp(34px,5vw,48px)/1 'Inter',sans-serif!important; color:var(--c-ink)!important; letter-spacing:-.05em; }
+        .tally-dialog.is-simple .tally-result strong.is-in { color:var(--c-accent)!important; }
+        .tally-footer { position:relative; border-top:2px solid var(--c-ink)!important; }
+        .tally-stamp { position:absolute; right:26px; top:-26px; padding:2px 14px; border:3px solid currentColor; background:var(--c-card); font:400 26px/1.2 'Permanent Marker','Inter',sans-serif; transform:rotate(-7deg); animation:stamp .45s cubic-bezier(.3,1.6,.5,1); pointer-events:none; }
+        .tally-stamp.is-win { color:var(--c-ok); } .tally-stamp.is-loss { color:var(--c-mult); }
+        @keyframes stamp { 0% { transform:rotate(-7deg) scale(2.4); opacity:0; } 100% { transform:rotate(-7deg) scale(1); opacity:1; } }
+        .tally-next button { border:2px solid var(--c-ink)!important; box-shadow:3px 3px 0 var(--c-ink); font-weight:800!important; }
+        .tally-next button:disabled { background:#e9e4d8!important; color:var(--c-faint)!important; box-shadow:none; }
+
+        /* ---- Dialogs, home, result, shop ---- */
+        dialog.manual-dialog,dialog.pack-dialog,dialog.sandbox,.restart-dialog { border:2px solid var(--c-ink)!important; box-shadow:9px 9px 0 var(--c-accent)!important; }
+        .rule-head,.pack-dialog-head { background:var(--c-gold)!important; border-bottom:2px solid var(--c-ink)!important; }
+        .rule-head h2,.pack-dialog-head h2 { font:900 30px/1 'Inter',sans-serif!important; letter-spacing:-.05em!important; text-transform:uppercase; }
+        .rule-head button,.pack-dialog-head button,.tally-head button { border:2px solid var(--c-ink)!important; background:var(--c-card)!important; box-shadow:2px 2px 0 var(--c-ink); font-weight:700!important; color:var(--c-ink)!important; }
+        .home-wordmark { font-weight:900!important; text-transform:uppercase; letter-spacing:-.06em!important; }
+        .home-wordmark span { position:relative; }
+        .home-wordmark::after { content:''; display:block; width:4.2em; max-width:100%; height:.16em; margin-top:.08em; background:var(--c-warn); transform:rotate(-1.5deg); }
+        .home-primary { border:2px solid var(--c-ink)!important; box-shadow:5px 5px 0 var(--c-ink)!important; transition:transform .1s, box-shadow .1s; }
+        .home-primary:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--c-warn)!important; }
+        .home-option { border-bottom:2px solid var(--c-ink)!important; }
+        .home-primary + .home-option { border-top:2px solid var(--c-ink)!important; }
+        .result-screen > .result-card { border:2px solid var(--c-ink)!important; box-shadow:9px 9px 0 var(--c-accent)!important; background:var(--grain),var(--c-card)!important; }
+        .result-screen .result-card h1 { font:900 40px/1 'Inter',sans-serif!important; text-transform:uppercase; letter-spacing:-.05em!important; }
+        .result-screen .result-primary { border:2px solid var(--c-ink); box-shadow:4px 4px 0 var(--c-ink); font-weight:800!important; }
+        .shop-title { font:900 clamp(30px,4.5vh,44px)/1 'Inter',sans-serif!important; text-transform:uppercase; letter-spacing:-.06em!important; }
+        .shop-ledger,.shop-card,.shop-pack,.shop-item,.shop-build-panel,.shop .build-rail,.shop-receipt,.shop-restock,.shop-slot,.shop-build summary { border:2px solid var(--c-ink)!important; }
+        .shop-ledger,.shop-card,.shop-pack,.shop-item,.shop .build-rail { box-shadow:var(--c-shadow)!important; }
+        .shop .build-rail,.shop-card,.shop-item,.shop-ledger { background:var(--grain),var(--c-card)!important; }
+        .shop-ledger .is-credits { background:var(--c-gold)!important; color:var(--c-ink)!important; } .shop-ledger .is-credits :is(dd,dt) { color:var(--c-ink)!important; }
+        .shop-card::before { display:block!important; height:6px!important; background:var(--type)!important; border-bottom:2px solid var(--c-ink); }
+        :is(.shop-card,.shop-pack,.shop-item):enabled:hover { transform:translate(-3px,-3px)!important; box-shadow:7px 7px 0 var(--accent,var(--c-accent))!important; }
+        :is(.shop-card,.shop-pack,.shop-item):enabled:active { transform:translate(1px,1px)!important; box-shadow:2px 2px 0 var(--c-ink)!important; }
+        .shop-buy { border-top:2px solid var(--c-ink)!important; }
+        .shop-pack { color:#fffdf6!important; background:radial-gradient(#ffffff30 1.1px,transparent 1.5px) 0 0/6px 6px,var(--c-accent)!important; }
+        .shop-pack.pack-large { background:radial-gradient(#ffffff30 1.1px,transparent 1.5px) 0 0/6px 6px,var(--c-warn)!important; }
+        .shop-pack :is(h3,p) { color:#fffdf6!important; }
+        .shop-pack .shop-buy { background:var(--c-card); color:var(--c-ink); }
+        .shop-pack .shop-buy b { color:var(--c-ink)!important; }
+        .shop-pack-art { color:#fffdf6!important; text-shadow:3px 3px 0 var(--c-ink)!important; font-weight:700!important; }
+        .shop-pack-art span:nth-child(2n) { opacity:1!important; }
+        .shop-go { border:2px solid var(--c-ink)!important; box-shadow:5px 5px 0 var(--c-ink)!important; font-weight:900!important; text-transform:uppercase; letter-spacing:-.01em!important; transition:transform .1s, box-shadow .1s; }
+        .shop-go:enabled:hover { transform:translate(-2px,-2px)!important; box-shadow:7px 7px 0 var(--c-warn)!important; }
+        .shop-stamp { background:var(--c-card)!important; color:var(--c-warn)!important; border:3px solid var(--c-warn)!important; font:400 22px/1.1 'Permanent Marker','Inter',sans-serif!important; transform:translate(-50%,-50%) rotate(-9deg)!important; }
+        .pack-dialog-cards button,.pack-dialog-cards button:not(.rarity-common-card) { border:2px solid var(--c-ink)!important; box-shadow:5px 5px 0 var(--aura,var(--c-ink))!important; background:var(--c-card)!important; }
+        .pack-dialog-cards button:hover { transform:translate(-3px,-3px)!important; }
+        .pack-dialog-plate { border-bottom:2px solid var(--c-ink)!important; margin:-18px -18px 14px!important; }
+        .rarity-badge { border:1.5px solid currentColor!important; font:700 9.5px/1.3 'JetBrains Mono',monospace!important; text-transform:uppercase; letter-spacing:.06em!important; }
+        .format-controls>button[aria-pressed=true] { box-shadow:inset 0 -3px var(--key-ink,#743dcc)!important; }
+        .score-effects>span { border-radius:0!important; }
+        @media (prefers-reduced-motion:reduce) { .score-pop,.sb-box b,.score-bar>strong,.tally-steps li,.tally-stamp,.tally-math>strong.is-in,.rail-item.pulse { animation:none!important; } }
+        @media (max-width:700px) { .sb-box { min-width:40px; padding:2px 5px; } .sb-box b { font-size:13px; } .score-bar > strong { font-size:15px!important; } .current-excerpt-score { flex-wrap:wrap; gap:4px!important; } .current-excerpt-score > span:first-child { flex-basis:100%; }
+            .tally-row { grid-template-columns:1fr!important; } .tally-math { justify-content:flex-end; } .tally-stamp { right:14px; font-size:20px; } }
+        /* Corners: the id outranks every earlier class rule. */
+        #root :is(button,input,textarea,select,summary,article,section,aside,div,span,li,ul,p,strong,b,em,dl,kbd,a,small,dialog,main,nav,header,footer),#root dialog { border-radius:0!important; }
+        #root .pm-clip { border-radius:10px!important; } #root .home-spinner { border-radius:50%!important; } #root .pm-fill { border-radius:0 0 10px 10px!important; }
+        /* HUD: one-line boxes that fit the slim bar */
+        .score-hud .sb-box { flex-direction:row; align-items:baseline; gap:4px; min-width:0; padding:1px 6px; box-shadow:2px 2px 0 var(--c-ink); }
+        .score-hud .sb-box small { order:-1; margin:0; font-size:7.5px; }
+        .score-hud .sb-box b { font-size:14px; }
+        .score-hud .score-bar > strong { font-size:17px!important; }
+        .tally-math > strong:not(.is-in) { font-size:18px!important; }
+        .tally-result strong:not(.is-in) { color:var(--c-faint)!important; }
+        .result-screen { background:#efe9dcd6!important; }
+        .wt-line span { display:inline!important; }
+        .wt-line > i { display:inline-block; width:34px; font-style:normal; color:#ffffff66; text-transform:uppercase; font-size:9.5px; letter-spacing:.06em; }
+        .wt-mult-line { padding-top:0; }
+        .tally-steps li.is-word { background:#e5eaff; } .tally-steps li.is-word b { color:var(--c-words); }
+        .sb-pop p.is-word { padding-left:8px; font-size:11px; } .sb-pop p.is-word b { font-size:10.5px; }
+        .round-banner { position:absolute; left:50%; top:118px; z-index:40; display:flex; align-items:baseline; gap:12px; padding:10px 18px; border:2px solid var(--c-ink); background:var(--c-gold); box-shadow:6px 6px 0 var(--c-ink); pointer-events:none; transform:translateX(-50%) rotate(-1.5deg); animation:banner 2.1s cubic-bezier(.2,.9,.3,1) forwards; }
+        .round-banner span { font:700 11px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+        .round-banner b { font:900 34px/1 'Inter',sans-serif; letter-spacing:-.05em; }
+        .round-banner small { font:400 17px 'Permanent Marker','Inter',sans-serif; color:var(--c-mult); }
+        @keyframes banner { 0% { opacity:0; transform:translate(-50%,-30px) rotate(-6deg) scale(1.2); } 12% { opacity:1; transform:translateX(-50%) rotate(-1.5deg) scale(1); } 80% { opacity:1; transform:translateX(-50%) rotate(-1.5deg); } 100% { opacity:0; transform:translate(-50%,-14px) rotate(-1.5deg); } }
+        @media (prefers-reduced-motion:reduce) { .round-banner { animation:none; opacity:0; } }
 </style>
 </head>
 <body>
@@ -1843,8 +2036,8 @@
         const REQUIRED_SENTENCES = 3;
         // New buff numbers (tuned on simulated rounds of real articles).
         const CLEAN_COPY_MULT=.5, TEMPO_STEP=.25, TEMPO_FLOOR=30, MARGINALIA_MULT=.75, LEDE_MULT=1.25, TITLE_DROP_MULT=4, POLYGLOT_MULT=3,
-            HIGHLIGHTER_TIMES=2, RABBIT_HOLE_STEP=1.25, RABBIT_HOLE_MAX=4, SNOWBALL_STEP=2, TIP_JAR_PAY=1, BOUNTY_MAX=5, LONG_FORM_PAY=1, LONG_FORM_WORDS=25, FRUGAL_PAY=1;
-        const BUFF_SLOTS = 4;
+            FACE_VALUE_RATE=.1, FACE_VALUE_CAP=9999, GLASS_CANNON_TIMES=5, HIGHLIGHTER_TIMES=2, RABBIT_HOLE_STEP=1.25, RABBIT_HOLE_MAX=4, SNOWBALL_STEP=2, TIP_JAR_PAY=1, BOUNTY_MAX=5, LONG_FORM_PAY=1, LONG_FORM_WORDS=25, FRUGAL_PAY=1;
+        const BUFF_SLOTS = 5;
         const IDLE_HINT_DELAY_MS = 3000;
         const MIN_SENTENCE_LEN   = 15;
         const MAX_SENTENCE_LEN   = 300;
@@ -1852,8 +2045,8 @@
         const MAX_FRAGMENT_LEN   = MAX_SENTENCE_LEN; // longer captions and cells are split into several targets
         const ANTE_BASE_TARGET   = 5_000_000;
         const MAX_ANTE           = 8;
-        // Tuned with simulated eight-round runs on real articles with four buff slots: the bot wins about 10% / 40% / 70% at 45 / 60 / 80 WPM.
-        const ROUND_TARGETS = [ANTE_BASE_TARGET, 50_000_000, 120_000_000, 240_000_000, 420_000_000, 650_000_000, 950_000_000, 1_300_000_000];
+        // Rounds 1–3 are an on-ramp; from there targets climb about ×3.8 a round to 100B in round 8.
+        const ROUND_TARGETS = [ANTE_BASE_TARGET, 50_000_000, 120_000_000, 450_000_000, 1_750_000_000, 6_500_000_000, 25_000_000_000, 100_000_000_000];
         const getRoundTarget = ante => ROUND_TARGETS[Math.max(0, Math.min(MAX_ANTE - 1, ante - 1))];
         const SAVE_KEY = 'encyclo.run.v1';
         const EMPTY_FORMAT = { b: false, i: false, l: false, cit: false, bul: false };
@@ -1935,13 +2128,14 @@
             });
             understudyCache.set(upgrades,out);return out;
         }
-        const guaranteedRunMultiplier=(upgrades,rules)=>(hasUpgrade(upgrades,'symmetric')?rules.runTrigger:1)*(hasUpgrade(upgrades,'carbon-effect')?(1+rules.runBonus)*rules.runTrigger:1);
+        const guaranteedRunMultiplier=(upgrades,rules)=>(hasUpgrade(upgrades,'symmetric')?rules.runTrigger:1)*(hasUpgrade(upgrades,'carbon-effect')?(1+rules.runBonus)*rules.runTrigger:1)
+            *expandUnderstudy(upgrades).filter(u=>(u.copyId||u.id)==='glass-cannon').reduce(m=>m*(1+(GLASS_CANNON_TIMES-1)*rules.runBonus)*rules.runTrigger,1);
         // Conditional run upgrades whose condition the locked excerpts have not already ruled out,
         // with the largest multiplier each can still pay. Unknown upgrades are assumed possible.
         const RUN_BONUS_MAX={rooted:2,divergent:5,pyramidal:1.5,bibliophile:3,orthography:1.6,vintage:.6,tonal:2,mosaic:8,encyclopedist:11};
         function runBonusOutlook(locked, upgrades, rules) {
             upgrades=expandUnderstudy(upgrades);
-            const conditional=upgrades.filter(u=>u.type==='RUN'&&!['symmetric','carbon-effect','safety-net'].includes(u.id));
+            const conditional=upgrades.filter(u=>u.type==='RUN'&&!['symmetric','carbon-effect','safety-net','glass-cannon'].includes(u.copyId||u.id));
             const text=s=>s.chars.filter(c=>!c.cit).map(c=>c.c).join('');
             const titles=locked.map(s=>s.articleTitle);
             const possible=u=>{
@@ -2784,6 +2978,8 @@
         const SCRIPTS={Greek:/\p{Script=Greek}/u,Cyrillic:/\p{Script=Cyrillic}/u,CJK:/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u,Arabic:/\p{Script=Arabic}/u,Hebrew:/\p{Script=Hebrew}/u,
             Indic:/[\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Kannada}\p{Script=Malayalam}]/u,Thai:/[\p{Script=Thai}\p{Script=Lao}]/u,
             Armenian:/\p{Script=Armenian}/u,Georgian:/\p{Script=Georgian}/u,Ethiopic:/\p{Script=Ethiopic}/u,IPA:/[\u0250-\u02AF\u1D00-\u1DBF]/u};
+        // Face Value: the number a word spells in digits, or 0. Commas group thousands; anything after a point is dropped.
+        const faceValue=text=>{const t=text.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,'');if(!/^\d{1,3}(?:,\d{3})*(?:\.\d+)?$|^\d+(?:\.\d+)?$/.test(t))return 0;return Math.min(FACE_VALUE_CAP,Math.floor(Number(t.replace(/,/g,''))));};
         const scriptsIn=text=>Object.keys(SCRIPTS).filter(k=>SCRIPTS[k].test(text));
         // Title words: letters and digits of the article title, minus its (disambiguation) and short function words.
         const TITLE_STOP=new Set(['the','and','for','from','with','of','in','on','at','to','a','an','by','de','la','le','von','van','der']);
@@ -2815,7 +3011,10 @@
             {id:'bounty',name:'Bounty',rarity:'uncommon',price:7,type:'UTILITY',desc:`+1¢ each time your round score doubles past the target (×2, ×4, ×8…), up to +${BOUNTY_MAX}¢ a round.`},
             {id:'long-form',name:'Long Form',rarity:'common',price:4,type:'UTILITY',desc:`+${LONG_FORM_PAY}¢ for each excerpt of ${LONG_FORM_WORDS} or more words in a cleared round.`},
             {id:'frugal',name:'Frugal',rarity:'common',price:4,type:'UTILITY',desc:`+${FRUGAL_PAY}¢ for each empty buff slot when a round clears.`},
-            {id:'scrapper',name:'Scrapper',rarity:'uncommon',price:7,type:'UTILITY',desc:'Sell buffs for their full price instead of half.'}
+            // Oddballs
+            {id:'face-value',name:'Face Value',rarity:'epic',price:13,type:'WORD',desc:`Numbers pay what they say, a tenth at a time: a word that is only a number (commas and points allowed) adds a tenth of its value to its word base, up to ${Math.round(FACE_VALUE_CAP*FACE_VALUE_RATE)}. “1907” adds ${Math.round(1907*FACE_VALUE_RATE)}.`,
+                action:w=>{const v=faceValue(w.text);return v>0?{baseAdd:Math.round(v*FACE_VALUE_RATE)}:null;}},
+            {id:'glass-cannon',name:'Glass Cannon',rarity:'rare',price:10,type:'RUN',slots:2,desc:`Takes two buff slots. ×${GLASS_CANNON_TIMES} round score, every round, no conditions.`,action:()=>({multAdd:GLASS_CANNON_TIMES-1})}
         );
 
         /* ================================================================
@@ -3505,15 +3704,15 @@
         const TIME_OFFERS=[{key:'next',seconds:5,price:1,label:'Next round'},{key:'all',seconds:5,price:3,label:'Every round'}];
         const newMarket=()=>({credits:7,incomeRemainder:0,totalWords:0,lastWords:0,lastBaseIncome:0,lastBonusIncome:0,lastIncome:null,totalEarned:0,bag:[null,null,null],stock:[],rerolls:0,freeUsed:false,purchased:[],earned:0,lastScore:0,packsBought:[],pack:null,extraSeconds:0,nextSeconds:0});
         // Pay only successfully locked words; edits, citations and retries cannot farm income.
-        // 120 integer units per credit (20 per word, so 6 words per credit) keep fractional income exact across rounds/saves.
-        const INCOME_UNITS=120;
+        // 120 integer units per credit (24 per word, so 5 words per credit) keep fractional income exact across rounds/saves.
+        const INCOME_UNITS=120, INCOME_PER_WORD=24, WORDS_PER_CREDIT=INCOME_UNITS/INCOME_PER_WORD;
         const incomeWords=sentence=>sentence.chars.map(c=>c.cit?' ':c.c).join('').split(/\s+/u).filter(w=>/[\p{L}\p{N}]/u.test(w));
         // Word income one excerpt contributes, in 1/120 credit units (paid only if the round clears).
         function excerptIncome(sentence, upgrades) {
             const words=incomeWords(sentence);
-            const base=words.length*20;
+            const base=words.length*INCOME_PER_WORD;
             const royalty=hasUpgrade(upgrades,'royalties')?words.filter(w=>Array.from(w).filter(c=>/[\p{L}\p{N}]/u.test(c)).length>=8).length*12:0;
-            const patron=hasUpgrade(upgrades,'patron')?words.length*5:0;
+            const patron=hasUpgrade(upgrades,'patron')?words.length*INCOME_PER_WORD/4:0;
             return {words:words.length,base,royalty,patron,units:base+royalty+patron,credits:(base+royalty+patron)/INCOME_UNITS};
         }
         const formatCredits=n=>{const r=Math.round(n*100)/100;return `${Number.isInteger(r)?r:r.toFixed(r*10%1?2:1)}¢`;};
@@ -3522,7 +3721,7 @@
             const tips=hasUpgrade(upgrades,'tip-jar')?sentences.filter(s=>s.typing&&s.typing.mistakes===0).length*TIP_JAR_PAY:0;
             const bounty=hasUpgrade(upgrades,'bounty')&&target>0&&runScore>=2*target?Math.min(BOUNTY_MAX,Math.floor(Math.log2(runScore/target))):0;
             const longForm=hasUpgrade(upgrades,'long-form')?sentences.filter(s=>incomeWords(s).length>=LONG_FORM_WORDS).length*LONG_FORM_PAY:0;
-            const frugal=hasUpgrade(upgrades,'frugal')?Math.max(0,BUFF_SLOTS-slottedBuffs(upgrades).length)*FRUGAL_PAY:0;
+            const frugal=hasUpgrade(upgrades,'frugal')?Math.max(0,BUFF_SLOTS-slotUse(upgrades))*FRUGAL_PAY:0;
             return {tips,bounty,longForm,frugal,total:tips+bounty+longForm+frugal};
         }
         function shopIncome(sentences, upgrades, market, round = {}) {
@@ -3545,13 +3744,15 @@
             const price=consumable?item.price:shopPrice(item);
             const bag=normalizeBag(market.bag),slot=bag.indexOf(null);
             if(market.credits<price||(!consumable&&(owned.some(u=>u.id===item.id)||market.purchased.includes(item.id)))||(consumable&&(slot<0||!market.stock.includes(item.id))))return null;
-            if(!consumable&&!item.booster&&slottedBuffs(owned).length>=BUFF_SLOTS)return null;
+            if(!consumable&&!item.booster&&slotUse(owned)+(item.slots||1)>BUFF_SLOTS)return null;
             if(consumable)bag[slot]=item.id;
             return {...market,credits:market.credits-price,bag,stock:consumable?market.stock.filter(id=>id!==item.id):market.stock,purchased:consumable?market.purchased:[...market.purchased,item.id]};
         }
         const hasUpgrade=(upgrades,id)=>upgrades.some(u=>u.id===id);
         // Buffs that take one of the BUFF_SLOTS: permanent cards, not letter levels or this-round effects.
         const slottedBuffs=upgrades=>upgrades.filter(u=>!u.temporary&&!u.booster);
+        // Slots in use: most buffs take one, Glass Cannon takes two.
+        const slotUse=upgrades=>slottedBuffs(upgrades).reduce((n,u)=>n+(u.slots||1),0);
         function articleTraits(meta={}) {
             const categories=(meta.categories||[]).join(' ').toLowerCase();
             return {nature:/biology|botany|zoology|species|plants|animals|flora|fauna/.test(categories),history:/history|historical|centur(?:y|ies)|ancient|medieval|archaeolog/.test(categories)};
@@ -4449,6 +4650,7 @@
                 const charDetails = wChars.map(co => ({
                     c: co.c,
                     score: getBoostedCharScore(co.c, upgrades, rules),
+                    boost: letterBoost(co.c, upgrades),
                     b: co.b, i: co.i, l: co.l, bul: !!co.bul, cit: false
                 }));
 
@@ -4634,12 +4836,92 @@
 
         // Hover any word of an excerpt: a small card shows its base, its word multiplier and their product.
         const fmtMult = x => Number(x.toFixed(x < 10 ? 2 : 1)).toLocaleString();
-        const WordTipCard = ({ tip }) => <div className={`word-tip ${tip.below ? 'is-below' : ''}`} style={{ left: tip.x, top: tip.y }} role="tooltip">
-            <span><b>{tip.word.base.toLocaleString()}</b><small>base</small></span><i>×</i>
-            <span><b>{fmtMult(tip.word.lenMult * tip.word.formatMult)}</b><small>mult</small></span><i>=</i>
-            <span className="is-total"><b>{tip.word.total.toLocaleString()}</b><small>score</small></span>
-        </div>;
-        function useWordHover(detailFor) {
+        /* ================================================================
+           WHERE THE POINTS COME FROM — one vocabulary everywhere:
+           a word is BASE × MULT; an excerpt is WORDS × MULT; a round multiplies three excerpts.
+           ================================================================ */
+        function wordBreakdown(w, rules) {
+            const boosted = w.charDetails.filter(c => c.boost);
+            const base = [{ label: boosted.length ? `letters (${[...new Set(boosted.map(c => `${c.c} +${c.boost}`))].join(', ')})` : 'letters', v: w.characterBase }];
+            if (w.formatAdd) base.push({ label: 'link', v: w.formatAdd });
+            w.wordEffects.filter(e => e.base).forEach(e => base.push({ label: e.name, v: e.base, buff: true }));
+            const format = [];
+            if (w.chars.some(c => c.b)) format.push({ label: 'bold', v: '×' + rules.bold });
+            if (w.chars.some(c => c.i)) format.push({ label: 'italic', v: '×' + rules.italic });
+            w.wordEffects.filter(e => e.mult).forEach(e => format.push({ label: e.name, v: '+' + fmtMult(e.mult), buff: true }));
+            w.wordEffects.filter(e => e.times && e.times !== 1).forEach(e => format.push({ label: e.name, v: '×' + fmtMult(e.times), buff: true }));
+            return { base, format, length: w.lenMult, formatMult: w.formatMult, mult: w.lenMult * w.formatMult, total: w.total };
+        }
+        // An excerpt in steps: the words' sum, then sentence base bonuses (add to WORDS), then citations,
+        // sentence multiplier bonuses and chain (change MULT), in the order the scorer applies them.
+        function excerptBreakdown(d) {
+            const words = d.words.reduce((n, w) => n + w.total, 0), steps = [];
+            let chips = words, mult = 1;
+            d.sentenceEffects.filter(e => e.base).forEach(e => { chips += e.base; steps.push({ kind: 'base', label: e.name, text: `+${e.base.toLocaleString()}`, chips, mult }); });
+            if (d.citationBlocks) { mult = d.sentenceMultiplier - d.sentenceEffects.reduce((n, e) => n + (e.mult || 0), 0); steps.push({ kind: 'x', label: `${d.citationBlocks} citation${d.citationBlocks === 1 ? '' : 's'}`, text: `×${fmtMult(mult)}`, chips, mult }); }
+            d.sentenceEffects.filter(e => e.mult).forEach(e => { mult += e.mult; steps.push({ kind: 'add', label: e.name, text: `+${fmtMult(e.mult)}`, chips, mult }); });
+            if (d.chainMultiplier !== 1) { mult *= d.chainMultiplier; steps.push({ kind: 'x', label: `Chain · ${d.triggeredUpgrades.length} buffs`, text: `×${fmtMult(d.chainMultiplier)}`, chips, mult }); }
+            // Word buffs, summed over the excerpt: they are what makes WORDS bigger than plain letters.
+            const wb = new Map();
+            d.words.forEach(w => w.wordEffects.forEach(e => { const g = wb.get(e.name) || { base: 0, mult: 0, times: 1, words: 0 }; g.base += e.base || 0; if (e.mult) g.mult = Math.max(g.mult, e.mult); if (e.times && e.times !== 1) g.times = e.times; g.words++; wb.set(e.name, g); }));
+            const wordBuffs = [...wb].map(([label, g]) => ({ label, text: gainText(g) }));
+            return { words, chips: d.sentenceBase, mult: d.sentenceMultiplier * d.chainMultiplier, steps, wordBuffs, total: d.sentenceTotal };
+        }
+        // What each buff adds to one excerpt, for the buffs list.
+        function buffGains(d) {
+            const out = new Map(), get = n => { if (!out.has(n)) out.set(n, { base: 0, mult: 0, times: 1, words: 0 }); return out.get(n); };
+            d?.words.forEach(w => w.wordEffects.forEach(e => { const g = get(e.name); g.base += e.base || 0; if (e.mult) g.mult = Math.max(g.mult, e.mult); if (e.times && e.times !== 1) g.times = e.times; g.words++; }));
+            d?.sentenceEffects.forEach(e => { const g = get(e.name); g.base += e.base || 0; g.mult += e.mult || 0; g.sentence = true; });
+            return out;
+        }
+        const gainText = g => {
+            const parts = [];
+            if (g.base) parts.push(`+${g.base.toLocaleString()} ${g.sentence ? 'words' : 'base'}`);
+            if (g.mult) parts.push(`+${fmtMult(g.mult)} mult${!g.sentence && g.words > 1 ? ' each' : ''}`);
+            if (g.times !== 1) parts.push(`×${fmtMult(g.times)} mult${g.words > 1 ? ' each' : ''}`);
+            return parts.join(' · ') + (!g.sentence && g.words ? ` · ${g.words} word${g.words === 1 ? '' : 's'}` : '');
+        };
+        // Floating score pops: own state, so a pop never re-renders the page around it.
+        function usePops() {
+            const emit = useRef(() => {});
+            const Host = useMemo(() => function PopHost() {
+                const [pops, setPops] = useState([]);
+                useEffect(() => { let id = 0; emit.current = p => { const k = ++id; setPops(ps => [...ps.slice(-30), { ...p, k }]); setTimeout(() => setPops(ps => ps.filter(x => x.k !== k)), p.ms || 950); }; return () => { emit.current = () => {}; }; }, []);
+                return <div className="pop-layer" aria-hidden="true">{pops.map(p => <span key={p.k} className={`score-pop ${p.kind || ''}`} style={{ left: p.x, top: p.y }}>{p.text}</span>)}</div>;
+            }, []);
+            const at = (el, text, kind, ms) => { if (!el) return; const r = el.getBoundingClientRect(); emit.current({ x: r.left + r.width / 2, y: r.top, text, kind, ms }); };
+            return { at, node: <Host/> };
+        }
+        const pulseRail = name => document.querySelectorAll('.build-rail .rail-item').forEach(li => { if (li.dataset.name === name) { li.classList.remove('pulse'); void li.offsetWidth; li.classList.add('pulse'); } });
+        // The live WORDS × MULT = SCORE readout for the excerpt being typed.
+        const ScoreBar = ({ detail, compact = false }) => {
+            const b = detail ? excerptBreakdown(detail) : null;
+            return <div className={`score-bar${b ? '' : ' is-empty'}${compact ? ' is-compact' : ''}`} tabIndex={b ? 0 : -1}>
+                <span className="sb-box sb-words"><b key={b ? b.chips : 'x'}>{b ? b.chips.toLocaleString() : '—'}</b><small>words</small></span>
+                <i>×</i>
+                <span className="sb-box sb-mult"><b key={b ? fmtMult(b.mult) : 'x'}>{b ? fmtMult(b.mult) : '—'}</b><small>mult</small></span>
+                <i>=</i>
+                <strong key={b ? b.total : 'x'} title={b ? b.total.toLocaleString() : ''}>{b ? formatScore(b.total) : '—'}</strong>
+                {b && <div className="sb-pop" role="tooltip">
+                    <p><span>{detail.words.length} words scored</span><b>{b.words.toLocaleString()}</b></p>
+                    {b.wordBuffs.map((x, i) => <p key={'w' + i} className="is-word"><span>↳ {x.label}</span><b>{x.text}</b></p>)}
+                    {b.steps.map((st, i) => <p key={i} className={`is-${st.kind}`}><span>{st.label}</span><b>{st.text}</b></p>)}
+                    <p className="sb-sum"><span>{b.chips.toLocaleString()} × {fmtMult(b.mult)}</span><b>{b.total.toLocaleString()}</b></p>
+                    <small>Hover any word in the article for its own base × mult.</small>
+                </div>}
+            </div>;
+        };
+
+        const WordTipCard = ({ tip }) => { const b = wordBreakdown(tip.word, tip.rules || DEFAULT_SCORING); return <div className={`word-tip ${tip.below ? 'is-below' : ''}`} style={{ left: tip.x, top: tip.y }} role="tooltip">
+            <div className="wt-eq">
+                <span className="wt-base"><b>{tip.word.base.toLocaleString()}</b><small>base</small></span><i>×</i>
+                <span className="wt-mult"><b>{fmtMult(b.mult)}</b><small>mult</small></span><i>=</i>
+                <span className="is-total"><b>{tip.word.total.toLocaleString()}</b><small>score</small></span>
+            </div>
+            <p className="wt-line wt-base-line"><i>base</i>{b.base.map((x, i) => <span key={i} className={x.buff ? 'is-buff' : ''}>{i ? '+ ' : ''}{x.v.toLocaleString()} {x.label} </span>)}</p>
+            <p className="wt-line wt-mult-line"><i>mult</i>{b.length !== 1 || b.format.length ? <>{b.length !== 1 && <span>×{fmtMult(b.length)} long word </span>}{b.format.length > 0 && <span>{b.length !== 1 ? '× ' : ''}{fmtMult(b.formatMult)} from {b.format.map((x, i) => <em key={i} className={x.buff ? 'is-buff' : ''}>{i ? ', ' : ''}{x.label} {x.v}</em>)}</span>}</> : <span>×1, plain short word</span>}</p>
+        </div>; };
+        function useWordHover(detailFor, rules = DEFAULT_SCORING) {
             // The card keeps its own state, so hovering never re-renders the article around it.
             const show = useRef(() => {});
             const cur = useRef({ key: null, els: [] });
@@ -4665,49 +4947,103 @@
                 els.forEach(x => x.classList.add('word-hover'));
                 cur.current = { key, els };
                 const r = el.getBoundingClientRect(), below = r.top < 90;
-                show.current({ x: Math.max(110, Math.min(window.innerWidth - 110, r.left + r.width / 2)), y: below ? r.bottom + 8 : r.top - 8, below, word });
+                show.current({ x: Math.max(150, Math.min(window.innerWidth - 150, r.left + r.width / 2)), y: below ? r.bottom + 8 : r.top - 8, below, word, rules });
             };
             return { onMouseOver, onMouseLeave: clear, clear, node: <Host/> };
         }
 
+        // The tally scores like a slot machine you can read: each word adds to WORDS, each sentence bonus
+        // changes MULT, then the three excerpts multiply and run bonuses land one by one.
+        function tallySchedule(details, bks, runSteps) {
+            let t = 250; const ex = [];
+            details.forEach((d, i) => {
+                const n = d.words.length, step = Math.max(16, Math.min(42, 700 / Math.max(1, n)));
+                const wordsAt = d.words.map((_, j) => t + j * step); t += n * step + 90;
+                const stepsAt = bks[i].steps.map((_, k) => t + k * 210); t += bks[i].steps.length * 210;
+                ex.push({ wordsAt, stepsAt, totalAt: t }); t += 260;
+            });
+            const eqAt = t; t += 260;
+            const runAt = runSteps.map((_, k) => t + k * 280); t += runSteps.length * 280;
+            const finalAt = t; t += 550;
+            return { ex, eqAt, runAt, finalAt, end: t + 150 };
+        }
         const ScoringOverlay = ({sentences,onComplete,targetScore,ante,upgrades,rules,market,practice=false}) => {
-            const [step,setStep]=useState(0);
-            const dialogRef=useRef(null);
+            const dialogRef=useRef(null), ledgerRef=useRef(null), lastT=useRef(0);
             const details=useMemo(()=>sentences.map(s=>scoreSentence(s,upgrades,rules)),[sentences,upgrades,rules]);
             const result=useMemo(()=>scoreRun(sentences,upgrades,rules,details),[sentences,upgrades,rules,details]);
-            const hover=useWordHover(sid=>details[sentences.findIndex(s=>s.id===sid)]);
-            const success=result.runTotal>=targetScore;
+            const bks=useMemo(()=>details.map(excerptBreakdown),[details]);
             const symmetric=upgrades.some(u=>u.id==='symmetric')?rules.symmetric:0;
+            // Round steps: Symmetric and Safety Net change the excerpt totals, run buffs multiply.
+            const runSteps=useMemo(()=>{
+                const out=[];const exp=expandUnderstudy(upgrades);
+                result.appliedRunUpgrades.forEach(name=>{
+                    if(name==='Symmetric')out.push({label:'Symmetric',text:`+${symmetric} each`});
+                    else if(name==='Safety Net')out.push({label:'Safety Net',text:'weakest lifted'});
+                    else{const u=exp.find(x=>x.name===name);const e=u?.action?.(sentences);out.push({label:name,text:`×${fmtMult((1+((e?.multAdd)||0)*rules.runBonus)*rules.runTrigger)}`});}
+                });
+                return out;
+            },[result,upgrades,sentences,rules,symmetric]);
+            const plan=useMemo(()=>tallySchedule(details,bks,runSteps),[details,bks,runSteps]);
+            const [t,setT]=useState(0);
+            const done=t>=plan.end;
+            const hover=useWordHover(sid=>details[sentences.findIndex(s=>s.id===sid)],rules);
+            const pops=usePops();
+            const success=result.runTotal>=targetScore;
             useEffect(()=>{const dialog=dialogRef.current;dialog.showModal();return ()=>dialog.close();},[]);
-            useEffect(()=>{const timer=setInterval(()=>setStep(n=>{if(n>=6){clearInterval(timer);return 6;}return n+1;}),250);return ()=>clearInterval(timer);},[]);
-            // One quiet line per excerpt, only when something beyond the word scores shaped its total.
-            const modifiers=d=>{
-                const words=d.words.reduce((n,w)=>n+w.total,0),parts=[];
-                if(d.sentenceBase>words)parts.push(`+${(d.sentenceBase-words).toLocaleString()} sentence base`);
-                if(d.sentenceMultiplier!==1)parts.push(`×${fmtMult(d.sentenceMultiplier)} sentence`);
-                if(d.chainMultiplier!==1)parts.push(`×${fmtMult(d.chainMultiplier)} chain`);
-                if(symmetric)parts.push(`+${symmetric} Symmetric`);
-                return parts.length?`Words ${words.toLocaleString()} · ${parts.join(' · ')}`:null;
-            };
-            const runNames=result.appliedRunUpgrades.join(', ');
-            return <dialog ref={dialogRef} className="tally-dialog is-simple" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()}>
-                <header className="tally-head"><div><span className="print-label">Round {ante} of {MAX_ANTE}</span><h1 id="tally-title">Tally</h1></div>{step<6 && <button onClick={()=>setStep(6)}>Skip</button>}</header>
-                <section className="tally-ledger" aria-label="Excerpt scores" onMouseOver={hover.onMouseOver} onMouseLeave={hover.onMouseLeave}>
-                    <p className="tally-hint">Hover a word for its base, multiplier and score.</p>
-                    {details.map((d,i)=>{const note=modifiers(d);return <article key={d.id} className="tally-row">
-                        <p className="tally-quote"><RenderedText chars={sentences[i].chars} sid={sentences[i].id} matchState="NONE"/></p>
-                        <strong title={result.finalSentenceTotals[i].toLocaleString()}>{step>=i+1?formatScore(result.finalSentenceTotals[i]):'—'}</strong>
-                        {note&&<small>{note}</small>}
-                    </article>;})}
+            useEffect(()=>{if(done)return;const timer=setInterval(()=>setT(x=>Math.min(plan.end,x+32)),32);return ()=>clearInterval(timer);},[done,plan.end]);
+            // Side effects of time passing: light each scored word, pop its points, tick.
+            useEffect(()=>{
+                const from=lastT.current;lastT.current=t;
+                const root=ledgerRef.current;if(!root)return;
+                const skipping=t-from>200;
+                plan.ex.forEach((e,i)=>{
+                    const host=root.querySelector(`[data-row="${i}"] [data-sid]`);if(!host)return;
+                    e.wordsAt.forEach((at,j)=>{
+                        if(at>t||at<=from)return;
+                        host.querySelectorAll(`[data-w="${j}"]`).forEach(x=>x.classList.add('is-scored'));
+                        if(!skipping){const el=host.querySelector(`[data-w="${j}"]`);pops.at(el,`+${details[i].words[j].total.toLocaleString()}`,details[i].words[j].wordEffects.length?'is-buffed':'is-words',800);if(j%2===0)AudioEngine.playTick?.();}
+                    });
+                    if(!skipping&&e.totalAt>from&&e.totalAt<=t)AudioEngine.playKey?.();
+                });
+                if(!skipping&&plan.finalAt>from&&plan.finalAt<=t)AudioEngine.playLock();
+            },[t,plan,details,pops]);
+            const skip=()=>{setT(plan.end);};
+            const count=(from,to,at,dur=450)=>t<at?null:t>=at+dur?to:Math.round(from+(to-from)*(1-Math.pow(1-(t-at)/dur,3)));
+            const finalShown=count(0,result.runTotal,plan.finalAt,550);
+            return <dialog ref={dialogRef} className="tally-dialog is-simple is-live" aria-labelledby="tally-title" onCancel={e=>e.preventDefault()} onClick={e=>{if(!done&&!e.target.closest('button'))skip();}}>
+                <header className="tally-head"><div><span className="print-label">Round {ante} of {MAX_ANTE}</span><h1 id="tally-title">Tally</h1></div>{!done && <button onClick={skip}>Skip</button>}</header>
+                <section ref={ledgerRef} className="tally-ledger" aria-label="Excerpt scores" onMouseOver={hover.onMouseOver} onMouseLeave={hover.onMouseLeave}>
+                    {details.map((d,i)=>{const e=plan.ex[i],b=bks[i];
+                        const shownWords=d.words.reduce((n,w,j)=>e.wordsAt[j]<=t?n+w.total:n,0);
+                        const shownSteps=b.steps.filter((_,k)=>e.stepsAt[k]<=t);
+                        const last=shownSteps[shownSteps.length-1];
+                        const chips=last?last.chips:shownWords, mult=last?last.mult:1, active=t>=e.wordsAt[0]&&t<e.totalAt+300;
+                        return <article key={d.id} data-row={i} className={`tally-row${active?' is-active':''}${t>=e.totalAt?' is-done':''}`}>
+                            <p className="tally-quote"><RenderedText chars={sentences[i].chars} sid={sentences[i].id} matchState="NONE"/></p>
+                            <div className="tally-math">
+                                <span className="sb-box sb-words"><b key={chips}>{t>=e.wordsAt[0]?chips.toLocaleString():'—'}</b><small>words</small></span><i>×</i>
+                                <span className="sb-box sb-mult"><b key={fmtMult(mult)}>{t>=e.wordsAt[0]?fmtMult(mult):'—'}</b><small>mult</small></span><i>=</i>
+                                <strong key={t>=e.totalAt?'y':'n'} className={t>=e.totalAt?'is-in':''} title={result.finalSentenceTotals[i].toLocaleString()}>{t>=e.totalAt?formatScore(d.sentenceTotal):'—'}</strong>
+                            </div>
+                            {(shownSteps.length>0||(b.wordBuffs.length>0&&t>=e.wordsAt[e.wordsAt.length-1]))&&<ul className="tally-steps">
+                                {t>=e.wordsAt[e.wordsAt.length-1]&&b.wordBuffs.map((x,k)=><li key={'w'+k} className="is-word">{x.label} <b>{x.text}</b></li>)}
+                                {shownSteps.map((st,k)=><li key={k} className={`is-${st.kind}`}>{st.label} <b>{st.text}</b></li>)}</ul>}
+                        </article>;
+                    })}
                 </section>
                 <footer className="tally-footer">
-                    <div className="tally-result"><div><span className="print-label">{step<5?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span>
-                        <p className="tally-equation">{step>=4?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}{step>=4&&result.multiplier!==1&&<> × <b title={runNames}>{fmtMult(result.multiplier)}</b> <span className="tally-run-names">{runNames}</span></>}</p></div>
-                        <strong title={result.runTotal.toLocaleString()}>{step>=5?formatScore(result.runTotal):'—'}</strong></div>
-                    {!practice&&step>=5&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market,{runScore:result.runTotal,target:targetScore});return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
-                    <div className="tally-next">{!practice&&step>=5&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={step<6} onClick={()=>onComplete(result.runTotal,success)}>{practice?'Finish practice':success?(ante>=MAX_ANTE?'Complete the run':'Visit the shop'):'See results'}</button></div>
+                    <div className="tally-result"><div>
+                        <span className="print-label">{!done?'Counting…':practice?'Practice complete':success?'Target cleared':'Below target'}</span>
+                        <p className="tally-equation">{t>=plan.eqAt?result.finalSentenceTotals.map(n=>formatScore(n)).join(' × '):'—'}</p>
+                        {runSteps.length>0&&<ul className="tally-steps is-run">{runSteps.map((st,k)=>t>=plan.runAt[k]&&<li key={k}>{st.label} <b>{st.text}</b></li>)}</ul>}
+                    </div>
+                        <strong className={done?'is-in':''} title={result.runTotal.toLocaleString()}>{finalShown===null?'—':formatScore(finalShown)}</strong></div>
+                    {done&&!practice&&<span className={`tally-stamp ${success?'is-win':'is-loss'}`} aria-hidden="true">{success?(result.runTotal>=targetScore*10?'Crushed it':'Cleared'):'Short'}</span>}
+                    {!practice&&done&&market&&(()=>{const pay=shopIncome(sentences,upgrades,market,{runScore:result.runTotal,target:targetScore});return <p className={`tally-pay ${success?'':'is-lost'}`}>{success?<>Payout <b>+{pay.earned}¢</b> · {pay.lastWords} words{pay.lastIncome.interest?` · interest +${pay.lastIncome.interest}¢`:''} · you’ll have <b>{market.credits+pay.earned}¢</b></>:<>No payout · {pay.lastWords} words would have paid +{pay.earned}¢</>}</p>;})()}
+                    <div className="tally-next">{!practice&&done&&<p>Target <b>{formatScore(targetScore)}</b> · {success?'surplus':'short'} <b>{formatScore(Math.abs(result.runTotal-targetScore))}</b></p>}<button autoFocus disabled={!done} onClick={()=>onComplete(result.runTotal,success)}>{practice?'Finish practice':success?(ante>=MAX_ANTE?'Complete the run':'Visit the shop'):'See results'}</button></div>
                 </footer>
                 {hover.node}
+                {pops.node}
             </dialog>;
         };
 
@@ -4884,8 +5220,9 @@
         // Owned buffs, always in view: the slotted cards, this round's item effects, and letter levels in one line.
         // In the shop each card can be sold and, for Understudy, moved. Cards the current excerpt triggers light up;
         // run cards already ruled out dim.
-        const sellValue = (u, owned) => hasUpgrade(owned, 'scrapper') && u.id !== 'scrapper' ? shopPrice(u) : Math.floor(shopPrice(u) / 2);
-        const BuildList = ({ upgrades, rules, fired = [], lost = [], onSell, onMove }) => {
+        const sellValue = u => Math.floor(shopPrice(u) / 2);
+        const BuildList = ({ upgrades, rules, fired = [], lost = [], onSell, onMove, detail }) => {
+            const gains = buffGains(detail);
             const showEmpty = !!onSell;
             const on = new Set(fired), off = new Set(lost);
             const [armed, setArmed] = useState(null);
@@ -4893,23 +5230,24 @@
             const slotted = slottedBuffs(upgrades), effects = upgrades.filter(u => u.temporary), letters = upgrades.filter(u => u.booster);
             const reorder = onMove && slotted.some(u => u.id === 'understudy');
             return <>
-                <ul>{slotted.map((u, i) => <li key={u.id} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}`} title={plainText(upgradeDescription(u, rules))}>
-                        <b><RichText text={u.richName || u.name}/></b>
+                <ul>{slotted.map((u, i) => <li key={u.id} data-name={u.name} className={`rail-item rail-${u.rarity}${on.has(u.name) ? ' is-live' : ''}${off.has(u.name) ? ' is-off' : ''}${u.slots > 1 ? ' is-double' : ''}`} title={plainText(upgradeDescription(u, rules))}>
+                        <b><RichText text={u.richName || u.name}/>{u.slots > 1 && <em className="rail-slots">2 slots</em>}</b>
+                        {gains.has(u.name) && <em className="rail-gain">{gainText(gains.get(u.name))}</em>}
                         <span><RichText text={u.id === 'understudy' ? (i && ['WORD','SENTENCE','RUN'].includes(slotted[i - 1].type) && slotted[i - 1].id !== 'safety-net' ? `Copying ${slotted[i - 1].name}.` : 'Copies nothing: put a scoring buff directly above it.') : shopBlurb(u, rules)}/></span>
                         {(onSell || reorder) && <div className="rail-actions">
                             {reorder && <><button type="button" aria-label={`Move ${u.name} up`} disabled={!i} onClick={() => onMove(u.id, -1)}>↑</button><button type="button" aria-label={`Move ${u.name} down`} disabled={i === slotted.length - 1} onClick={() => onMove(u.id, 1)}>↓</button></>}
                             {onSell && <button type="button" className={`rail-sell${armed === u.id ? ' is-armed' : ''}`} onClick={() => { if (armed === u.id) { setArmed(null); onSell(u.id); } else setArmed(u.id); }}>{armed === u.id ? `Confirm +${sellValue(u, upgrades)}¢` : `Sell ${sellValue(u, upgrades)}¢`}</button>}
                         </div>}
                     </li>)}
-                    {showEmpty && Array.from({ length: Math.max(0, BUFF_SLOTS - slotted.length) }, (_, i) => <li key={`empty-${i}`} className="rail-slot">Empty slot</li>)}
-                    {effects.map(u => <li key={u.id} className={`rail-item rail-effect${on.has(u.name) ? ' is-live' : ''}`} title={plainText(upgradeDescription(u, rules))}><b>{u.name}<em>this round</em></b></li>)}
+                    {showEmpty && Array.from({ length: Math.max(0, BUFF_SLOTS - slotUse(upgrades)) }, (_, i) => <li key={`empty-${i}`} className="rail-slot">Empty slot</li>)}
+                    {effects.map(u => <li key={u.id} data-name={u.name} className={`rail-item rail-effect${on.has(u.name) ? ' is-live' : ''}`} title={plainText(upgradeDescription(u, rules))}><b>{u.name}<em>this round</em></b>{gains.has(u.name) && <em className="rail-gain">{gainText(gains.get(u.name))}</em>}</li>)}
                 </ul>
                 {!showEmpty && !slotted.length && !effects.length && <p className="rail-empty">None yet. The shop sells them between rounds.</p>}
                 {letters.length > 0 && <p className="rail-letters" title={letters.map(u => u.name).join(', ')}><span>Letters</span>{letters.map(u => <i key={u.id} lang="und">{u.glyph}<sup>{u.level}</sup></i>)}</p>}
             </>;
         };
         const BuildRail = ({ label = 'Your buffs', ...props }) => <aside className="build-rail" aria-label={label}>
-            <div className="rail-head"><span>{label}</span><b>{slottedBuffs(props.upgrades).length}/{BUFF_SLOTS}</b></div>
+            <div className="rail-head"><span>{label}</span><b>{slotUse(props.upgrades)}/{BUFF_SLOTS}</b></div>
             <BuildList {...props}/>
         </aside>;
 
@@ -4922,7 +5260,7 @@
             }, []);
             const onKeyDown = e => { if (e.key === 'Escape' && ref.current.open) { e.stopPropagation(); ref.current.open = false; ref.current.querySelector('summary').focus(); } };
             return <details ref={ref} className="shop-build" onKeyDown={onKeyDown}>
-                <summary>Buffs <b>{slottedBuffs(props.upgrades).length}/{BUFF_SLOTS}</b></summary>
+                <summary>Buffs <b>{slotUse(props.upgrades)}/{BUFF_SLOTS}</b></summary>
                 <div className="shop-build-panel build-rail-list"><BuildList {...props}/></div>
             </details>;
         };
@@ -4936,8 +5274,8 @@
                     <p>The pace gauge on the left fills toward <b>Goal</b> as you bank excerpts. The notch marks exactly-on-pace; fill above it means you are ahead. The striped segment previews the excerpt you are typing, and <b>This one</b> compares it to what the slot needs.</p><table><thead><tr><th>Round</th><th>Target</th><th>Clock</th></tr></thead><tbody>{ROUND_SECONDS.map((seconds,i) => <tr key={i}><td>{i+1}</td><td>{formatScore(getRoundTarget(i+1))}</td><td>{seconds}s</td></tr>)}</tbody></table></details>
                 <details><summary>02 / Typing & formatting</summary><p>Click the typing field to focus it. Formatting buttons are toggles, not keys you hold down. Turn each required format on before typing that part, then off when it ends. Multiple formats can be on at once. The toggles stay on until you change them, including between excerpts. After three seconds without typing in an unfinished excerpt, a hint appears above the input when the next character is unambiguous. It shows the character and any formatting toggles that need changing. If only the last character is wrong, it shows how to replace it. Typing or changing a format dismisses the hint. The format-button values show the standard word multiplier for bold/italic, link points per word, and citation multiplier per citation block; bullet formatting itself adds no points.</p><table><thead><tr><th>Action</th><th>Shortcut</th></tr></thead><tbody>{[['Bold','B'],['Italic','I'],['Link','L'],['Citation',';'],['Bullet','O'],['Compose','M']].map(([label,key]) => <tr key={key}><td>{label}</td><td>Ctrl / ⌘ + {key}</td></tr>)}<tr><td>Special characters</td><td>Hold Ctrl, then Ctrl + shown key</td></tr><tr><td>Use item in bag slot 1–3</td><td>Ctrl + 1–3</td></tr></tbody></table><p>Enter locks only a complete match. Backspace removes the last character. Ctrl, ⌘ or Alt + Backspace clears the input. Clear or Escape clears the unfinished sentence and resets formatting; locked sentences stay. Escape first closes Compose or the special-character panel when either is open. An unmatched character or format turns the input red; edit it to restore a match. Straight quotes also match curly quotes; a hyphen matches an en dash or em dash. Spaces still require the correct formatting.</p><p>Citation mode applies to references and annotations such as [which?] and [citation needed], including brackets. These use small baseline brackets with a dotted underline, without internal link or italic toggles. Math superscripts and area exponents are ordinary text, never citations. Each format combination has its own ink color and an underline showing its component colors. Hover a word or check the active-format preview to see the combination; bullet-only text and bullet markers stay green. Bullet mode matches the text of a list item; do not type its decorative bullet. Special characters typed from the Ctrl panel use your active formats.</p><p>Practice has three excerpts, no clock and no target. Complete the plain, bold and italic excerpts to finish; it does not replace your saved run.</p></details>
                 <details><summary>03 / Navigation, clock & saving</summary><p>The clock starts with your first typed character, inserted special character or article link, except for an unused Scout’s Honor free click. Following a link clears unfinished input after the new article loads; locked excerpts and upgrades remain. Back returns to a previously visited article.</p><p>The clock pauses while the game menu is open, during article loading, Rules, dev mode and scoring. Practice is untimed. Switching browser tabs alone does not pause a running clock. Save & leave stores the run in this browser; Continue resumes with the clock paused until typing or navigation begins. The run also autosaves while playing. Restart starts at round one with a new article and resets upgrades and credits; Keep playing cancels it. The clock pauses while choosing. New run replaces the saved run.</p></details>
-                <details><summary>04 / Every point, in order</summary><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers. Cards marked × multiply the word multiplier instead, after every addition, so they grow with the rest of your build. Hover any word, in the article or the tally, to see its base, its multiplier (length × format) and its score.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
-                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 6 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 10 words followed by 8 pays 3 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. Tip Jar pays per excerpt typed without a mistake, Long Form per excerpt of 25+ words, Bounty per doubling of the target, and Frugal per empty buff slot. All money buffs apply on future clears. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>You hold up to four buffs. Letter levels and this-round item effects don’t take a slot. When all four are full, sell one from your buffs list in the shop: it pays back half its price (Scrapper pays full price). Order matters only for Understudy, which copies the scoring buff directly above it; move buffs up and down in the shop.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Highlighter costs 5: ×2 word multiplier, after every addition, on bold, italic and linked words this round. Loupe costs 4: outlines the three highest-scoring excerpts you have not used on the current article, until you leave it. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
+                <details><summary>04 / Every point, in order</summary><p>Scoring has one shape everywhere. A word scores <b>base × mult</b>. An excerpt scores <b>WORDS × MULT</b>: WORDS (blue) is its word scores added up plus sentence base bonuses, MULT (red) is its citations, sentence multiplier bonuses and chain. A round multiplies the three excerpts, then run buffs multiply that. The top bar shows WORDS × MULT live while you type (hover it for the list of contributions), finished words pop their points above the article, the buffs list says what each buff is adding right now, and the tally replays it all step by step. Hover any word for its own breakdown.</p><p>Split an excerpt at spaces to form words. Punctuation counts toward word length. Citation characters are excluded from word scores and word length; each uninterrupted citation block supplies a sentence multiplier instead.</p><p>Letter values: A E I L N O R S T U = 1; D G = 2; B C M P = 3; F H V W Y = 4; K = 5; J X = 8; Q Z = 10. Character boosters are added first, then uppercase A–Z multiplies the combined value by {rules.capital}. Digits use their numeric value. Ordinary punctuation (. , ! ? ; : quotes parentheses brackets braces hyphens dashes underscore) scores {rules.punctuation}; other characters score {rules.special}.</p><p>Add character values, +{rules.link} if any character is linked, and qualifying word upgrade base bonuses ×{rules.wordBonus}. Length multiplier is 1 up to {rules.lengthStart} characters, then +{rules.lengthStep} per additional character, with no cap. Any bold character supplies ×{rules.bold}; any italic character supplies ×{rules.italic}; these multiply together. Word upgrade multiplier additions ×{rules.wordBonus} are added after those format multipliers. Face Value adds a tenth of a number's value to its word base (1907 adds 191). Glass Cannon takes two buff slots and multiplies every round by 5. Cards marked × multiply the word multiplier instead, after every addition, so they grow with the rest of your build. Hover any word, in the article or the tally, to see its base, its multiplier (length × format) and its score.</p><p className="rule-equation">Word = floor(base × length multiplier × format multiplier)</p><p>First and last words have no innate bonus. Position buffs reward them when purchased. Sum the word totals and add sentence upgrade base bonuses ×{rules.sentenceBonus}. The sentence multiplier starts at {rules.citation} raised to the number of citation blocks, then adds qualifying sentence multiplier bonuses ×{rules.sentenceBonus}.</p><p>Each distinct word or sentence upgrade that actually triggers counts once toward that excerpt’s chain. Chain is off until purchased. With Chain, each extra trigger adds {Math.round(rules.chain*100)}%, with no cap. Forged Links doubles that per-trigger bonus. Repeated triggers of the same upgrade do not extend the chain. Formatting and citations alone do not count as upgrade triggers.</p><p className="rule-equation">Excerpt = floor(sentence base × sentence multiplier × chain)</p><p>With Symmetric, add {rules.symmetric} to each excerpt total before multiplying. Multiply all three excerpt totals. Each qualifying run upgrade then multiplies this product by (1 + its bonus ×{rules.runBonus}) ×{rules.runTrigger}; Symmetric supplies ×{rules.runTrigger} without another bonus multiplier. All qualifying run multipliers multiply together. Round down the final result. For standard rules, Rooted alone gives ×1.8, and Rooted with Tonal gives ×2.88. The dev run amplifier defaults to ×1; run upgrades receive no blanket amplification.</p></details>
+                <details><summary>05 / The shop, rarity & consumables</summary><p>Start with 7 credits. Earn 1 credit per 5 total words in successfully locked excerpts of cleared rounds. The HUD shows each excerpt’s credits as you type it, the tally shows the payout, and the shop itemises what you earned. Partial credits carry forward across rounds and saves, so 6 words followed by 4 pays 2 credits in total. Words must contain a letter or digit; citations, punctuation-only tokens, discarded input and practice do not earn money. Round number and score no longer grant money. Patron adds 25% to word income, Long-form Royalties adds 0.1 credit per word of 8+ letters or digits, and Savings Account pays 1 credit per 10 saved before the payout. Tip Jar pays per excerpt typed without a mistake, Long Form per excerpt of 25+ words, Bounty per doubling of the target, and Frugal per empty buff slot. All money buffs apply on future clears. Unspent credits carry over. Points and credits are separate. Buy any number of items you can afford, then select the next round. You can leave without buying. The same article carries over.</p><p>You hold up to five buffs. Letter levels and this-round item effects don’t take a slot. When all five are full, sell one from your buffs list in the shop: it pays back half its price. Order matters only for Understudy, which copies the scoring buff directly above it; move buffs up and down in the shop.</p><p>Permanent upgrade base prices and offer weights: Common 6 credits / 45%, Uncommon 9 / 30%, Rare 13 / 16%, Epic 18 / 7%, Legendary 26 / 2%. Individual card prices override the base; the displayed price is what you pay. Specialist cards need a trigger in the current article. Chain needs two trigger upgrades; Forged Links needs Chain and six. Resonance needs two word upgrades, Singularity three. Patron only appears through shop four; Wider Lens and Second Opinion through shop five. Older fixed cards such as Sibilant, Prolix, Verbose and Pocket Dictionary are retired from new offers; owned copies still work. Each slot draws a rarity, then a buff family and a variant. Most scoring cards belong to a family and name a highlighted detail: a letter, a length, a format, a mark, a century, or a word, prefix or suffix from this article. The detail sets the trigger, and how scarce that trigger is sets the reward, rarity and price together, so a common detail pays a little and a scarce one pays far more. A card keeps its detail after purchase and through saves. Only one card of a family appears per stock, and a word or sentence card only appears if it can trigger somewhere in this article. Format Ink buffs reward combinations within one word; three or more formats pay more. Collection buffs count qualifying words across locked excerpts this round. Reference Index uses citation numbers, while Editorial Notes uses annotation letters. Owned upgrades and duplicate offers are excluded; at most one run upgrade appears per stock. Empty rarity weights are removed and the rest renormalized. Shops offer four upgrades, or five with Wider Lens. Restocking replaces unsold upgrades and supplies. Replaced upgrades cannot appear in the immediate restock. Restocks cost 3 credits, then 5, 7, and so on; Second Opinion grants one free restock each shop without raising the paid price.</p><p>Card replays rescore your last three excerpts with your current build plus the offered upgrade. These are comparisons, not guarantees for the next round. Time and economy upgrades do not increase replay points; Chain does. Permanent effects start in the next round, except shop effects, which work immediately when applicable. Time rewards stack and can exceed the starting clock.</p><p>Letter packs: a Small pack (3 credits) reveals 3 characters and a Large pack (4 credits) reveals 5; keep one as a permanent boost. Each pack can be opened once per shop. Characters are drawn from letters, digits, accented and historic Latin, maths, currency and other symbols, Greek, Coptic, IPA, Cyrillic, Armenian, Georgian, Hebrew, Arabic, Syriac, Ethiopic, Devanagari, Bengali, Tamil, Thai, Khmer, Tibetan, runes, Ogham, Chinese, Japanese and Korean, plus any special character in your current article. Boosts rise with scarcity: E pays +6, J +16, é +40, ° +100 and α +400. Pack tier odds are 50% common, 33% uncommon, 12% rare, 4% epic and 1% legendary, renormalized to available characters. A Large pack guarantees at least one uncommon or better and is sold out when all uncommon-or-better characters reach level three. Within each tier, familiar characters are a little more likely. Every copy adds its booster before the A–Z uppercase multiplier, then word multipliers apply. Each character can reach level three, and levels stack. Revealed cards show matching excerpts in this article and an example gain when available; this is an opportunity, not a guaranteed round payoff. Boosts never count as Chain triggers and survive saves. Finish or skip an open pack before leaving.</p><p>Clock: before each round you can buy +5 seconds for the next round only (1 credit) or +5 seconds on every future round (3 credits), as many times as you like. Pocket Watch is retired from offers; owned copies still work.</p><p>Carry up to three consumables in three bag slots, including duplicates. A new item goes in the lowest empty slot, and using an item empties its slot without moving the others. Use them during play with Ctrl+1–3 for slots 1–3 (Control on a Mac too; Alt/Option+1–3 also works), by clicking them next to the score, or from MENU, which pauses the clock. Each purchase is one use. Borrowed Time costs 4 and adds 20 seconds immediately. Fresh Ink costs 5: +8 word base and one word-upgrade chain trigger in every excerpt this round. Carbon Copy costs 5: ×2 final round score, without a chain trigger. Highlighter costs 5: ×2 word multiplier, after every addition, on bold, italic and linked words this round. Loupe costs 4: outlines the three highest-scoring excerpts you have not used on the current article, until you leave it. Scoring consumables also affect already locked excerpts and expire when you enter the shop. Two copies of the same scoring effect cannot be active together. Unused items stay in your bag across rounds. Restocks offer two different consumables, chosen uniformly. Saves retain credits, stock, purchases, bag and active round effects.</p><p>Word upgrades apply to every qualifying word. Sentence upgrades apply once per qualifying excerpt. Run upgrades apply to the three locked excerpts in lock order. Base bonuses and multiplier additions use the scaling factors in section 04, including scoring consumables. Missing article categories grant no affinity; nature and history can both qualify. Back navigation does not earn exploration rewards.</p><div className="rules-catalogue">{FAMILY_CATALOGUE.map(f => <section key={f.key}><span className={`rarity-badge rarity-${f.low}`}>{f.low===f.high?RARITIES[f.low].label:`${RARITIES[f.low].label}–${RARITIES[f.high].label}`}</span> <span className="print-label">{f.type} · FAMILY</span><h3>{f.title}</h3><p><RichText text={f.summary}/></p></section>)}{UPGRADE_POOL.filter(u=>!u.retired).map(u => <section key={u.id}><span className={`rarity-badge rarity-${u.rarity}`}>{RARITIES[u.rarity].label}</span> <span className="print-label">{u.type}</span><h3>{u.name}{u.temporary?' · this round':''}</h3><p>{upgradeDescription(u,rules)}</p></section>)}</div></details>
                 <details><summary>06 / Special characters</summary><p>Hold Ctrl for a moment to open the character panel: every special character on the current page, each with a key. While still holding Ctrl, press that key to type the character with your active formatting; release Ctrl to close the panel. Keys are fixed for the whole article, with the most frequent characters on single keys. Pages with more characters than keys use two-key labels (for example Ctrl+0 then Ctrl+S). Experienced players can press Ctrl+key without waiting for the panel. The Ω button pins the panel open for mouse and touch; click a character to type it. Hint keys never reuse the format toggles (B I L ; O M) or the item slots (1–3). Characters that match plain keys are left out: straight quotes match curly quotes, a hyphen matches en and em dashes, and superscript digits accept ordinary digits (² → 2); exponents do not require Citation mode. Combining marks are shown on a dotted circle for legibility; only the mark is inserted.</p><p>Compose also works for common Latin accents and typography: toggle Compose, then type a two-character combination. A supported pair inserts one character with the active formatting and exits Compose. An unsupported pair inserts both characters literally. Escape or Enter cancels composition without clearing the existing input.</p><table><thead><tr><th>Pair</th><th>Character</th></tr></thead><tbody>{Object.entries(COMPOSE_SYMBOLS).map(([pair,char]) => <tr key={pair}><td><code>{pair}</code></td><td>{char}</td></tr>)}</tbody></table><p>Combine a letter with an accent marker in either order: apostrophe for acute, backtick for grave, double quote for diaeresis, ^ for circumflex, ~ for tilde, comma for cedilla, / for stroke, or o for ring. An accented character is inserted when the combination forms a single character; otherwise the pair is inserted literally. Example: apostrophe + e gives é.</p></details>
                 <details><summary>07 / Dev mode & sandbox</summary><p>Dev mode pauses the clock. Tab completes an excerpt only when the current input matches exactly one available excerpt. The scoring sandbox previews actual article excerpts or your own text, with any combination of upgrades. Preview upgrades do not change your equipped upgrades. Time upgrades affect the sandbox’s trial budget, including when lock refunds arrive. Draft upgrades do not affect trial points or time. A trial starts a fresh hypothetical round; it does not inherit already-spent utility effects from your live round.</p><p>Select three different excerpts for a trial. Time is an estimate: character count ÷ (WPM × 5) × 60 seconds, plus 7% for corrections, 0.55 seconds per formatting change, one second per lock, and four seconds to find each excerpt after the first. Each article change adds seven seconds unless Scout’s Honor covers the first hop. Clock-paused network loading is excluded. Affinity rewards use saved article categories; missing categories grant no estimated reward. A lock must finish before the clock expires to receive Second Wind. The time-budget column includes all modeled rewards; a late refund cannot rescue an earlier timeout. Trials can include previously used excerpts. Each ladder row tests the same selection and build; it is not a simulation of earning upgrades over seven rounds.</p><p>Parameter edits affect the sandbox immediately. “Use these rules while playing in dev mode” also changes live previews and results, including already locked excerpts. Leaving dev mode restores standard scoring. Settings are stored in this browser; Reset defaults restores standard values and Export settings downloads them as JSON.</p></details>
             </div>
@@ -5276,10 +5614,10 @@
                     out.width = stack.width;
                     out.height = stack.height;
                     const octx = out.getContext('2d');
-                    octx.fillStyle = '#f3f5f8';
+                    octx.fillStyle = '#efe9dc';
                     octx.fillRect(0, 0, out.width, out.height);
-                    // One quiet slate ink: the photo survives only as a tonal texture behind the page.
-                    octx.fillStyle = 'rgba(38,50,68,0.085)';
+                    // One blue ink on paper: the photo survives as a halftone behind the page.
+                    octx.fillStyle = 'rgba(33,70,224,0.16)';
 
                     const step = 5;
                     const maxR = step * 0.62;
@@ -5443,8 +5781,30 @@
             // Best case: every conditional run bonus the locked excerpts have not ruled out also lands.
             const bonusOutlook=useMemo(()=>runBonusOutlook(lockedSentences,activeUpgrades,rules),[lockedSentences,activeUpgrades,rules]);
             const sentenceById=useMemo(()=>{const m=new Map();contentBlocks.forEach(b=>[...(b.sentences||[]),...(b.fragments||[])].forEach(x=>m.set(x.id,x)));return m;},[contentBlocks]);
-            const articleHover=useWordHover(sid=>{const x=sentenceById.get(sid);return x?scoreSentence(x,activeUpgrades,rules):null;});
+            const articleHover=useWordHover(sid=>{const x=sentenceById.get(sid);return x?scoreSentence(x,activeUpgrades,rules):null;},rules);
             const typedWords=useMemo(()=>charWordIndex(buffer).reduce((n,w)=>Math.max(n,w+1),0),[buffer]);
+            // As each word of the matched excerpt is finished, its points pop above it and the buffs it used flash.
+            const pops=usePops();
+            const popState=useRef({id:null,done:0});
+            // Round banner: slides in when a round starts, names the target, gets out of the way.
+            const [banner,setBanner]=useState(null);
+            useEffect(()=>{if(gameState!=='PLAYING'||isPractice)return;setBanner({ante,k:Date.now()});const t=setTimeout(()=>setBanner(null),2100);return ()=>clearTimeout(t);},[gameState,ante,isPractice]);
+            useEffect(()=>{
+                const st=popState.current;
+                if(!liveExcerpt||!liveDetail){st.id=null;st.done=0;return;}
+                const L=buffer.length,ends=[];
+                charWordIndex(liveExcerpt.chars).forEach((w,k)=>{if(w>=0)ends[w]=k;});
+                const done=ends.filter(e=>e<L-1||L===liveExcerpt.chars.length).length;
+                if(st.id!==liveExcerpt.id){st.id=liveExcerpt.id;st.done=0;}
+                if(done<st.done){st.done=done;return;}
+                const host=document.querySelector(`.wiki-content [data-sid="${CSS.escape(String(liveExcerpt.id))}"]`);
+                for(let j=st.done;j<done;j++){
+                    const w=liveDetail.words[j];if(!w)continue;
+                    setTimeout(()=>{pops.at(host?.querySelector(`[data-w="${j}"]`),`+${w.total.toLocaleString()}`,w.wordEffects.length?'is-buffed':'is-words');w.wordEffects.forEach(e=>pulseRail(e.name));},(j-st.done)*45);
+                }
+                if(done===ends.length&&st.done<ends.length&&liveDetail.sentenceEffects.length)setTimeout(()=>liveDetail.sentenceEffects.forEach(e=>pulseRail(e.name)),(done-st.done)*45+120);
+                st.done=done;
+            },[buffer.length,liveExcerpt,liveDetail]);// eslint-disable-line
             const bonusPace=useMemo(()=>remainingExcerptPace(lockedSentences,activeUpgrades,rules,targetScore,bonusOutlook.multiplier),[lockedSentences,activeUpgrades,rules,targetScore,bonusOutlook]);
             // Credits: word income is paid only when the round clears.
             const lockedIncome=useMemo(()=>lockedSentences.map(s=>excerptIncome(s,activeUpgrades)),[lockedSentences,activeUpgrades]);
@@ -5524,6 +5884,8 @@
 
                             if (sentence && buffer.length === sentence.chars.length) {
                                 AudioEngine.playLock();
+                                {const d=scoreSentence({...sentence,articleTitle:article,typing:draftTyping(sentence.chars.length)},activeUpgrades,rules);
+                                 pops.at(document.querySelector(`.wiki-content [data-sid="${CSS.escape(String(sentence.id))}"] [data-w="0"]`),`${d.sentenceTotal.toLocaleString()}`,'is-lock',1400);}
                                 if(!isPractice && lockedSentences.length<2 && hasUpgrade(activeUpgrades,'breathing')){setTimeLeft(t=>t+8);setUtilityNotice('Second Wind +8s');}
                                 setUsedSentenceIds(prev => { const n = new Set(prev); n.add(sentence.id); return n; });
                                 setLockedSentences(prev => {
@@ -5537,7 +5899,7 @@
                             AudioEngine.playEnter();
                         }
                 document.querySelector('[data-typing-surface]')?.focus({preventScroll:true});
-            },[gameState,isRed,matchStates,flatSentences,buffer,lockedSentences.length,isPractice,activeUpgrades,article,articleMeta.categories]);
+            },[gameState,isRed,matchStates,flatSentences,buffer,lockedSentences.length,isPractice,activeUpgrades,article,articleMeta.categories,rules]);
 
             /* ----------------------------------------------------------
                Keyboard controller
@@ -5816,7 +6178,7 @@
                 if(!next)return;
                 updateMarket(next);setActiveUpgrades(prev=>[...prev,upgrade]);AudioEngine.playLock();
             };
-            // Buff slots: sell for half price (Scrapper: full), reorder for Understudy.
+            // Buff slots: sell for half price, reorder for Understudy.
             const sellBuff = id => {
                 if(gameState!=='UPGRADE_SELECT')return;
                 const u=activeUpgrades.find(x=>x.id===id);if(!u||u.temporary||u.booster)return;
@@ -6046,7 +6408,7 @@
                         {income&&<section className="shop-receipt" aria-live="polite" aria-label="Round earnings">
                             <span className="shop-receipt-title">You earned <b>+{market.earned}¢</b></span>
                             <span>{income.excerpts.map((c,i)=><i key={i}>Excerpt {i+1} <b>+{formatCredits(c)}</b></i>)}</span>
-                            <span>{income.words} words ÷ 6 = {formatCredits(income.base)}</span>
+                            <span>{income.words} words ÷ {WORDS_PER_CREDIT} = {formatCredits(income.base)}</span>
                             {income.royalty>0&&<span>Royalties +{formatCredits(income.royalty)}</span>}
                             {income.patron>0&&<span>Patron +{formatCredits(income.patron)}</span>}
                             {income.tips>0&&<span>Tip Jar +{income.tips}¢</span>}
@@ -6060,18 +6422,18 @@
                         </section>}
                         <main className="shop-floor">
                             <section className="shop-shelf shop-upgrades" aria-labelledby="shop-upgrades">
-                                <div className="shop-label"><h2 id="shop-upgrades">Upgrades</h2><span>{slottedBuffs(owned).length} of {BUFF_SLOTS} slots used</span></div>
+                                <div className="shop-label"><h2 id="shop-upgrades">Upgrades</h2><span>{slotUse(owned)} of {BUFF_SLOTS} slots used</span></div>
                                 <div className={`shop-cards cols-${Math.max(4,upgradeOptions.length)}`} style={{'--cols':Math.max(4,upgradeOptions.length)}}>
                                     {upgradeOptions.map(opt => {
                                         const sold=activeUpgrades.some(u=>u.id===opt.id);
-                                        const price=shopPrice(opt), afford=market.credits>=price, slotsFull=!sold&&slottedBuffs(owned).length>=BUFF_SLOTS;
+                                        const price=shopPrice(opt), afford=market.credits>=price, slotsFull=!sold&&slotUse(owned)+(opt.slots||1)>BUFF_SLOTS;
                                         const withUpgrade=sold?activeUpgrades:[...activeUpgrades,opt];
                                         const replay=(opt.type!=='UTILITY'||['chain','chain-forged'].includes(opt.id))&&lastRoundScore!==null?scoreRun(lockedSentences,withUpgrade,rules).runTotal:null;
                                         const clock=nextClock(withUpgrade);
                                         const preview=sold?null:replay!==null?{label:'Last round',from:formatScore(lastRoundScore),to:replay===lastRoundScore?null:formatScore(replay)}:clock!==clockNow?{label:'Clock',from:`${clockNow}s`,to:`${clock}s`}:null;
                                         const blurb=shopBlurb(opt,rules), full=upgradeDescription(opt,rules);
                                         return (
-                                            <button key={opt.id} className={`shop-card type-${opt.type.toLowerCase()}${sold?' is-owned':''}`} onClick={() => handleSelectUpgrade(opt)} disabled={sold||!afford||slotsFull} title={slotsFull?'All four buff slots are full. Sell one first.':blurb!==full?plainText(full):undefined}>
+                                            <button key={opt.id} className={`shop-card type-${opt.type.toLowerCase()}${sold?' is-owned':''}`} onClick={() => handleSelectUpgrade(opt)} disabled={sold||!afford||slotsFull} title={slotsFull?'All five buff slots are full. Sell one first.':blurb!==full?plainText(full):undefined}>
                                                 <span className="shop-card-body">
                                                     <span className="shop-card-meta"><span className="shop-type">{opt.type}</span><span className={`rarity-badge rarity-${opt.rarity}`}>{RARITIES[opt.rarity].label}</span></span>
                                                     <h3><RichText text={opt.richName||opt.name}/></h3>
@@ -6236,7 +6598,7 @@
                         <section className="score-hud" aria-label="Round score dashboard">
                             <div className="score-hud-metrics">
                                 {!isPractice&&<div><span>Target</span><strong title={targetScore.toLocaleString()}>{formatScore(targetScore)}</strong></div>}
-                                <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><strong title={liveScore!==null?liveScore.toLocaleString():''}>{liveScore!==null?formatScore(liveScore):'—'}</strong>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}{(liveDetail||typedWords>0)&&<em className="hud-words" title="Words typed / words in this sentence">{liveDetail?`${Math.min(typedWords,liveDetail.words.length)}/${liveDetail.words.length}`:typedWords} {(liveDetail?liveDetail.words.length:typedWords)===1?'word':'words'}</em>}</div>
+                                <div className="current-excerpt-score" aria-live="polite" aria-atomic="true"><span>This sentence</span><ScoreBar detail={liveDetail}/>{!isPractice&&liveIncome&&<em className="hud-earn" title={`${liveIncome.words} words · paid if the round clears`}>+{formatCredits(liveIncome.credits)}</em>}{(liveDetail||typedWords>0)&&<em className="hud-words" title="Words typed / words in this sentence">{liveDetail?`${Math.min(typedWords,liveDetail.words.length)}/${liveDetail.words.length}`:typedWords} {(liveDetail?liveDetail.words.length:typedWords)===1?'word':'words'}</em>}</div>
                                 {!isPractice&&(()=>{
                                     const bonusCount=bonusOutlook.live.length, split=bonusCount>0&&bonusPace!==requiredPace, fmt=n=>Number.isFinite(n)?formatScore(n):'unreachable';
                                     const names=bonusOutlook.live.map(u=>u.name).join(', ');
@@ -6246,7 +6608,7 @@
                                         {split&&<strong className="is-bonus" title={Number.isFinite(bonusPace)?bonusPace.toLocaleString():''}>{fmt(bonusPace)}<small>{bonusCount===1?bonusOutlook.live[0].name:`all ${bonusCount} bonuses`}</small></strong>}
                                     </div>;
                                 })()}
-                                {!isPractice&&<div className="hud-credits" title={`${market.credits}¢ in hand. Locked excerpts pay ${formatCredits(pendingCredits)} when the round clears (1¢ per 6 words${hasUpgrade(activeUpgrades,'patron')||hasUpgrade(activeUpgrades,'royalties')?', plus bonuses':''}).`}><span>Credits</span><strong>{market.credits}¢</strong><em className="hud-earn">{pendingCredits>0?`+${formatCredits(pendingCredits)} on clear`:''}</em></div>}
+                                {!isPractice&&<div className="hud-credits" title={`${market.credits}¢ in hand. Locked excerpts pay ${formatCredits(pendingCredits)} when the round clears (1¢ per ${WORDS_PER_CREDIT} words${hasUpgrade(activeUpgrades,'patron')||hasUpgrade(activeUpgrades,'royalties')?', plus bonuses':''}).`}><span>Credits</span><strong>{market.credits}¢</strong><em className="hud-earn">{pendingCredits>0?`+${formatCredits(pendingCredits)} on clear`:''}</em></div>}
                                 {!isPractice&&bagCount(market.bag)>0&&<div className="quick-bag" role="group" aria-label={`Items — use with ${ITEM_KEY_HINT}`}>
                                     {normalizeBag(market.bag).map((id,k)=>{const item=CONSUMABLES.find(c=>c.id===id);if(!item)return <span key={`empty-${k}`} className="qb-slot is-empty" aria-label={`Slot ${k+1} empty`}><kbd>{itemKeyLabel(k)}</kbd></span>;const active=item.effect&&hasUpgrade(activeUpgrades,item.effect);const nudged=itemNudge?.slot===k;
                                         return <button key={`${k}-${item.id}-${nudged?itemNudge.n:0}`} type="button" data-rarity={item.rarity} className={`qb-slot ${active?'is-active':''} ${nudged?'nudge':''}`}
@@ -6258,7 +6620,7 @@
                                 </div>}
 
                             </div>
-                            <div className="score-feedback"><span className="excerpt-counter">Sentence {Math.min(3,lockedSentences.length+1)} / 3</span>{liveDetail?<ScoreEffects detail={liveDetail} rules={rules} compact/>:(<div className="hud-locks" aria-label="Locked excerpt scores">{[0,1,2].map(i=>{const locked=lockedSentences[i];return <span key={i} className={locked?'locked':i===lockedSentences.length?'active':''} title={locked?locked.chars.map(c=>c.c).join(''):''}><b>0{i+1}</b>{locked?formatScore(scoreSentence(locked,activeUpgrades,rules).sentenceTotal):'—'}{locked&&!isPractice&&<small className="lock-earn">+{formatCredits(lockedIncome[i].credits)}</small>}{locked&&<i aria-label="Locked">✓</i>}</span>;})}</div>)}</div>
+                            <div className="score-feedback"><span className="excerpt-counter">Sentence {Math.min(3,lockedSentences.length+1)} / 3</span>{(<div className="hud-locks" aria-label="Locked excerpt scores">{[0,1,2].map(i=>{const locked=lockedSentences[i];return <span key={i} className={locked?'locked':i===lockedSentences.length?'active':''} title={locked?locked.chars.map(c=>c.c).join(''):''}><b>0{i+1}</b>{locked?formatScore(scoreSentence(locked,activeUpgrades,rules).sentenceTotal):'—'}{locked&&!isPractice&&<small className="lock-earn">+{formatCredits(lockedIncome[i].credits)}</small>}{locked&&<i aria-label="Locked">✓</i>}</span>;})}</div>)}</div>
                             
                             {!isPractice&&lockedSentences.length===2&&<div className={`target-forecast ${roundForecast!==null&&roundForecast>=targetScore?'cleared':''}`}><span>Round if locked <b>{roundForecast===null?'—':formatScore(roundForecast)}</b>{roundForecast!==null&&` · ${roundForecast>=targetScore?'target met':`${formatScore(targetScore-roundForecast)} short`}`}</span></div>}
 
@@ -6275,15 +6637,17 @@
                     
                     {!isPractice&&<PaceMeter locked={lockedSentences} live={liveExcerpt} liveScore={liveScore} needed={neededScore} upgrades={activeUpgrades} rules={rules} target={targetScore}/>}
                     {/* Wikipedia article canvas */}
-                    {!isPractice&&<BuildRail upgrades={activeUpgrades} rules={rules} fired={liveDetail?.triggeredUpgrades||[]} lost={bonusOutlook.lost.map(u=>u.name)}/>}
+                    {!isPractice&&<BuildRail upgrades={activeUpgrades} rules={rules} detail={liveDetail} fired={liveDetail?.triggeredUpgrades||[]} lost={bonusOutlook.lost.map(u=>u.name)}/>}
                     {articleHover.node}
+                    {pops.node}
+                    {banner&&<div key={banner.k} className="round-banner" aria-hidden="true"><span>Round {banner.ante} of {MAX_ANTE}</span><b>{formatScore(getRoundTarget(banner.ante))}</b><small>to clear</small></div>}
                     <div className="flex-1 overflow-y-auto px-6 pt-3 pb-24 font-article relative" onScroll={articleHover.clear} style={{
                         backgroundImage: halftoneBg ? `url("${halftoneBg}")` : 'none',
                         backgroundRepeat: 'repeat-y',
                         backgroundSize: '100% auto',
                         backgroundPosition: halftoneBg ? 'top center' : undefined,
                         backgroundAttachment: halftoneBg ? 'local' : undefined,
-                        backgroundColor: '#f3f5f8',
+                        backgroundColor: '#efe9dc',
                         transition: 'background-image 0.6s ease'
                     }}>
                         <div className="max-w-4xl mx-auto bg-white border-2 border-zinc-900 p-8 md:p-10 wiki-content relative" onClick={handleWikiClick} onMouseOver={articleHover.onMouseOver} onMouseLeave={articleHover.onMouseLeave}
